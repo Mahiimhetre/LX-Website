@@ -90,7 +90,6 @@ export const login = async (req, res) => {
             
             // If expired but within grace period, we allow login but could add a warning header/meta
             if (now > expiryDate) {
-                console.log(`User ${user.email} is logging in during password grace period.`);
                 // Note: Frontend can check this flag to show a "Change Password" banner
                 res.set('X-Password-Expired', 'true'); 
             }
