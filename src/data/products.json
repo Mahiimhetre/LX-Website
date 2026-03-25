@@ -1,0 +1,242 @@
+{
+  "title": "Product Inventory",
+  "columns": [
+    {
+      "key": "id",
+      "label": "Product ID",
+      "sortable": true
+    },
+    {
+      "key": "name",
+      "label": "Product Name",
+      "sortable": true
+    },
+    {
+      "key": "category",
+      "label": "Category",
+      "sortable": true
+    },
+    {
+      "key": "price",
+      "label": "Price",
+      "sortable": true
+    },
+    {
+      "key": "stock",
+      "label": "Stock",
+      "sortable": true
+    }
+  ],
+  "items": [
+    {
+      "id": "P001",
+      "name": "Laptop Pro",
+      "category": "Electronics",
+      "price": "₹85,000",
+      "stock": 15
+    },
+    {
+      "id": "P002",
+      "name": "Wireless Mouse",
+      "category": "Accessories",
+      "price": "₹2,500",
+      "stock": 45
+    },
+    {
+      "id": "P003",
+      "name": "Gaming Chair",
+      "category": "Furniture",
+      "price": "₹12,000",
+      "stock": 8
+    },
+    {
+      "id": "P004",
+      "name": "Smartphone",
+      "category": "Electronics",
+      "price": "₹35,000",
+      "stock": 22
+    },
+    {
+      "id": "P005",
+      "name": "Desk Lamp",
+      "category": "Furniture",
+      "price": "₹3,500",
+      "stock": 30
+    },
+    {
+      "id": "P006",
+      "name": "Keyboard",
+      "category": "Accessories",
+      "price": "₹4,200",
+      "stock": 18
+    },
+    {
+      "id": "P007",
+      "name": "Monitor",
+      "category": "Electronics",
+      "price": "₹25,000",
+      "stock": 12
+    },
+    {
+      "id": "P008",
+      "name": "Headphones",
+      "category": "Accessories",
+      "price": "₹8,500",
+      "stock": 25
+    },
+    {
+      "id": "P009",
+      "name": "Office Desk",
+      "category": "Furniture",
+      "price": "₹15,000",
+      "stock": 5
+    },
+    {
+      "id": "P010",
+      "name": "Tablet",
+      "category": "Electronics",
+      "price": "₹28,000",
+      "stock": 20
+    },
+    {
+      "id": "P011",
+      "name": "Webcam HD",
+      "category": "Accessories",
+      "price": "₹6,500",
+      "stock": 35
+    },
+    {
+      "id": "P012",
+      "name": "Smart TV",
+      "category": "Electronics",
+      "price": "₹55,000",
+      "stock": 9
+    },
+    {
+      "id": "P013",
+      "name": "Bookshelf",
+      "category": "Furniture",
+      "price": "₹8,000",
+      "stock": 14
+    },
+    {
+      "id": "P014",
+      "name": "Power Bank",
+      "category": "Accessories",
+      "price": "₹3,200",
+      "stock": 50
+    },
+    {
+      "id": "P015",
+      "name": "Printer",
+      "category": "Electronics",
+      "price": "₹18,000",
+      "stock": 11
+    },
+    {
+      "id": "P016",
+      "name": "Ergonomic Chair",
+      "category": "Furniture",
+      "price": "₹22,000",
+      "stock": 7
+    },
+    {
+      "id": "P017",
+      "name": "USB Hub",
+      "category": "Accessories",
+      "price": "₹1,800",
+      "stock": 40
+    },
+    {
+      "id": "P018",
+      "name": "Router WiFi",
+      "category": "Electronics",
+      "price": "₹4,500",
+      "stock": 28
+    },
+    {
+      "id": "P019",
+      "name": "Standing Desk",
+      "category": "Furniture",
+      "price": "₹35,000",
+      "stock": 3
+    },
+    {
+      "id": "P020",
+      "name": "Bluetooth Speaker",
+      "category": "Accessories",
+      "price": "₹7,200",
+      "stock": 32
+    },
+    {
+      "id": "P021",
+      "name": "Graphics Card",
+      "category": "Electronics",
+      "price": "₹65,000",
+      "stock": 6
+    },
+    {
+      "id": "P022",
+      "name": "File Cabinet",
+      "category": "Furniture",
+      "price": "₹9,500",
+      "stock": 16
+    },
+    {
+      "id": "P023",
+      "name": "Cable Organizer",
+      "category": "Accessories",
+      "price": "₹1,200",
+      "stock": 60
+    },
+    {
+      "id": "P024",
+      "name": "External SSD",
+      "category": "Electronics",
+      "price": "₹12,500",
+      "stock": 19
+    },
+    {
+      "id": "P025",
+      "name": "Whiteboard",
+      "category": "Furniture",
+      "price": "₹4,800",
+      "stock": 13
+    },
+    {
+      "id": "P026",
+      "name": "Microphone",
+      "category": "Accessories",
+      "price": "₹5,500",
+      "stock": 27
+    },
+    {
+      "id": "P027",
+      "name": "Smart Watch",
+      "category": "Electronics",
+      "price": "₹15,000",
+      "stock": 18
+    },
+    {
+      "id": "P028",
+      "name": "Desk Organizer",
+      "category": "Furniture",
+      "price": "₹2,200",
+      "stock": 42
+    },
+    {
+      "id": "P029",
+      "name": "Phone Case",
+      "category": "Accessories",
+      "price": "₹800",
+      "stock": 65
+    },
+    {
+      "id": "P030",
+      "name": "Gaming Console",
+      "category": "Electronics",
+      "price": "₹45,000",
+      "stock": 4
+    }
+  ]
+}

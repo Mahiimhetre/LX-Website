@@ -1,0 +1,5 @@
+adding plans for load timer.
+adding auto data filler for different type of inputs in extension.
+adding some features like real time locator healing on best possible logic for currupted locators.
+also cchecl for the ai support if any ai is free then aadd use of ai in our extensio nfor best possible output for user.
+  

@@ -1,0 +1,36 @@
+{
+  "name": "locatorx-backend",
+  "version": "1.0.0",
+  "description": "Express MySQL Backend for Locator-X",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "tsx server.js",
+    "dev": "nodemon --exec tsx server.js"
+  },
+  "dependencies": {
+    "@react-email/components": "^1.0.10",
+    "@react-email/render": "^2.0.4",
+    "@react-email/tailwind": "^2.0.6",
+    "axios": "^1.13.6",
+    "bcrypt": "^5.1.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "express-rate-limit": "^8.3.1",
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1",
+    "mysql2": "^3.9.7",
+    "node-cron": "^4.2.1",
+    "nodemailer": "^6.9.13",
+    "razorpay": "^2.9.6",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "sequelize": "^6.37.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0",
+    "tsx": "^4.21.0"
+  }
+}

@@ -1,0 +1,6 @@
+/.env
+/backend/.env
+/build_error.txt
+/discus.md
+/node_modules
+/backend/node_modules

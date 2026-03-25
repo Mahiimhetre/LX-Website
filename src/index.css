@@ -1,0 +1,154 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Hide native password reveal/clear in Edge */
+input::-ms-reveal,
+input::-ms-clear {
+  display: none;
+}
+
+@layer base {
+  :root {
+    /* Enforced Premium Dark Mode Variables */
+    --background: 224 71% 4%;
+    /* Deep Midnight */
+    --foreground: 210 40% 98%;
+
+    --card: 222 47% 11%;
+    /* Lighter Midnight */
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222 47% 11%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 250 100% 65%;
+    /* Vibrant Indigo/Violet */
+    --primary-foreground: 0 0% 100%;
+    --primary-light: 250 40% 20%;
+
+    --secondary: 217 33% 17%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
+
+    --accent: 217 33% 17%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62% 30%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217 33% 17%;
+    --input: 217 33% 17%;
+    --ring: 250 100% 65%;
+
+    --radius: 1.5rem;
+    /* Highly rounded for capsule look */
+  }
+
+  /* .dark class is no longer strictly necessary if :root has dark variables, 
+     but keeping it for compatibility with any hardcoded dark: selectors */
+  .dark {
+    --background: 224 71% 4%;
+    --foreground: 210 40% 98%;
+    /* ... same as root ... */
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased selection:bg-primary/20 selection:text-primary;
+    font-family: 'Inter', sans-serif;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: 'Outfit', sans-serif;
+  }
+}
+
+@layer utilities {
+  .glass {
+    @apply backdrop-blur-md bg-white/5 border border-white/10 shadow-glass;
+  }
+
+  /* Enforce dark glass style always */
+  .glass-dark {
+    @apply backdrop-blur-md bg-black/30 border border-white/5 shadow-glass;
+  }
+
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500;
+  }
+
+  .hover-expand {
+    @apply h-9 w-9 flex items-center justify-start p-0 gap-0 transition-all duration-300 rounded-full overflow-hidden shrink-0 !important;
+  }
+
+  .hover-expand > :first-child {
+    @apply ml-[10px] shrink-0 !important; /* Center 16px icon in 36px(w-9) container: (36-16)/2 = 10px */
+  }
+
+  .hover-expand:hover,
+  .hover-expand:focus-within,
+  .hover-expand.is-expanded {
+    @apply w-auto pr-4 gap-2 !important;
+  }
+
+  .hover-expand-text {
+    @apply max-w-0 overflow-hidden transition-all duration-300 whitespace-nowrap opacity-0;
+  }
+
+  .hover-expand:hover .hover-expand-text,
+  .hover-expand:focus-within .hover-expand-text,
+  .hover-expand.is-expanded .hover-expand-text {
+    @apply max-w-xs opacity-100 ml-1;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-muted-foreground/30 rounded-full hover:bg-muted-foreground/50 transition-colors;
+}
+
+/* Fix for Chrome/Edge Autofill background */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px hsl(var(--secondary)) inset !important;
+  -webkit-text-fill-color: hsl(var(--foreground)) !important;
+  transition: background-color 5000s ease-in-out 0s;
+  caret-color: hsl(var(--foreground));
+}
+
+/* Fix for Chrome/Edge Autofill background */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px hsl(var(--secondary)) inset !important;
+  -webkit-text-fill-color: hsl(var(--foreground)) !important;
+  transition: background-color 5000s ease-in-out 0s;
+  caret-color: hsl(var(--foreground));
+}
