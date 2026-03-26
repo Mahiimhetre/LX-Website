@@ -63,7 +63,6 @@ import { initCronJobs } from './utils/cronJobs.js';
 connectDB().then(async () => {
     // Sync models with database
     await sequelize.sync({ alter: true });
-    console.log('Database models synchronized');
     
     // Initialize Jobs
     initCleanupJob();
