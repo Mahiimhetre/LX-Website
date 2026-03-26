@@ -20,7 +20,7 @@ export const initCronJobs = () => {
 /**
  * Check for passwords expiring in 7, 3, and 1 day(s).
  */
-async function checkPasswordExpiries() {
+export async function checkPasswordExpiries() {
     try {
         const checkDays = [7, 3, 1];
         const now = new Date();
@@ -57,7 +57,7 @@ async function checkPasswordExpiries() {
 /**
  * Check for plans expiring in 7 and 1 day.
  */
-async function checkPlanExpiries() {
+export async function checkPlanExpiries() {
     try {
         const checkDays = [7, 1];
         const now = new Date();
