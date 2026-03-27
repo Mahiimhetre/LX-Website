@@ -1,0 +1,23 @@
+6c2dc72f5b9dcad18905cba277631b11d8d64241
+100644 92a326941e5c0931dd9db326532d00804915004b 1	package-lock.json
+100644 233b79f745256d1a1cff8ef12de6fb54fbaf2a29 2	package-lock.json
+100644 ffac6546d674cfd4db2b7b39c51bcba57ead33d6 3	package-lock.json
+100644 871f3bdef914442d1d1972b2d9013c88ee7f63e9 1	package.json
+100644 a48710b8def65b8fb63cbe46d822d983ab7ac13b 2	package.json
+100644 666878e88a5ed4120b583bed99be4753d8e54e06 3	package.json
+100644 ea04455b4ef6c19699ad87f277d24933c616cb00 2	src/lib/utils.test.js
+100644 ec793610437d137770b09e21523c182240ca4d1b 3	src/lib/utils.test.js
+100644 5efd1319dcdfca4504ea35a14d947a3696c8a700 2	src/services/authService.test.js
+100644 f05da56df4b408232ad0448bb6e9d28b0a86064e 3	src/services/authService.test.js
+
+Auto-merging backend/server.js
+Auto-merging backend/utils/cronJobs.js
+Auto-merging backend/utils/upload.js
+Auto-merging package-lock.json
+CONFLICT (content): Merge conflict in package-lock.json
+Auto-merging package.json
+CONFLICT (content): Merge conflict in package.json
+Auto-merging src/lib/utils.test.js
+CONFLICT (add/add): Merge conflict in src/lib/utils.test.js
+Auto-merging src/services/authService.test.js
+CONFLICT (add/add): Merge conflict in src/services/authService.test.js
