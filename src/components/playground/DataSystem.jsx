@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,7 +18,8 @@ import { cn } from "@/lib/utils";
 import productsData from '@/data/products.json';
 
 // --- Product Inventory (DataTable) ---
-export const DataTable = ({ onAddToCart, cartCount, onViewCart, onViewOrders }) => {
+// ⚡ Bolt Optimization: Wrap component in React.memo to prevent unnecessary re-renders when parent's `view` state changes.
+export const DataTable = React.memo(({ onAddToCart, cartCount, onViewCart, onViewOrders }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [entriesPerPage, setEntriesPerPage] = useState(10);
     const [currentPage, setCurrentPage] = useState(1);
@@ -172,10 +173,11 @@ export const DataTable = ({ onAddToCart, cartCount, onViewCart, onViewOrders }) 
             </CardContent>
         </Card>
     );
-};
+});
 
 // --- Data Management Component ---
-export const DataManagement = () => {
+// ⚡ Bolt Optimization: Wrap component in React.memo to prevent unnecessary re-renders on unrelated parent state updates.
+export const DataManagement = React.memo(() => {
     const [retentionPeriod, setRetentionPeriod] = useState('7');
     const [showData, setShowData] = useState(false);
     const [files, setFiles] = useState([]);
@@ -272,4 +274,4 @@ export const DataManagement = () => {
             </CardContent>
         </Card>
     );
-};
+});
