@@ -57,7 +57,6 @@ export const AuthProvider = ({ children }) => {
                 localStorage.setItem('locatorx_current_user', JSON.stringify(userData));
 
                 // Dispatch event for extension content script
-                console.log('AuthContext: Syncing with extension...', userData);
                 document.dispatchEvent(new CustomEvent('SYNC_LOCATOR_X', { detail: userData }));
             } else {
                 localStorage.removeItem('locatorx_current_user');
