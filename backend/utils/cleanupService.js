@@ -63,9 +63,17 @@ export const performCleanup = async () => {
             }]
         });
 
-        for (const user of usersToDelete) {
-            console.log(`Deleting unverified user: ${user.email} (Created at: ${user.createdAt})`);
-            await user.destroy(); // This should cascade delete the profile if configured, otherwise delete profile manually
+        if (usersToDelete.length > 0) {
+            const userIds = usersToDelete.map(user => user.id);
+            console.log(`Deleting ${usersToDelete.length} unverified users...`);
+
+            await User.destroy({
+                where: {
+                    id: {
+                        [Op.in]: userIds
+                    }
+                }
+            });
         }
 
         console.log(`Cleanup completed. Reminders sent: ${usersToRemind.length}, Users deleted: ${usersToDelete.length}`);
