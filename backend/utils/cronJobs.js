@@ -20,7 +20,7 @@ export const initCronJobs = () => {
 /**
  * Check for passwords expiring in 7, 3, and 1 day(s).
  */
-async function checkPasswordExpiries() {
+export async function checkPasswordExpiries() {
     try {
         const checkDays = [7, 3, 1];
         const now = new Date();
@@ -43,11 +43,11 @@ async function checkPasswordExpiries() {
                 include: [{ model: Profile, as: 'profile' }]
             });
 
-            for (const user of users) {
+            await Promise.all(users.map(async (user) => {
                 const name = user.profile?.firstName || user.email.split('@')[0];
                 console.log(`CRON: Sending Password Expiry Reminder (${days} days) to ${user.email}`);
                 await emailService.sendPasswordExpiryReminder(user.email, name, days);
-            }
+            }));
         }
     } catch (error) {
         console.error('CRON ERROR (Password Expiry):', error);
@@ -57,7 +57,7 @@ async function checkPasswordExpiries() {
 /**
  * Check for plans expiring in 7 and 1 day.
  */
-async function checkPlanExpiries() {
+export async function checkPlanExpiries() {
     try {
         const checkDays = [7, 1];
         const now = new Date();
@@ -83,14 +83,14 @@ async function checkPlanExpiries() {
                 }]
             });
 
-            for (const team of teams) {
+            await Promise.all(teams.map(async (team) => {
                 const owner = team.owner;
                 if (owner) {
                     const name = owner.profile?.firstName || owner.email.split('@')[0];
                     console.log(`CRON: Sending Plan Expiry Reminder (${days} days) to ${owner.email} for team ${team.name}`);
                     await emailService.sendPlanExpiryReminder(owner.email, name, team.name, days);
                 }
-            }
+            }));
         }
     } catch (error) {
         console.error('CRON ERROR (Plan Expiry):', error);

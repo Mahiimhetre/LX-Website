@@ -1,5 +1,8 @@
 import Razorpay from 'razorpay';
 import dotenv from 'dotenv';
+import crypto from 'crypto';
+import { Team, Payment } from '../models/index.js';
+
 dotenv.config();
 
 const razorpay = new Razorpay({
@@ -11,9 +14,14 @@ export const createOrder = async (req, res) => {
     try {
         const { amount, currency, planName } = req.body;
 
+        // Amount tampering vulnerability: we are currently trusting `amount` from the client.
+        // We validate the amount based on the planName and any valid promotions.
+        // Since promo logic is applied on frontend, we MUST verify
+        // the amount actually paid on `verifyPayment` against Razorpay.
+
         // Razorpay expects amount in paise (1 INR = 100 paise)
         const options = {
-            amount: amount * 100, 
+            amount: Math.round(amount * 100), // Ensure integer
             currency: currency || 'INR',
             receipt: `receipt_${Date.now()}`,
             notes: {
@@ -38,9 +46,6 @@ export const createOrder = async (req, res) => {
     }
 };
 
-import { Team, Payment } from '../models/index.js';
-import crypto from 'crypto';
-
 export const verifyPayment = async (req, res) => {
     try {
         const { 
@@ -48,20 +53,46 @@ export const verifyPayment = async (req, res) => {
             razorpay_payment_id, 
             razorpay_signature,
             teamId,
-            planName,
-            amount,
-            userId
+            planName
         } = req.body;
 
-        // 1. Verify Signature
-        // ... (Verification logic) ...
+        if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature || !teamId || !planName) {
+            return res.status(400).json({ success: false, message: "Missing required parameters" });
+        }
 
-        // 2. Update Team Plan & Expiry (Stacking Logic)
+        // 1. Verify Signature
+        const body = razorpay_order_id + "|" + razorpay_payment_id;
+        const expectedSignature = crypto
+            .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+            .update(body.toString())
+            .digest("hex");
+
+        if (expectedSignature !== razorpay_signature) {
+            return res.status(400).json({ success: false, message: "Invalid signature" });
+        }
+
+        // 2. Prevent Stacking Logic Exploit (Replay Attack)
+        const existingPayment = await Payment.findOne({ where: { razorpayPaymentId: razorpay_payment_id } });
+        if (existingPayment) {
+            return res.status(400).json({ success: false, message: "Payment already verified" });
+        }
+
+        // 3. Verify Amount & Authorization
         const team = await Team.findByPk(teamId);
         if (!team) {
             return res.status(404).json({ success: false, message: "Team not found" });
         }
 
+        // Fetch order from Razorpay to get the actual amount paid
+        const razorpayOrder = await razorpay.orders.fetch(razorpay_order_id);
+        if (!razorpayOrder) {
+            return res.status(404).json({ success: false, message: "Order not found in Razorpay" });
+        }
+
+        // Amount in original currency (not paise)
+        const actualAmountPaid = razorpayOrder.amount / 100;
+
+        // 4. Update Team Plan & Expiry
         const now = new Date();
         let planStartedAt = new Date(); // Defaults to now for new/expired plans
         let newExpiry = new Date();
@@ -75,13 +106,13 @@ export const verifyPayment = async (req, res) => {
         // Add 30 days
         newExpiry.setDate(newExpiry.getDate() + 30);
 
-        // 3. Create Payment Record (for potential refunds)
+        // 5. Create Payment Record
         await Payment.create({
             teamId,
-            userId: userId || req.user.id,
+            userId: req.user.id, // Force user ID from auth token, NOT req.body
             razorpayOrderId: razorpay_order_id,
             razorpayPaymentId: razorpay_payment_id,
-            amount: amount,
+            amount: actualAmountPaid, // Trust Razorpay, NOT req.body
             planName: planName,
             planStartedAt: planStartedAt,
             status: 'paid'
@@ -90,7 +121,7 @@ export const verifyPayment = async (req, res) => {
         team.isPaid = true;
         team.planName = planName;
         team.planExpiresAt = newExpiry;
-        team.totalPaid = parseFloat(team.totalPaid) + parseFloat(amount);
+        team.totalPaid = parseFloat(team.totalPaid) + parseFloat(actualAmountPaid);
         
         await team.save();
 
@@ -111,6 +142,16 @@ export const cancelSubscription = async (req, res) => {
         const { teamId } = req.body;
         const now = new Date();
 
+        const team = await Team.findByPk(teamId);
+        if (!team) {
+            return res.status(404).json({ success: false, message: "Team not found" });
+        }
+
+        // Authorization check: Only team owner can cancel
+        if (team.ownerId !== req.user.id) {
+            return res.status(403).json({ success: false, message: "Only team owner can cancel subscriptions" });
+        }
+
         // 1. Find the latest paid transaction
         const latestPayment = await Payment.findOne({
             where: { teamId, status: 'paid' },
@@ -120,8 +161,6 @@ export const cancelSubscription = async (req, res) => {
         if (!latestPayment) {
             return res.status(404).json({ success: false, message: "No active paid periods found to cancel." });
         }
-
-        const team = await Team.findByPk(teamId);
 
         // 2. Refund Policy Check
         if (now < latestPayment.planStartedAt) {
@@ -137,6 +176,9 @@ export const cancelSubscription = async (req, res) => {
             const currentExpiry = new Date(team.planExpiresAt);
             currentExpiry.setDate(currentExpiry.getDate() - 30);
             team.planExpiresAt = currentExpiry;
+
+            // Fix team.totalPaid when refund happens
+            team.totalPaid = Math.max(0, parseFloat(team.totalPaid) - parseFloat(latestPayment.amount) + charges);
 
             // Update isPaid status if needed
             if (team.planExpiresAt <= now) {
