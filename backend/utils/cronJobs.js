@@ -24,7 +24,10 @@ export async function checkPasswordExpiries() {
     try {
         const checkDays = [7, 3, 1];
         const now = new Date();
+        const dateConditions = [];
+        const dateMap = [];
 
+        // Pre-calculate target dates and build the OR conditions
         for (const days of checkDays) {
             const targetDate = new Date();
             targetDate.setDate(now.getDate() + days);
@@ -33,17 +36,30 @@ export async function checkPasswordExpiries() {
             const nextDay = new Date(targetDate);
             nextDay.setDate(targetDate.getDate() + 1);
 
-            const users = await User.findAll({
-                where: {
-                    passwordExpiresAt: {
-                        [Op.gte]: targetDate,
-                        [Op.lt]: nextDay
-                    }
-                },
-                include: [{ model: Profile, as: 'profile' }]
+            dateConditions.push({
+                passwordExpiresAt: {
+                    [Op.gte]: targetDate,
+                    [Op.lt]: nextDay
+                }
             });
+            dateMap.push({ days, start: targetDate.getTime(), end: nextDay.getTime() });
+        }
 
-            for (const user of users) {
+        // Single query for all matching days
+        const users = await User.findAll({
+            where: {
+                [Op.or]: dateConditions
+            },
+            include: [{ model: Profile, as: 'profile' }]
+        });
+
+        for (const user of users) {
+            // Determine which days bucket the user falls into
+            const expiryTime = new Date(user.passwordExpiresAt).getTime();
+            const matchedDate = dateMap.find(d => expiryTime >= d.start && expiryTime < d.end);
+
+            if (matchedDate) {
+                const days = matchedDate.days;
                 const name = user.profile?.firstName || user.email.split('@')[0];
                 console.log(`CRON: Sending Password Expiry Reminder (${days} days) to ${user.email}`);
                 await emailService.sendPasswordExpiryReminder(user.email, name, days);
@@ -61,6 +77,8 @@ export async function checkPlanExpiries() {
     try {
         const checkDays = [7, 1];
         const now = new Date();
+        const dateConditions = [];
+        const dateMap = [];
 
         for (const days of checkDays) {
             const targetDate = new Date();
@@ -70,20 +88,31 @@ export async function checkPlanExpiries() {
             const nextDay = new Date(targetDate);
             nextDay.setDate(targetDate.getDate() + 1);
 
-            const teams = await Team.findAll({
-                where: {
-                    planExpiresAt: {
-                        [Op.gte]: targetDate,
-                        [Op.lt]: nextDay
-                    }
-                },
-                include: [{ 
-                    association: 'owner',
-                    include: [{ model: Profile, as: 'profile' }] 
-                }]
+            dateConditions.push({
+                planExpiresAt: {
+                    [Op.gte]: targetDate,
+                    [Op.lt]: nextDay
+                }
             });
+            dateMap.push({ days, start: targetDate.getTime(), end: nextDay.getTime() });
+        }
 
-            for (const team of teams) {
+        const teams = await Team.findAll({
+            where: {
+                [Op.or]: dateConditions
+            },
+            include: [{
+                association: 'owner',
+                include: [{ model: Profile, as: 'profile' }]
+            }]
+        });
+
+        for (const team of teams) {
+            const expiryTime = new Date(team.planExpiresAt).getTime();
+            const matchedDate = dateMap.find(d => expiryTime >= d.start && expiryTime < d.end);
+
+            if (matchedDate) {
+                const days = matchedDate.days;
                 const owner = team.owner;
                 if (owner) {
                     const name = owner.profile?.firstName || owner.email.split('@')[0];

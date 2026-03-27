@@ -1,5 +1,30 @@
+<<<<<<< HEAD
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { login, register, verifyEmail } from './authService.js';
+=======
+import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
+import { verifyEmail, logout } from './authService.js';
+
+describe('authService - logout', () => {
+    const CURRENT_USER_KEY = 'locatorx_current_user';
+
+    beforeEach(() => {
+        localStorage.clear();
+    });
+
+    it('should remove CURRENT_USER_KEY from localStorage', () => {
+        const removeItemSpy = vi.spyOn(Storage.prototype, 'removeItem');
+        localStorage.setItem(CURRENT_USER_KEY, JSON.stringify({ id: '123' }));
+
+        logout();
+
+        expect(removeItemSpy).toHaveBeenCalledWith(CURRENT_USER_KEY);
+        expect(localStorage.getItem(CURRENT_USER_KEY)).toBeNull();
+
+        removeItemSpy.mockRestore();
+    });
+});
+>>>>>>> origin/main
 
 describe('authService', () => {
     const USERS_KEY = 'locatorx_users';
