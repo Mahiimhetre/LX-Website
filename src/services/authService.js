@@ -327,7 +327,6 @@ export const requestPasswordReset = async (email) => {
     saveResetTokens(tokens);
 
     // In real app, this would send an email with the reset link
-    // console.log('Password reset token:', token);
 
     return { success: true, message: 'Password reset link sent to your email' };
 };
