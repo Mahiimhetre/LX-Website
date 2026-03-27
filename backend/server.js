@@ -21,6 +21,10 @@ const limiter = rateLimit({
 // Apply rate limiter to auth routes only (optional, but safer)
 app.use('/api/auth/login', limiter);
 app.use('/api/auth/register', limiter);
+app.use('/api/auth/verify-email', limiter);
+app.use('/api/auth/resend-verification', limiter);
+app.use('/api/auth/reset-password-request', limiter);
+app.use('/api/auth/reset-password', limiter);
 
 app.use(cors({
     origin: process.env.FRONTEND_URL || 'http://localhost:5173',
