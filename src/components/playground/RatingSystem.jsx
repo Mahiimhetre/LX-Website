@@ -52,7 +52,6 @@ const RatingSystem = () => {
             alert('Please provide at least one rating');
             return;
         }
-        console.log({ ratings, review, files });
         alert('Review submitted successfully!');
         setRatings({ service: 0, product: 0, support: 0 });
         setReview('');
