@@ -1,6 +1,7 @@
 
 // Mock Authentication Service
 // Replicates backend behavior using localStorage
+import apiClient from '../api/client.js';
 
 const USERS_KEY = 'locatorx_users';
 const CURRENT_USER_KEY = 'locatorx_current_user';
@@ -258,10 +259,12 @@ export const register = async (name, email, password) => {
     });
     saveVerificationTokens(tokens);
 
-    // Auto-verify for demo purposes (in real app, this would send an email)
-    setTimeout(() => {
-        verifyEmail(token);
-    }, 2000);
+    // Send a real verification email using the backend's mock endpoint
+    apiClient.post('/auth/mock-send-verification', {
+        email: email.toLowerCase(),
+        name,
+        token
+    }).catch(err => console.error('Error sending verification email:', err));
 
     const { password: _, ...userWithoutPassword } = newUser;
     return {
@@ -401,7 +404,15 @@ export const requestPasswordReset = async (email) => {
     });
     saveResetTokens(tokens);
 
-    // In real app, this would send an email with the reset link
+    const user = Array.from(users.values()).find(u => u.email.toLowerCase() === email.toLowerCase());
+    const name = user ? user.name : email.split('@')[0];
+
+    // Send a real password reset email using the backend's mock endpoint
+    apiClient.post('/auth/mock-send-password-reset', {
+        email: email.toLowerCase(),
+        name,
+        token
+    }).catch(err => console.error('Error sending password reset email:', err));
 
     return { success: true, message: 'Password reset link sent to your email' };
 };
@@ -485,10 +496,14 @@ export const resendVerification = async (email) => {
             });
             saveVerificationTokens(tokens);
 
-            // Auto-verify for demo purposes
-            setTimeout(() => {
-                verifyEmail(token);
-            }, 2000);
+            const name = user.name || email.split('@')[0];
+
+            // Send real verification email
+            apiClient.post('/auth/mock-send-verification', {
+                email: email.toLowerCase(),
+                name,
+                token
+            }).catch(err => console.error('Error sending verification email:', err));
 
             return { success: true, message: 'Verification email resent' };
         }
