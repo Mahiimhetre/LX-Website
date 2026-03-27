@@ -21,6 +21,79 @@ const RATE_LIMIT = {
     ATTEMPT_WINDOW: 30 * 60 * 1000,      // 30 minutes window for counting attempts
 };
 
+// Password hashing utility using Web Crypto API
+const PBKDF2_ITERATIONS = 100000;
+const SALT_LENGTH = 16;
+const HASH_ALGORITHM = 'SHA-256';
+
+const hashPassword = async (password) => {
+    const salt = globalThis.crypto.getRandomValues(new Uint8Array(SALT_LENGTH));
+    const passwordBuffer = new TextEncoder().encode(password);
+
+    const baseKey = await globalThis.crypto.subtle.importKey(
+        'raw',
+        passwordBuffer,
+        'PBKDF2',
+        false,
+        ['deriveBits', 'deriveKey']
+    );
+
+    const hashBuffer = await globalThis.crypto.subtle.deriveBits(
+        {
+            name: 'PBKDF2',
+            salt: salt,
+            iterations: PBKDF2_ITERATIONS,
+            hash: HASH_ALGORITHM,
+        },
+        baseKey,
+        256
+    );
+
+    const saltHex = Array.from(salt).map(b => b.toString(16).padStart(2, '0')).join('');
+    const hashHex = Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+
+    return `pbkdf2:${PBKDF2_ITERATIONS}:${saltHex}:${hashHex}`;
+};
+
+const verifyPassword = async (password, storedHash) => {
+    if (!storedHash.startsWith('pbkdf2:')) {
+        // Fallback for plain-text passwords during transition
+        return password === storedHash;
+    }
+
+    const parts = storedHash.split(':');
+    if (parts.length !== 4) return false;
+
+    const iterations = parseInt(parts[1], 10);
+    const saltHex = parts[2];
+    const hashHex = parts[3];
+
+    const salt = new Uint8Array(saltHex.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
+    const passwordBuffer = new TextEncoder().encode(password);
+
+    const baseKey = await globalThis.crypto.subtle.importKey(
+        'raw',
+        passwordBuffer,
+        'PBKDF2',
+        false,
+        ['deriveBits', 'deriveKey']
+    );
+
+    const hashBuffer = await globalThis.crypto.subtle.deriveBits(
+        {
+            name: 'PBKDF2',
+            salt: salt,
+            iterations: iterations,
+            hash: HASH_ALGORITHM,
+        },
+        baseKey,
+        256
+    );
+
+    const currentHashHex = Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+    return currentHashHex === hashHex;
+};
+
 // Helper functions
 const generateId = () => {
     return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
@@ -163,11 +236,12 @@ export const register = async (name, email, password) => {
     }
 
     const userId = generateId();
+    const hashedPassword = await hashPassword(password);
     const newUser = {
         id: userId,
         name,
         email: email.toLowerCase(),
-        password, // In real app, this would be hashed
+        password: hashedPassword,
         isVerified: false,
         createdAt: new Date().toISOString(),
     };
@@ -214,7 +288,8 @@ export const login = async (email, password) => {
 
     for (const [, user] of users) {
         if (user.email.toLowerCase() === email.toLowerCase()) {
-            if (user.password !== password) {
+            const isPasswordCorrect = await verifyPassword(password, user.password);
+            if (!isPasswordCorrect) {
                 const attemptResult = recordFailedAttempt(email);
                 if (attemptResult.lockedOut) {
                     const minutes = Math.ceil(attemptResult.lockoutTime / 60);
@@ -332,7 +407,7 @@ export const requestPasswordReset = async (email) => {
     return { success: true, message: 'Password reset link sent to your email' };
 };
 
-export const resetPassword = (token, newPassword) => {
+export const resetPassword = async (token, newPassword) => {
     const tokens = getResetTokens();
     const tokenData = tokens.get(token);
 
@@ -353,7 +428,7 @@ export const resetPassword = (token, newPassword) => {
     const users = getUsers();
     for (const [id, user] of users) {
         if (user.email === tokenData.email) {
-            user.password = newPassword;
+            user.password = await hashPassword(newPassword);
             users.set(id, user);
             saveUsers(users);
             tokens.delete(token);
@@ -374,7 +449,8 @@ export const changePassword = async (
 
     for (const [id, user] of users) {
         if (user.email.toLowerCase() === email.toLowerCase()) {
-            if (user.password !== currentPassword) {
+            const isPasswordCorrect = await verifyPassword(currentPassword, user.password);
+            if (!isPasswordCorrect) {
                 return { success: false, message: 'Current password is incorrect' };
             }
 
@@ -382,7 +458,7 @@ export const changePassword = async (
                 return { success: false, message: 'New password must be at least 8 characters' };
             }
 
-            user.password = newPassword;
+            user.password = await hashPassword(newPassword);
             users.set(id, user);
             saveUsers(users);
 
