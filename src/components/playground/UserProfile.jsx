@@ -81,8 +81,7 @@ const UserProfile = () => {
     const saveSignature = () => {
         const canvas = canvasRef.current;
         if (!canvas) return;
-        const dataUrl = canvas.toDataURL('image/png');
-        console.log('Signature saved:', dataUrl.substring(0, 50) + '...');
+        // Signature saved logic goes here
     };
 
     const toggleEdit = () => {
