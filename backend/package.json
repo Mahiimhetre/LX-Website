@@ -27,8 +27,7 @@
     "razorpay": "^2.9.6",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
-    "sequelize": "^6.37.3",
-    "sinon": "^21.0.3"
+    "sequelize": "^6.37.3"
   },
   "devDependencies": {
     "nodemon": "^3.1.0",
