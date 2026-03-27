@@ -1,7 +1,7 @@
-import cron from 'node-cron';
 import { User, Profile } from '../models/index.js';
 import { Op } from 'sequelize';
-import { sendCleanupReminderEmail } from './emailService.js';
+import * as emailService from './emailService.js';
+import cron from 'node-cron';
 
 /**
  * Cleanup Service
@@ -38,13 +38,29 @@ export const performCleanup = async () => {
             }]
         });
 
+        const successfulUserIds = [];
+
+        // Sequentially send emails to avoid rate limits or overwhelming SMTP servers
         for (const user of usersToRemind) {
             console.log(`Sending cleanup reminder to: ${user.email}`);
-            const success = await sendCleanupReminderEmail(user.email);
+            const success = await emailService.sendCleanupReminderEmail(user.email);
             if (success) {
-                user.profile.reminderSent = true;
-                await user.profile.save();
+                successfulUserIds.push(user.id);
             }
+        }
+
+        // Perform a single bulk update for the reminderSent flag
+        if (successfulUserIds.length > 0) {
+            await Profile.update(
+                { reminderSent: true },
+                {
+                    where: {
+                        userId: {
+                            [Op.in]: successfulUserIds
+                        }
+                    }
+                }
+            );
         }
 
         // 2. Delete Users (Created more than 7 days ago, not verified)
@@ -63,12 +79,20 @@ export const performCleanup = async () => {
             }]
         });
 
-        for (const user of usersToDelete) {
-            console.log(`Deleting unverified user: ${user.email} (Created at: ${user.createdAt})`);
-            await user.destroy(); // This should cascade delete the profile if configured, otherwise delete profile manually
+        if (usersToDelete.length > 0) {
+            const userIds = usersToDelete.map(user => user.id);
+            console.log(`Deleting ${usersToDelete.length} unverified users...`);
+
+            await User.destroy({
+                where: {
+                    id: {
+                        [Op.in]: userIds
+                    }
+                }
+            });
         }
 
-        console.log(`Cleanup completed. Reminders sent: ${usersToRemind.length}, Users deleted: ${usersToDelete.length}`);
+        console.log(`Cleanup completed. Reminders sent: ${successfulUserIds.length}, Users deleted: ${usersToDelete.length}`);
     } catch (error) {
         console.error('Error in cleanup job:', error);
     }

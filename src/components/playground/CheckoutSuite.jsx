@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,7 +20,8 @@ import {
 } from 'lucide-react';
 
 // --- Shopping Cart Component ---
-export const ShoppingCart = ({
+// ⚡ Bolt Optimization: Wrap component in React.memo so it only re-renders when its specific props (like `cart`) change.
+export const ShoppingCart = React.memo(({
     cart,
     onUpdateQuantity,
     onRemoveItem,
@@ -156,9 +157,10 @@ export const ShoppingCart = ({
             </CardContent>
         </Card>
     );
-};
+});
 
 // --- Address Form Component ---
+// ⚡ Bolt Optimization: Wrap component in React.memo so it only re-renders when its specific props change.
 const countries = {
     in: { name: 'India', states: ['Maharashtra', 'Karnataka', 'Delhi', 'Tamil Nadu'] },
     us: { name: 'United States', states: ['California', 'Texas', 'New York', 'Florida'] },
@@ -176,7 +178,7 @@ const citiesByState = {
     'Ontario': ['Toronto', 'Ottawa', 'Hamilton'],
 };
 
-export const AddressForm = ({ onClose, onProceedToPayment, cartTotal }) => {
+export const AddressForm = React.memo(({ onClose, onProceedToPayment, cartTotal }) => {
     const [address, setAddress] = useState({
         fullName: '', phone: '', address: '', country: '',
         state: '', city: '', pinCode: '', addressType: ''
@@ -305,10 +307,11 @@ export const AddressForm = ({ onClose, onProceedToPayment, cartTotal }) => {
             </CardFooter>
         </Card>
     );
-};
+});
 
 // --- Payment Gateway Component ---
-export const PaymentGateway = ({ amount, onClose, onPaymentComplete }) => {
+// ⚡ Bolt Optimization: Wrap component in React.memo so it only re-renders when its specific props change.
+export const PaymentGateway = React.memo(({ amount, onClose, onPaymentComplete }) => {
     const [paymentMethod, setPaymentMethod] = useState('upi');
     const [paymentAmount, setPaymentAmount] = useState(amount);
     const [isProcessing, setIsProcessing] = useState(false);
@@ -449,4 +452,4 @@ export const PaymentGateway = ({ amount, onClose, onPaymentComplete }) => {
             <CardFooter><Button className="w-full h-12" onClick={processPayment} disabled={isProcessing}>{isProcessing ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Processing...</> : `Pay ₹${paymentAmount.toLocaleString('en-IN')}`}</Button></CardFooter>
         </Card>
     );
-};
+});
