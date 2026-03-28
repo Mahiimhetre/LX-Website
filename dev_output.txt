@@ -1,0 +1,18 @@
+
+> vite_react_shadcn_ts@0.0.0 dev /app
+> vite
+
+
+  VITE v6.4.1  ready in 303 ms
+
+  ➜  Local:   http://localhost:3000/
+  ➜  Network: http://192.168.0.2:3000/
+
+warn - The class `duration-[10000ms]` is ambiguous and matches multiple utilities.
+warn - If this is content and not a class, replace it with `duration-&lsqb;10000ms&rsqb;` to silence this warning.
+
+warn - The class `duration-[12000ms]` is ambiguous and matches multiple utilities.
+warn - If this is content and not a class, replace it with `duration-&lsqb;12000ms&rsqb;` to silence this warning.
+
+warn - The class `duration-[8000ms]` is ambiguous and matches multiple utilities.
+warn - If this is content and not a class, replace it with `duration-&lsqb;8000ms&rsqb;` to silence this warning.
