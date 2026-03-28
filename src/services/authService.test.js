@@ -1,6 +1,15 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { login, register, verifyEmail, logout } from './authService.js';
 
+vi.mock('@/api/client', () => {
+    return {
+        default: {
+            post: vi.fn(() => Promise.resolve({ data: { success: true } })),
+            get: vi.fn(() => Promise.resolve({ data: { success: true } })),
+        }
+    };
+});
+
 describe('authService', () => {
     const USERS_KEY = 'locatorx_users';
     const VERIFICATION_TOKENS_KEY = 'locatorx_verification_tokens';
