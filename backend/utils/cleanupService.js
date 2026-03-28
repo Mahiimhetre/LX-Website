@@ -65,6 +65,8 @@ export const performCleanup = async () => {
 
         // 2. Delete Users (Created more than 7 days ago, not verified)
         const usersToDelete = await User.findAll({
+            // ⚡ Bolt: Only fetch the user ID instead of materializing full User and Profile objects into memory
+            attributes: ['id'],
             where: {
                 createdAt: {
                     [Op.lt]: sevenDaysAgo
@@ -73,10 +75,12 @@ export const performCleanup = async () => {
             include: [{
                 model: Profile,
                 as: 'profile',
+                attributes: [], // ⚡ Bolt: Skip fetching Profile columns entirely, we just need the INNER JOIN
                 where: {
                     isVerified: false
                 }
-            }]
+            }],
+            raw: true // ⚡ Bolt: Return plain JS objects to bypass Sequelize instance overhead
         });
 
         if (usersToDelete.length > 0) {
