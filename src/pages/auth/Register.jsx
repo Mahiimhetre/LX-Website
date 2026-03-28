@@ -159,6 +159,7 @@ const Register = () => {
                                         type="button"
                                         onClick={() => setName('')}
                                         className="absolute right-4 top-3.5 text-muted-foreground/50 hover:text-foreground transition-colors p-1"
+                                        aria-label="Clear name"
                                     >
                                         <X className="w-4 h-4" />
                                     </button>
@@ -198,6 +199,7 @@ const Register = () => {
                                         type="button"
                                         onClick={() => setEmail('')}
                                         className="absolute right-4 top-3.5 text-muted-foreground/50 hover:text-foreground transition-colors p-1"
+                                        aria-label="Clear email"
                                     >
                                         <X className="w-4 h-4" />
                                     </button>
@@ -235,6 +237,7 @@ const Register = () => {
                                             type="button"
                                             onClick={() => setPassword('')}
                                             className="text-muted-foreground/50 hover:text-foreground transition-colors p-1"
+                                            aria-label="Clear password"
                                         >
                                             <X className="w-4 h-4" />
                                         </button>
@@ -243,6 +246,7 @@ const Register = () => {
                                         type="button"
                                         onClick={() => setShowPassword(!showPassword)}
                                         className="text-muted-foreground/50 hover:text-foreground transition-colors p-1"
+                                        aria-label={showPassword ? "Hide password" : "Show password"}
                                     >
                                         {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                                     </button>
@@ -311,6 +315,7 @@ const Register = () => {
                                             type="button"
                                             onClick={() => setConfirmPassword('')}
                                             className="text-muted-foreground/50 hover:text-foreground transition-colors p-1"
+                                            aria-label="Clear confirm password"
                                         >
                                             <X className="w-4 h-4" />
                                         </button>
@@ -319,6 +324,7 @@ const Register = () => {
                                         type="button"
                                         onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                                         className="text-muted-foreground/50 hover:text-foreground transition-colors p-1"
+                                        aria-label={showConfirmPassword ? "Hide confirm password" : "Show confirm password"}
                                     >
                                         {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                                     </button>

@@ -100,6 +100,7 @@ const Login = () => {
                                         type="button"
                                         onClick={() => setEmail('')}
                                         className="absolute right-3 top-3 text-muted-foreground/50 hover:text-foreground transition-colors p-0.5"
+                                        aria-label="Clear email"
                                     >
                                         <X className="w-3.5 h-3.5" />
                                     </button>
@@ -137,6 +138,7 @@ const Login = () => {
                                             type="button"
                                             onClick={() => setPassword('')}
                                             className="text-muted-foreground/50 hover:text-foreground transition-colors p-0.5"
+                                            aria-label="Clear password"
                                         >
                                             <X className="w-3.5 h-3.5" />
                                         </button>
@@ -145,6 +147,7 @@ const Login = () => {
                                         type="button"
                                         onClick={() => setShowPassword(!showPassword)}
                                         className="text-muted-foreground/50 hover:text-foreground transition-colors p-0.5"
+                                        aria-label={showPassword ? "Hide password" : "Show password"}
                                     >
                                         {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                                     </button>
