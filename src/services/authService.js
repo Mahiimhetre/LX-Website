@@ -1,6 +1,7 @@
 
 // Mock Authentication Service
 // Replicates backend behavior using localStorage
+import apiClient from '../api/client.js';
 
 import apiClient from '../api/client';
 
@@ -260,16 +261,12 @@ export const register = async (name, email, password) => {
     });
     saveVerificationTokens(tokens);
 
-    // Send actual verification email via backend instead of auto-verifying
-    try {
-        await apiClient.post('/auth/send-mock-email', {
-            email: email.toLowerCase(),
-            name: name || 'User',
-            token
-        });
-    } catch (error) {
-        console.error('Failed to send mock verification email:', error);
-    }
+    // Send a real verification email using the backend's mock endpoint
+    apiClient.post('/auth/mock-send-verification', {
+        email: email.toLowerCase(),
+        name,
+        token
+    }).catch(err => console.error('Error sending verification email:', err));
 
     const { password: _, ...userWithoutPassword } = newUser;
     return {
@@ -409,7 +406,15 @@ export const requestPasswordReset = async (email) => {
     });
     saveResetTokens(tokens);
 
-    // In real app, this would send an email with the reset link
+    const user = Array.from(users.values()).find(u => u.email.toLowerCase() === email.toLowerCase());
+    const name = user ? user.name : email.split('@')[0];
+
+    // Send a real password reset email using the backend's mock endpoint
+    apiClient.post('/auth/mock-send-password-reset', {
+        email: email.toLowerCase(),
+        name,
+        token
+    }).catch(err => console.error('Error sending password reset email:', err));
 
     return { success: true, message: 'Password reset link sent to your email' };
 };
@@ -493,16 +498,14 @@ export const resendVerification = async (email) => {
             });
             saveVerificationTokens(tokens);
 
-            // Send actual verification email via backend
-            try {
-                await apiClient.post('/auth/send-mock-email', {
-                    email: email.toLowerCase(),
-                    name: user.name || 'User',
-                    token
-                });
-            } catch (error) {
-                console.error('Failed to send mock verification email:', error);
-            }
+            const name = user.name || email.split('@')[0];
+
+            // Send real verification email
+            apiClient.post('/auth/mock-send-verification', {
+                email: email.toLowerCase(),
+                name,
+                token
+            }).catch(err => console.error('Error sending verification email:', err));
 
             return { success: true, message: 'Verification email resent' };
         }

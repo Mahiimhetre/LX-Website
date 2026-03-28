@@ -122,12 +122,10 @@ describe('authService', () => {
             // Register a user for testing
             await register('Test User', testEmail, testPassword);
 
-            // Get the verification token from localStorage
-            const tokens = new Map(JSON.parse(localStorage.getItem(VERIFICATION_TOKENS_KEY) || '[]'));
-            const token = Array.from(tokens.keys())[0];
-
-            // Manually verify
-            if (token) {
+            // Mock auto-verify directly for testing purposes
+            const tokens = JSON.parse(localStorage.getItem(VERIFICATION_TOKENS_KEY));
+            if (tokens && tokens.length > 0) {
+                const token = tokens[0][0];
                 verifyEmail(token);
             }
         });

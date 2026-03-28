@@ -12,6 +12,8 @@ import {
     githubLogin,
     githubCallback,
     sendMockVerificationEmail
+    mockSendVerificationEmail,
+    mockSendPasswordResetEmail
 } from '../controllers/authController.js';
 import { requireAuth } from '../middleware/authMiddleware.js';
 
@@ -30,6 +32,9 @@ router.get('/google', googleLogin);
 router.get('/google/callback', googleCallback);
 router.get('/github', githubLogin);
 router.get('/github/callback', githubCallback);
+
+router.post('/mock-send-verification', mockSendVerificationEmail);
+router.post('/mock-send-password-reset', mockSendPasswordResetEmail);
 
 // Protected route to get user session (replaces supabase.auth.getSession)
 router.get('/session', requireAuth, getSession);

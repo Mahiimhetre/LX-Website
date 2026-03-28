@@ -6,10 +6,15 @@ import { useState } from "react";
 const PromoBanner = () => {
     const [isVisible, setIsVisible] = useState(true);
 
-    // Set countdown for 24 hours from now for demo purposes
-    // IN REAL APP: This should be a fixed date or fetched from server
-    const tomorrow = new Date();
-    tomorrow.setHours(tomorrow.getHours() + 24);
+    // Set countdown from environment variable or fallback to 24 hours from now
+    const envDate = import.meta.env.VITE_PROMO_TARGET_DATE;
+    const targetDate = new Date();
+
+    if (envDate && !isNaN(Date.parse(envDate))) {
+        targetDate.setTime(Date.parse(envDate));
+    } else {
+        targetDate.setHours(targetDate.getHours() + 24);
+    }
 
     if (!isVisible) return null;
 
@@ -24,7 +29,7 @@ const PromoBanner = () => {
                     <span className="font-bold text-yellow-300">50% OFF</span> Pro Plan
                 </p>
                 <div className="h-4 w-[1px] bg-white/20 mx-1"></div>
-                <CountdownTimer targetDate={tomorrow} className="text-yellow-100" />
+                <CountdownTimer targetDate={targetDate} className="text-yellow-100" />
             </div>
 
             <Link
