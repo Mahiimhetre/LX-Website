@@ -11,7 +11,6 @@ import {
     googleCallback,
     githubLogin,
     githubCallback,
-    sendMockVerificationEmail
     mockSendVerificationEmail,
     mockSendPasswordResetEmail
 } from '../controllers/authController.js';
@@ -23,7 +22,6 @@ router.post('/register', register);
 router.post('/login', login);
 router.post('/verify-email', verifyEmail);
 router.post('/resend-verification', resendVerificationEmail);
-router.post('/send-mock-email', sendMockVerificationEmail);
 router.post('/reset-password-request', resetPasswordRequest);
 router.post('/reset-password', resetPasswordConfirm);
 

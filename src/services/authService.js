@@ -3,8 +3,6 @@
 // Replicates backend behavior using localStorage
 import apiClient from '../api/client.js';
 
-import apiClient from '../api/client';
-
 const USERS_KEY = 'locatorx_users';
 const CURRENT_USER_KEY = 'locatorx_current_user';
 const VERIFICATION_TOKENS_KEY = 'locatorx_verification_tokens';

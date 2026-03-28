@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { login, register, verifyEmail, logout } from './authService.js';
 
-vi.mock('../api/client', () => {
+vi.mock('@/api/client', () => {
     return {
         default: {
             post: vi.fn(() => Promise.resolve({ data: { success: true } })),
