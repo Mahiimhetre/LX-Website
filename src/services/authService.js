@@ -2,6 +2,8 @@
 // Mock Authentication Service
 // Replicates backend behavior using localStorage
 
+import apiClient from '../api/client';
+
 const USERS_KEY = 'locatorx_users';
 const CURRENT_USER_KEY = 'locatorx_current_user';
 const VERIFICATION_TOKENS_KEY = 'locatorx_verification_tokens';
@@ -258,10 +260,16 @@ export const register = async (name, email, password) => {
     });
     saveVerificationTokens(tokens);
 
-    // Auto-verify for demo purposes (in real app, this would send an email)
-    setTimeout(() => {
-        verifyEmail(token);
-    }, 2000);
+    // Send actual verification email via backend instead of auto-verifying
+    try {
+        await apiClient.post('/auth/send-mock-email', {
+            email: email.toLowerCase(),
+            name: name || 'User',
+            token
+        });
+    } catch (error) {
+        console.error('Failed to send mock verification email:', error);
+    }
 
     const { password: _, ...userWithoutPassword } = newUser;
     return {
@@ -485,10 +493,16 @@ export const resendVerification = async (email) => {
             });
             saveVerificationTokens(tokens);
 
-            // Auto-verify for demo purposes
-            setTimeout(() => {
-                verifyEmail(token);
-            }, 2000);
+            // Send actual verification email via backend
+            try {
+                await apiClient.post('/auth/send-mock-email', {
+                    email: email.toLowerCase(),
+                    name: user.name || 'User',
+                    token
+                });
+            } catch (error) {
+                console.error('Failed to send mock verification email:', error);
+            }
 
             return { success: true, message: 'Verification email resent' };
         }

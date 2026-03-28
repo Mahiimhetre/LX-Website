@@ -1,6 +1,15 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { login, register, verifyEmail, logout } from './authService.js';
 
+vi.mock('../api/client', () => {
+    return {
+        default: {
+            post: vi.fn(() => Promise.resolve({ data: { success: true } })),
+            get: vi.fn(() => Promise.resolve({ data: { success: true } })),
+        }
+    };
+});
+
 describe('authService', () => {
     const USERS_KEY = 'locatorx_users';
     const VERIFICATION_TOKENS_KEY = 'locatorx_verification_tokens';
@@ -113,8 +122,14 @@ describe('authService', () => {
             // Register a user for testing
             await register('Test User', testEmail, testPassword);
 
-            // Note: register auto-verifies after 2000ms, let's fast forward
-            vi.advanceTimersByTime(2500);
+            // Get the verification token from localStorage
+            const tokens = new Map(JSON.parse(localStorage.getItem(VERIFICATION_TOKENS_KEY) || '[]'));
+            const token = Array.from(tokens.keys())[0];
+
+            // Manually verify
+            if (token) {
+                verifyEmail(token);
+            }
         });
 
         it('should decrement remaining attempts on failed login', async () => {

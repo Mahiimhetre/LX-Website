@@ -10,7 +10,8 @@ import {
     googleLogin,
     googleCallback,
     githubLogin,
-    githubCallback
+    githubCallback,
+    sendMockVerificationEmail
 } from '../controllers/authController.js';
 import { requireAuth } from '../middleware/authMiddleware.js';
 
@@ -20,6 +21,7 @@ router.post('/register', register);
 router.post('/login', login);
 router.post('/verify-email', verifyEmail);
 router.post('/resend-verification', resendVerificationEmail);
+router.post('/send-mock-email', sendMockVerificationEmail);
 router.post('/reset-password-request', resetPasswordRequest);
 router.post('/reset-password', resetPasswordConfirm);
 
