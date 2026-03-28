@@ -34,7 +34,7 @@ export default defineConfig(({ mode }) => {
     },
     test: {
       globals: true,
-      environment: "jsdom",
+      environment: "node",
       setupFiles: "./src/test/setup.js",
     },
   };

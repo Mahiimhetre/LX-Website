@@ -1,0 +1,72 @@
+
+[1m[46m RUN [49m[22m [36mv4.1.1 [39m[90mE:/LX-Website[39m
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ» Unhandled Errors ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»
+
+Vitest caught 4 unhandled errors during the test run.
+This might cause false positive tests. Resolve unhandled errors to make sure your tests are not affected.
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ» Unhandled Error ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»
+Error: [vitest-pool]: Failed to start forks worker for test files E:/LX-Website/src/services/authService.test.js.
+ Γ¥» node_modules/vitest/dist/chunks/cli-api.BUXBO6jS.js:3449:94
+ Γ¥» processTicksAndRejections node:internal/process/task_queues:105:5
+ Γ¥» Pool.schedule node_modules/vitest/dist/chunks/cli-api.BUXBO6jS.js:3449:5
+
+Caused by: Error: require() of ES Module E:\LX-Website\node_modules\@exodus\bytes\encoding-lite.js from E:\LX-Website\node_modules\html-encoding-sniffer\lib\html-encoding-sniffer.js not supported.
+Instead change the require of encoding-lite.js in E:\LX-Website\node_modules\html-encoding-sniffer\lib\html-encoding-sniffer.js to a dynamic import() which is available in all CommonJS modules.
+ Γ¥» TracingChannel.traceSync node:diagnostics_channel:315:14
+ Γ¥» Object.<anonymous> node_modules/html-encoding-sniffer/lib/html-encoding-sniffer.js:2:41
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»
+Serialized Error: { code: 'ERR_REQUIRE_ESM' }
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ» Unhandled Error ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»
+Error: [vitest-pool]: Failed to start forks worker for test files E:/LX-Website/src/services/hashing.test.js.
+ Γ¥» node_modules/vitest/dist/chunks/cli-api.BUXBO6jS.js:3449:94
+ Γ¥» processTicksAndRejections node:internal/process/task_queues:105:5
+ Γ¥» Pool.schedule node_modules/vitest/dist/chunks/cli-api.BUXBO6jS.js:3449:5
+
+Caused by: Error: require() of ES Module E:\LX-Website\node_modules\@exodus\bytes\encoding-lite.js from E:\LX-Website\node_modules\html-encoding-sniffer\lib\html-encoding-sniffer.js not supported.
+Instead change the require of encoding-lite.js in E:\LX-Website\node_modules\html-encoding-sniffer\lib\html-encoding-sniffer.js to a dynamic import() which is available in all CommonJS modules.
+ Γ¥» TracingChannel.traceSync node:diagnostics_channel:315:14
+ Γ¥» Object.<anonymous> node_modules/html-encoding-sniffer/lib/html-encoding-sniffer.js:2:41
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»
+Serialized Error: { code: 'ERR_REQUIRE_ESM' }
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ» Unhandled Error ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»
+Error: [vitest-pool]: Failed to start forks worker for test files E:/LX-Website/src/lib/validations.test.js.
+ Γ¥» node_modules/vitest/dist/chunks/cli-api.BUXBO6jS.js:3449:94
+ Γ¥» processTicksAndRejections node:internal/process/task_queues:105:5
+ Γ¥» Pool.schedule node_modules/vitest/dist/chunks/cli-api.BUXBO6jS.js:3449:5
+
+Caused by: Error: require() of ES Module E:\LX-Website\node_modules\@exodus\bytes\encoding-lite.js from E:\LX-Website\node_modules\html-encoding-sniffer\lib\html-encoding-sniffer.js not supported.
+Instead change the require of encoding-lite.js in E:\LX-Website\node_modules\html-encoding-sniffer\lib\html-encoding-sniffer.js to a dynamic import() which is available in all CommonJS modules.
+ Γ¥» TracingChannel.traceSync node:diagnostics_channel:315:14
+ Γ¥» Object.<anonymous> node_modules/html-encoding-sniffer/lib/html-encoding-sniffer.js:2:41
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»
+Serialized Error: { code: 'ERR_REQUIRE_ESM' }
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ» Unhandled Error ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»
+Error: [vitest-pool]: Failed to start forks worker for test files E:/LX-Website/src/lib/utils.test.js.
+ Γ¥» node_modules/vitest/dist/chunks/cli-api.BUXBO6jS.js:3449:94
+ Γ¥» processTicksAndRejections node:internal/process/task_queues:105:5
+ Γ¥» Pool.schedule node_modules/vitest/dist/chunks/cli-api.BUXBO6jS.js:3449:5
+
+Caused by: Error: require() of ES Module E:\LX-Website\node_modules\@exodus\bytes\encoding-lite.js from E:\LX-Website\node_modules\html-encoding-sniffer\lib\html-encoding-sniffer.js not supported.
+Instead change the require of encoding-lite.js in E:\LX-Website\node_modules\html-encoding-sniffer\lib\html-encoding-sniffer.js to a dynamic import() which is available in all CommonJS modules.
+ Γ¥» TracingChannel.traceSync node:diagnostics_channel:315:14
+ Γ¥» Object.<anonymous> node_modules/html-encoding-sniffer/lib/html-encoding-sniffer.js:2:41
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»
+Serialized Error: { code: 'ERR_REQUIRE_ESM' }
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»
+
+
+[2m Test Files [22m [2mno tests[22m
+[2m      Tests [22m [2mno tests[22m
+[2m     Errors [22m [1m[31m4 errors[39m[22m
+[2m   Start at [22m 08:43:15
+[2m   Duration [22m 651ms[2m (transform 0ms, setup 0ms, import 0ms, tests 0ms, environment 0ms)[22m
+
