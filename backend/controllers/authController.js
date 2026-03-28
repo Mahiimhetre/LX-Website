@@ -394,3 +394,37 @@ export const getSession = async (req, res) => {
         res.status(500).json({ success: false, message: 'Server error' });
     }
 };
+
+export const mockSendVerificationEmail = async (req, res) => {
+    try {
+        const { email, name, token } = req.body;
+
+        if (!email || !token) {
+            return res.status(400).json({ success: false, message: 'Email and token are required' });
+        }
+
+        await sendVerificationEmail(email, name || 'User', token);
+
+        res.json({ success: true, message: 'Verification email sent successfully' });
+    } catch (error) {
+        console.error('Mock send verification error:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+};
+
+export const mockSendPasswordResetEmail = async (req, res) => {
+    try {
+        const { email, name, token } = req.body;
+
+        if (!email || !token) {
+            return res.status(400).json({ success: false, message: 'Email and token are required' });
+        }
+
+        await sendPasswordResetEmail(email, name || 'User', token);
+
+        res.json({ success: true, message: 'Password reset email sent successfully' });
+    } catch (error) {
+        console.error('Mock send password reset error:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+};
