@@ -53,18 +53,25 @@ export async function checkPasswordExpiries() {
             include: [{ model: Profile, as: 'profile' }]
         });
 
-        await Promise.all(users.map(async (user) => {
-            // Determine which days bucket the user falls into
-            const expiryTime = new Date(user.passwordExpiresAt).getTime();
-            const matchedDate = dateMap.find(d => expiryTime >= d.start && expiryTime < d.end);
+        // ⚡ Bolt: Use a sequential for...of loop instead of Promise.all for I/O bound tasks
+        // Why: Promise.all creates unbounded concurrency which can exhaust memory and trigger SMTP rate limits when processing thousands of users.
+        // Impact: Trades a slight increase in total execution time for significantly improved memory stability and reliability of email delivery.
+        for (const user of users) {
+            try {
+                // Determine which days bucket the user falls into
+                const expiryTime = new Date(user.passwordExpiresAt).getTime();
+                const matchedDate = dateMap.find(d => expiryTime >= d.start && expiryTime < d.end);
 
-            if (matchedDate) {
-                const days = matchedDate.days;
-                const name = user.profile?.firstName || user.email.split('@')[0];
-                console.log(`CRON: Sending Password Expiry Reminder (${days} days) to ${user.email}`);
-                await emailService.sendPasswordExpiryReminder(user.email, name, days);
+                if (matchedDate) {
+                    const days = matchedDate.days;
+                    const name = user.profile?.firstName || user.email.split('@')[0];
+                    console.log(`CRON: Sending Password Expiry Reminder (${days} days) to ${user.email}`);
+                    await emailService.sendPasswordExpiryReminder(user.email, name, days);
+                }
+            } catch (innerError) {
+                console.error(`Failed to send password expiry reminder to ${user.email}:`, innerError);
             }
-        }));
+        }
     } catch (error) {
         console.error('CRON ERROR (Password Expiry):', error);
     }
@@ -107,20 +114,27 @@ export async function checkPlanExpiries() {
             }]
         });
 
-        await Promise.all(teams.map(async (team) => {
-            const expiryTime = new Date(team.planExpiresAt).getTime();
-            const matchedDate = dateMap.find(d => expiryTime >= d.start && expiryTime < d.end);
+        // ⚡ Bolt: Use a sequential for...of loop instead of Promise.all for I/O bound tasks
+        // Why: Promise.all creates unbounded concurrency which can exhaust memory and trigger SMTP rate limits when processing thousands of users.
+        // Impact: Trades a slight increase in total execution time for significantly improved memory stability and reliability of email delivery.
+        for (const team of teams) {
+            try {
+                const expiryTime = new Date(team.planExpiresAt).getTime();
+                const matchedDate = dateMap.find(d => expiryTime >= d.start && expiryTime < d.end);
 
-            if (matchedDate) {
-                const days = matchedDate.days;
-                const owner = team.owner;
-                if (owner) {
-                    const name = owner.profile?.firstName || owner.email.split('@')[0];
-                    console.log(`CRON: Sending Plan Expiry Reminder (${days} days) to ${owner.email} for team ${team.name}`);
-                    await emailService.sendPlanExpiryReminder(owner.email, name, team.name, days);
+                if (matchedDate) {
+                    const days = matchedDate.days;
+                    const owner = team.owner;
+                    if (owner) {
+                        const name = owner.profile?.firstName || owner.email.split('@')[0];
+                        console.log(`CRON: Sending Plan Expiry Reminder (${days} days) to ${owner.email} for team ${team.name}`);
+                        await emailService.sendPlanExpiryReminder(owner.email, name, team.name, days);
+                    }
                 }
+            } catch (innerError) {
+                console.error(`Failed to send plan expiry reminder for team ${team.name}:`, innerError);
             }
-        }));
+        }
     } catch (error) {
         console.error('CRON ERROR (Plan Expiry):', error);
     }
