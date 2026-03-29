@@ -1,0 +1,3 @@
+## 2024-03-29 - Missing ARIA labels on icon-only buttons
+**Learning:** Found multiple instances of icon-only buttons (`<button><Icon /></button>`) across different components (`Sidebar`, `AIChatWidget`, `PaymentModal`) that lacked `aria-label`s, making them inaccessible to screen readers. This seems to be a common pattern when adding interactive icons without considering accessibility first.
+**Action:** Always verify that buttons containing only icons or visual elements have explicit `aria-label` or `title` attributes to provide context for screen reader users and improve overall accessibility and usability.
