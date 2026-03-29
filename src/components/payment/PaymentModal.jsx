@@ -117,7 +117,7 @@ const PaymentModal = ({ isOpen, onClose, planName, amount, currency, user, onSuc
                                 <span className="text-slate-400">Payment ID</span>
                                 <div className="flex items-center gap-2">
                                     <span className="font-mono text-xs">{paymentDetails?.razorpay_payment_id || 'PAY-N/A'}</span>
-                                    <button onClick={() => copyToClipboard(paymentDetails?.razorpay_payment_id)} className="p-1 hover:bg-white/10 rounded transition-colors">
+                                    <button onClick={() => copyToClipboard(paymentDetails?.razorpay_payment_id)} aria-label="Copy payment ID" title="Copy payment ID" className="p-1 hover:bg-white/10 rounded transition-colors">
                                         <Copy className="w-3 h-3 text-slate-400" />
                                     </button>
                                 </div>
