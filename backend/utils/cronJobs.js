@@ -24,14 +24,19 @@ export async function checkPasswordExpiries() {
     try {
         const checkDays = [7, 3, 1];
         const now = new Date();
+        // ⚡ Bolt: Calculate a stable 'today' midnight timestamp once per function
+        // to ensure consistent bucket categorization across result processing and
+        // prevent side effects from mutating shared Date objects.
+        const today = new Date(now);
+        today.setHours(0, 0, 0, 0);
+
         const dateConditions = [];
         const dateMap = [];
 
         // Pre-calculate target dates and build the OR conditions
         for (const days of checkDays) {
-            const targetDate = new Date();
-            targetDate.setDate(now.getDate() + days);
-            targetDate.setHours(0, 0, 0, 0);
+            const targetDate = new Date(today);
+            targetDate.setDate(today.getDate() + days);
 
             const nextDay = new Date(targetDate);
             nextDay.setDate(targetDate.getDate() + 1);
@@ -53,20 +58,26 @@ export async function checkPasswordExpiries() {
             include: [{ model: Profile, as: 'profile' }]
         });
 
-        await Promise.all(users.map(async (user) => {
-            // Determine which days bucket the user falls into
-            const expiryTime = new Date(user.passwordExpiresAt).getTime();
-            const matchedDate = dateMap.find(d => expiryTime >= d.start && expiryTime < d.end);
+        // ⚡ Bolt: Avoid unbounded Promise.all concurrency for large user arrays in cron jobs.
+        // Process sequentially to prevent OOM errors, connection pool exhaustion, and email API rate limits.
+        for (const user of users) {
+            try {
+                // Determine which days bucket the user falls into
+                const expiryTime = new Date(user.passwordExpiresAt).getTime();
+                const matchedDate = dateMap.find(d => expiryTime >= d.start && expiryTime < d.end);
 
-            if (matchedDate) {
-                const days = matchedDate.days;
-                const name = user.profile?.firstName || user.email.split('@')[0];
-                console.log(`CRON: Sending Password Expiry Reminder (${days} days) to ${user.email}`);
-                await emailService.sendPasswordExpiryReminder(user.email, name, days);
+                if (matchedDate) {
+                    const days = matchedDate.days;
+                    const name = user.profile?.firstName || user.email.split('@')[0];
+                    console.log(`CRON: Sending Password Expiry Reminder (${days} days) to ${user.email}`);
+                    await emailService.sendPasswordExpiryReminder(user.email, name, days);
+                }
+            } catch (err) {
+                console.error(`CRON ERROR (Password Expiry - User ${user.email}):`, err);
             }
-        }));
+        }
     } catch (error) {
-        console.error('CRON ERROR (Password Expiry):', error);
+        console.error('CRON ERROR (Password Expiry - General):', error);
     }
 }
 
@@ -77,13 +88,18 @@ export async function checkPlanExpiries() {
     try {
         const checkDays = [7, 1];
         const now = new Date();
+        // ⚡ Bolt: Calculate a stable 'today' midnight timestamp once per function
+        // to ensure consistent bucket categorization across result processing and
+        // prevent side effects from mutating shared Date objects.
+        const today = new Date(now);
+        today.setHours(0, 0, 0, 0);
+
         const dateConditions = [];
         const dateMap = [];
 
         for (const days of checkDays) {
-            const targetDate = new Date();
-            targetDate.setDate(now.getDate() + days);
-            targetDate.setHours(0, 0, 0, 0);
+            const targetDate = new Date(today);
+            targetDate.setDate(today.getDate() + days);
 
             const nextDay = new Date(targetDate);
             nextDay.setDate(targetDate.getDate() + 1);
@@ -107,21 +123,27 @@ export async function checkPlanExpiries() {
             }]
         });
 
-        await Promise.all(teams.map(async (team) => {
-            const expiryTime = new Date(team.planExpiresAt).getTime();
-            const matchedDate = dateMap.find(d => expiryTime >= d.start && expiryTime < d.end);
+        // ⚡ Bolt: Avoid unbounded Promise.all concurrency for large user arrays in cron jobs.
+        // Process sequentially to prevent OOM errors, connection pool exhaustion, and email API rate limits.
+        for (const team of teams) {
+            try {
+                const expiryTime = new Date(team.planExpiresAt).getTime();
+                const matchedDate = dateMap.find(d => expiryTime >= d.start && expiryTime < d.end);
 
-            if (matchedDate) {
-                const days = matchedDate.days;
-                const owner = team.owner;
-                if (owner) {
-                    const name = owner.profile?.firstName || owner.email.split('@')[0];
-                    console.log(`CRON: Sending Plan Expiry Reminder (${days} days) to ${owner.email} for team ${team.name}`);
-                    await emailService.sendPlanExpiryReminder(owner.email, name, team.name, days);
+                if (matchedDate) {
+                    const days = matchedDate.days;
+                    const owner = team.owner;
+                    if (owner) {
+                        const name = owner.profile?.firstName || owner.email.split('@')[0];
+                        console.log(`CRON: Sending Plan Expiry Reminder (${days} days) to ${owner.email} for team ${team.name}`);
+                        await emailService.sendPlanExpiryReminder(owner.email, name, team.name, days);
+                    }
                 }
+            } catch (err) {
+                console.error(`CRON ERROR (Plan Expiry - Team ${team.name}):`, err);
             }
-        }));
+        }
     } catch (error) {
-        console.error('CRON ERROR (Plan Expiry):', error);
+        console.error('CRON ERROR (Plan Expiry - General):', error);
     }
 }
