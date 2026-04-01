@@ -91,6 +91,7 @@ const Sidebar = ({ isCollapsed, toggleSidebar, isMobile, isOpen, closeMobile }) 
             {!isMobile && (
                 <button
                     onClick={toggleSidebar}
+                    aria-label="Toggle sidebar"
                     className="absolute -right-3 top-20 w-6 h-6 bg-card border border-white/10 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground shadow-lg transition-colors"
                 >
                     {isCollapsed ? <ChevronRight className="w-3 h-3" /> : <ChevronLeft className="w-3 h-3" />}

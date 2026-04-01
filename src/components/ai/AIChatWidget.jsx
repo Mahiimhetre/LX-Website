@@ -76,7 +76,7 @@ const AIChatWidget = () => {
                                 </p>
                             </div>
                         </div>
-                        <button onClick={() => setIsOpen(false)} className="text-muted-foreground hover:text-foreground transition-colors p-1">
+                        <button onClick={() => setIsOpen(false)} aria-label="Close chat widget" className="text-muted-foreground hover:text-foreground transition-colors p-1">
                             <X size={18} />
                         </button>
                     </div>
@@ -126,6 +126,7 @@ const AIChatWidget = () => {
                             <button
                                 onClick={handleSendMessage}
                                 disabled={!input.trim() || isLoading}
+                                aria-label="Send message"
                                 className="absolute right-1 p-1.5 bg-primary text-white rounded-full disabled:opacity-50 hover:scale-105 transition-transform"
                             >
                                 <Send size={14} />
@@ -144,6 +145,7 @@ const AIChatWidget = () => {
             {/* Bubble Button */}
             <button
                 onClick={() => setIsOpen(!isOpen)}
+                aria-label="Toggle chat widget"
                 className={cn(
                     "flex items-center justify-center w-12 h-12 rounded-full shadow-2xl transition-all duration-300 hover:scale-110",
                     isOpen
