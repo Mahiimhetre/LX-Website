@@ -53,18 +53,24 @@ export async function checkPasswordExpiries() {
             include: [{ model: Profile, as: 'profile' }]
         });
 
-        await Promise.all(users.map(async (user) => {
-            // Determine which days bucket the user falls into
-            const expiryTime = new Date(user.passwordExpiresAt).getTime();
-            const matchedDate = dateMap.find(d => expiryTime >= d.start && expiryTime < d.end);
+        // ⚡ Bolt: Chunked execution to prevent unbounded concurrency memory spikes and SMTP rate limits
+        // Processing in batches of 20 balances performance with resource stability.
+        const CHUNK_SIZE = 20;
+        for (let i = 0; i < users.length; i += CHUNK_SIZE) {
+            const chunk = users.slice(i, i + CHUNK_SIZE);
+            await Promise.all(chunk.map(async (user) => {
+                // Determine which days bucket the user falls into
+                const expiryTime = new Date(user.passwordExpiresAt).getTime();
+                const matchedDate = dateMap.find(d => expiryTime >= d.start && expiryTime < d.end);
 
-            if (matchedDate) {
-                const days = matchedDate.days;
-                const name = user.profile?.firstName || user.email.split('@')[0];
-                console.log(`CRON: Sending Password Expiry Reminder (${days} days) to ${user.email}`);
-                await emailService.sendPasswordExpiryReminder(user.email, name, days);
-            }
-        }));
+                if (matchedDate) {
+                    const days = matchedDate.days;
+                    const name = user.profile?.firstName || user.email.split('@')[0];
+                    console.log(`CRON: Sending Password Expiry Reminder (${days} days) to ${user.email}`);
+                    await emailService.sendPasswordExpiryReminder(user.email, name, days);
+                }
+            }));
+        }
     } catch (error) {
         console.error('CRON ERROR (Password Expiry):', error);
     }
@@ -107,20 +113,26 @@ export async function checkPlanExpiries() {
             }]
         });
 
-        await Promise.all(teams.map(async (team) => {
-            const expiryTime = new Date(team.planExpiresAt).getTime();
-            const matchedDate = dateMap.find(d => expiryTime >= d.start && expiryTime < d.end);
+        // ⚡ Bolt: Chunked execution to prevent unbounded concurrency memory spikes and SMTP rate limits
+        // Processing in batches of 20 balances performance with resource stability.
+        const CHUNK_SIZE = 20;
+        for (let i = 0; i < teams.length; i += CHUNK_SIZE) {
+            const chunk = teams.slice(i, i + CHUNK_SIZE);
+            await Promise.all(chunk.map(async (team) => {
+                const expiryTime = new Date(team.planExpiresAt).getTime();
+                const matchedDate = dateMap.find(d => expiryTime >= d.start && expiryTime < d.end);
 
-            if (matchedDate) {
-                const days = matchedDate.days;
-                const owner = team.owner;
-                if (owner) {
-                    const name = owner.profile?.firstName || owner.email.split('@')[0];
-                    console.log(`CRON: Sending Plan Expiry Reminder (${days} days) to ${owner.email} for team ${team.name}`);
-                    await emailService.sendPlanExpiryReminder(owner.email, name, team.name, days);
+                if (matchedDate) {
+                    const days = matchedDate.days;
+                    const owner = team.owner;
+                    if (owner) {
+                        const name = owner.profile?.firstName || owner.email.split('@')[0];
+                        console.log(`CRON: Sending Plan Expiry Reminder (${days} days) to ${owner.email} for team ${team.name}`);
+                        await emailService.sendPlanExpiryReminder(owner.email, name, team.name, days);
+                    }
                 }
-            }
-        }));
+            }));
+        }
     } catch (error) {
         console.error('CRON ERROR (Plan Expiry):', error);
     }
