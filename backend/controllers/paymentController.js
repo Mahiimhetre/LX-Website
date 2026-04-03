@@ -178,7 +178,8 @@ export const cancelSubscription = async (req, res) => {
             team.planExpiresAt = currentExpiry;
 
             // Fix team.totalPaid when refund happens
-            team.totalPaid = Math.max(0, parseFloat(team.totalPaid) - parseFloat(latestPayment.amount) + charges);
+            // We subtract the actual refund amount from the total paid to correctly handle charges
+            team.totalPaid = Math.max(0, parseFloat(team.totalPaid) - parseFloat(refundAmount));
 
             // Update isPaid status if needed
             if (team.planExpiresAt <= now) {
