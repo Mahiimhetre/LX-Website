@@ -225,6 +225,7 @@ const Header = () => {
                             {headerSearch && (
                                 <button
                                     onClick={() => setHeaderSearch('')}
+                                    aria-label="Clear Search"
                                     className="p-1 hover:bg-white/10 rounded-full text-muted-foreground hover:text-foreground transition-all shrink-0 ml-1 animate-in zoom-in duration-200"
                                 >
                                     <X size={12} />
@@ -241,6 +242,7 @@ const Header = () => {
                                         setIsUserMenuOpen(!isUserMenuOpen);
                                         setIsProfileSubmenuOpen(false);
                                     }}
+                                    aria-label="User Menu"
                                     className={cn(
                                         "relative flex items-center justify-center transition-all duration-300 group/avatar outline-none focus:outline-none focus-visible:ring-0 active:scale-95",
                                         isUserMenuOpen && "scale-105"
@@ -305,6 +307,7 @@ const Header = () => {
                                                                 e.stopPropagation();
                                                                 fileInputRef.current?.click();
                                                             }}
+                                                            aria-label="Change Avatar"
                                                             className="absolute -bottom-0.5 -right-0.5 w-6 h-6 bg-primary text-white rounded-full flex items-center justify-center shadow-lg border-2 border-[#1a1a1a] hover:scale-110 transition-transform z-10"
                                                             title="Change Avatar"
                                                         >
@@ -331,6 +334,7 @@ const Header = () => {
                                                                         }
                                                                     }
                                                                 }}
+                                                                aria-label="Remove Avatar"
                                                                 className="absolute -top-1 -right-1 w-5 h-5 bg-black/50 backdrop-blur-md text-white/70 rounded-full flex items-center justify-center border border-white/10 opacity-0 group-hover/avatar:opacity-100 hover:bg-destructive hover:text-white transition-all duration-200"
                                                                 title="Remove Avatar"
                                                             >
@@ -354,6 +358,7 @@ const Header = () => {
                                                             <button
                                                                 onMouseDown={(e) => e.preventDefault()} // Prevent blur before click
                                                                 onClick={handleSaveName}
+                                                                aria-label="Save Name"
                                                                 className="p-1.5 bg-primary hover:bg-primary/90 rounded-full text-white flex-shrink-0 shadow-lg shadow-primary/20 transition-all hover:scale-105"
                                                             >
                                                                 <Pencil size={12} />
@@ -367,6 +372,7 @@ const Header = () => {
                                                                     setIsEditingName(true);
                                                                     setEditName(user.user_metadata?.name || '');
                                                                 }}
+                                                                aria-label="Edit Name"
                                                                 className="opacity-0 group-hover/name:opacity-100 text-muted-foreground hover:text-primary transition-opacity"
                                                             >
                                                                 <Pencil size={12} />
@@ -415,6 +421,7 @@ const Header = () => {
 
                         <button
                             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                            aria-label="Toggle Mobile Menu"
                             className={cn(
                                 "xl:hidden hover-expand border border-white/10 transition-all",
                                 isMobileMenuOpen && "is-expanded"
