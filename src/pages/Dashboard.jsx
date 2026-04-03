@@ -381,13 +381,14 @@ const ProjectCard = ({ project, onDelete }) => (
             </div>
         </div>
 
-        <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-white hover:bg-white/5">
+        <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
+            <Button variant="ghost" size="icon" aria-label="Edit project" className="h-8 w-8 text-muted-foreground hover:text-white hover:bg-white/5">
                 <Edit size={14} />
             </Button>
             <Button
                 variant="ghost"
                 size="icon"
+                aria-label="Delete project"
                 className="h-8 w-8 text-muted-foreground hover:text-red-400 hover:bg-red-500/10"
                 onClick={(e) => {
                     e.stopPropagation();
@@ -396,7 +397,7 @@ const ProjectCard = ({ project, onDelete }) => (
             >
                 <Trash2 size={14} />
             </Button>
-            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10">
+            <Button variant="ghost" size="icon" aria-label="Open project" className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10">
                 <ExternalLink size={14} />
             </Button>
         </div>

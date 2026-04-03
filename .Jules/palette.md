@@ -1,0 +1,3 @@
+## 2025-02-14 - Accessible Action Buttons
+**Learning:** Hiding interaction elements using only `group-hover:opacity-100` makes them completely inaccessible to keyboard users, as tabbed focus inside the group doesn't trigger the hover state. Also, using purely icon-based actions without `aria-label`s makes their function unidentifiable to screen reader users.
+**Action:** When hiding inline action buttons until interaction, always pair `group-hover:opacity-100` with `focus-within:opacity-100` on the container so they reveal during keyboard navigation. Additionally, always explicitly provide an `aria-label` to buttons containing only icons.
