@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { login, register, verifyEmail, logout } from './authService.js';
+import { login, register, verifyEmail, logout, requestPasswordReset } from './authService.js';
+import apiClient from '@/api/client';
 
 vi.mock('@/api/client', () => {
     return {
@@ -202,6 +203,28 @@ describe('authService', () => {
             expect(lockoutResult.success).toBe(false);
             expect(lockoutResult.remainingAttempts).toBe(0);
             expect(lockoutResult.message).toContain('Too many failed login attempts');
+        });
+    });
+
+    describe('requestPasswordReset', () => {
+        const testEmail = 'test@example.com';
+
+        it('should return error if user does not exist', async () => {
+            const result = await requestPasswordReset('nonexistent@example.com');
+            expect(result).toEqual({ success: false, message: 'No account found with this email' });
+        });
+
+        it('should return success and send email if user exists', async () => {
+            // Register a user first
+            await register('Test User', testEmail, 'password123');
+
+            const result = await requestPasswordReset(testEmail);
+            expect(result).toEqual({ success: true, message: 'Password reset link sent to your email' });
+
+            expect(apiClient.post).toHaveBeenCalledWith('/auth/mock-send-password-reset', expect.objectContaining({
+                email: testEmail,
+                name: 'Test User'
+            }));
         });
     });
 });
