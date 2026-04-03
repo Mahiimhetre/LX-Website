@@ -46,6 +46,11 @@ export const createOrder = async (req, res) => {
     }
 };
 
+const BASE_PRICES = {
+    USD: { pro: 29, teamBase: 79 },
+    INR: { pro: 299, teamBase: 1999 }
+};
+
 export const verifyPayment = async (req, res) => {
     try {
         const { 
@@ -91,6 +96,18 @@ export const verifyPayment = async (req, res) => {
 
         // Amount in original currency (not paise)
         const actualAmountPaid = razorpayOrder.amount / 100;
+
+        const prices = BASE_PRICES[team.currency] || BASE_PRICES.INR;
+        let minAmount = 0;
+        if (planName.toLowerCase() === 'pro') {
+            minAmount = Math.floor(prices.pro * 0.5); // Allow for 50% flash sale
+        } else if (planName.toLowerCase() === 'team') {
+            minAmount = prices.teamBase;
+        }
+
+        if (actualAmountPaid < minAmount) {
+            return res.status(400).json({ success: false, message: "Amount paid is lower than the required minimum for this plan." });
+        }
 
         // 4. Update Team Plan & Expiry
         const now = new Date();
@@ -178,7 +195,8 @@ export const cancelSubscription = async (req, res) => {
             team.planExpiresAt = currentExpiry;
 
             // Fix team.totalPaid when refund happens
-            team.totalPaid = Math.max(0, parseFloat(team.totalPaid) - parseFloat(latestPayment.amount) + charges);
+            // We subtract the actual refund amount from the total paid to correctly handle charges
+            team.totalPaid = Math.max(0, parseFloat(team.totalPaid) - parseFloat(refundAmount));
 
             // Update isPaid status if needed
             if (team.planExpiresAt <= now) {

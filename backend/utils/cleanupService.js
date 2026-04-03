@@ -39,14 +39,20 @@ export const performCleanup = async () => {
         });
 
         const successfulUserIds = [];
+        const CHUNK_SIZE = 20;
 
-        // Sequentially send emails to avoid rate limits or overwhelming SMTP servers
-        for (const user of usersToRemind) {
-            console.log(`Sending cleanup reminder to: ${user.email}`);
-            const success = await emailService.sendCleanupReminderEmail(user.email);
-            if (success) {
-                successfulUserIds.push(user.id);
-            }
+        // Process in chunks to balance performance and SMTP rate limits
+        for (let i = 0; i < usersToRemind.length; i += CHUNK_SIZE) {
+            const chunk = usersToRemind.slice(i, i + CHUNK_SIZE);
+            const chunkResults = await Promise.all(chunk.map(async (user) => {
+                console.log(`Sending cleanup reminder to: ${user.email}`);
+                const success = await emailService.sendCleanupReminderEmail(user.email);
+                return { id: user.id, success };
+            }));
+
+            chunkResults.forEach(res => {
+                if (res.success) successfulUserIds.push(res.id);
+            });
         }
 
         // Perform a single bulk update for the reminderSent flag

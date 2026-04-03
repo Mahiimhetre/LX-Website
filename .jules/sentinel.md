@@ -1,0 +1,4 @@
+## 2024-05-18 - Amount Tampering in Payment Flow
+**Vulnerability:** The Razorpay integration trusted the client-side `amount` payload without verifying it against the server's expected price for the plan upon verification.
+**Learning:** Relying solely on Razorpay's signature validation only ensures the transaction is authentic, but it does NOT verify that the transaction was for the correct product value. The `actualAmountPaid` fetched from the gateway must be compared against a server-side source of truth.
+**Prevention:** Always compute the expected price (or at least a minimum acceptable threshold) server-side and validate the `actualAmountPaid` fetched from the payment provider in the payment verification endpoint.

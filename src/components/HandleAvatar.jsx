@@ -134,6 +134,7 @@ const HandleAvatar = ({ userId, currentAvatarUrl, onUploadComplete, size = 'md' 
                         "absolute bottom-0 right-0 p-1.5 rounded-full bg-primary text-white shadow-lg border-2 border-background hover:scale-110 transition-all duration-200 z-10",
                         size === 'sm' ? 'p-1' : 'p-1.5'
                     )}
+                    aria-label="Edit avatar"
                 >
                     <Pencil className={cn(size === 'sm' ? 'w-3 h-3' : 'w-4 h-4')} />
                 </button>
@@ -148,6 +149,7 @@ const HandleAvatar = ({ userId, currentAvatarUrl, onUploadComplete, size = 'md' 
                     }}
                     className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-black/50 backdrop-blur-md text-white/70 flex items-center justify-center hover:bg-destructive hover:text-white transition-all duration-200 border border-white/10 opacity-0 group-hover/avatar-container:opacity-100 scale-75 group-hover/avatar-container:scale-100"
                     title="Remove avatar"
+                    aria-label="Remove avatar"
                 >
                     <X className="w-3.5 h-3.5" />
                 </button>

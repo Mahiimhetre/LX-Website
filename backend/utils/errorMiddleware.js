@@ -12,11 +12,16 @@ export const globalErrorHandler = (err, req, res, next) => {
     console.error('Stack:', err.stack);
     console.error('----------------');
 
-    // Send generic response to user (Avoid leaking implementation details in production)
+    // Send response to user (Avoid leaking implementation details in production for 500 errors)
+    const isProduction = process.env.NODE_ENV === 'production';
+    const message = (isProduction && err.statusCode === 500)
+        ? 'Internal Server Error'
+        : (err.message || 'Internal Server Error');
+
     res.status(err.statusCode).json({
         success: false,
         status: err.status,
-        message: err.message || 'Internal Server Error'
+        message: message
     });
 };
 
