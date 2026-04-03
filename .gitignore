@@ -4,3 +4,8 @@
 /discus.md
 /node_modules
 /backend/node_modules
+/tmp
+/temp
+tmp/
+temp/
+dist/
