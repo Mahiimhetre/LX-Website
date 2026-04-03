@@ -29,15 +29,18 @@ const RatingSystem = () => {
         setFiles(prev => prev.filter((_, i) => i !== index));
     };
 
-    const StarRating = ({ value, onChange }) => {
+    const StarRating = ({ value, onChange, ariaLabel }) => {
         return (
-            <div className="flex gap-1">
+            <div className="flex gap-1" role="radiogroup" aria-label={ariaLabel}>
                 {[1, 2, 3, 4, 5].map((star) => (
                     <button
                         key={star}
                         type="button"
+                        role="radio"
+                        aria-checked={star <= value}
+                        aria-label={`Rate ${star} stars`}
                         onClick={() => onChange(star)}
-                        className={`focus:outline-none transition-transform hover:scale-110 ${star <= value ? 'text-yellow-500' : 'text-muted-foreground/30'}`}
+                        className={`rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background transition-transform hover:scale-110 ${star <= value ? 'text-yellow-500' : 'text-muted-foreground/30'}`}
                     >
                         <Star className={`h-6 w-6 ${star <= value ? 'fill-yellow-500' : ''}`} />
                     </button>
@@ -67,19 +70,19 @@ const RatingSystem = () => {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div className="bg-background/20 p-4 rounded-lg flex flex-col items-center gap-2 border border-white/5">
                         <Label>Service Quality</Label>
-                        <StarRating value={ratings.service} onChange={(val) => handleRating('service', val)} />
+                        <StarRating ariaLabel="Service Quality Rating" value={ratings.service} onChange={(val) => handleRating('service', val)} />
                         <span className="text-sm text-muted-foreground">{ratings.service}/5</span>
                     </div>
 
                     <div className="bg-background/20 p-4 rounded-lg flex flex-col items-center gap-2 border border-white/5">
                         <Label>Product Quality</Label>
-                        <StarRating value={ratings.product} onChange={(val) => handleRating('product', val)} />
+                        <StarRating ariaLabel="Product Quality Rating" value={ratings.product} onChange={(val) => handleRating('product', val)} />
                         <span className="text-sm text-muted-foreground">{ratings.product}/5</span>
                     </div>
 
                     <div className="bg-background/20 p-4 rounded-lg flex flex-col items-center gap-2 border border-white/5">
                         <Label>Support</Label>
-                        <StarRating value={ratings.support} onChange={(val) => handleRating('support', val)} />
+                        <StarRating ariaLabel="Support Rating" value={ratings.support} onChange={(val) => handleRating('support', val)} />
                         <span className="text-sm text-muted-foreground">{ratings.support}/5</span>
                     </div>
                 </div>
@@ -119,7 +122,8 @@ const RatingSystem = () => {
                                         <span className="truncate">{file.name}</span>
                                         <button
                                             onClick={() => removeFile(index)}
-                                            className="absolute right-1 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-destructive transition-colors"
+                                            aria-label="Remove file"
+                                            className="absolute right-1 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-destructive transition-colors rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 focus-visible:ring-offset-background"
                                         >
                                             <Trash2 className="h-4 w-4" />
                                         </button>
