@@ -42,6 +42,7 @@ const PromoBanner = () => {
             <button
                 onClick={() => setIsVisible(false)}
                 className="absolute right-2 top-1/2 -translate-y-1/2 p-1 hover:bg-white/10 rounded-full transition-colors"
+                aria-label="Close promotional banner"
             >
                 <X size={14} />
             </button>
