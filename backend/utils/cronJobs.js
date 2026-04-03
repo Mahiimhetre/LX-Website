@@ -24,14 +24,15 @@ export async function checkPasswordExpiries() {
     try {
         const checkDays = [7, 3, 1];
         const now = new Date();
+        const today = new Date(now);
+        today.setHours(0, 0, 0, 0);
         const dateConditions = [];
         const dateMap = [];
 
         // Pre-calculate target dates and build the OR conditions
         for (const days of checkDays) {
-            const targetDate = new Date();
-            targetDate.setDate(now.getDate() + days);
-            targetDate.setHours(0, 0, 0, 0);
+            const targetDate = new Date(today);
+            targetDate.setDate(today.getDate() + days);
 
             const nextDay = new Date(targetDate);
             nextDay.setDate(targetDate.getDate() + 1);
@@ -53,11 +54,10 @@ export async function checkPasswordExpiries() {
             include: [{ model: Profile, as: 'profile' }]
         });
 
-        // ⚡ Bolt: Chunked execution to prevent unbounded concurrency memory spikes and SMTP rate limits
-        // Processing in batches of 20 balances performance with resource stability.
-        const CHUNK_SIZE = 20;
-        for (let i = 0; i < users.length; i += CHUNK_SIZE) {
-            const chunk = users.slice(i, i + CHUNK_SIZE);
+        // Use chunked execution to prevent unbounded concurrency
+        const chunkSize = 20;
+        for (let i = 0; i < users.length; i += chunkSize) {
+            const chunk = users.slice(i, i + chunkSize);
             await Promise.all(chunk.map(async (user) => {
                 // Determine which days bucket the user falls into
                 const expiryTime = new Date(user.passwordExpiresAt).getTime();
@@ -83,13 +83,14 @@ export async function checkPlanExpiries() {
     try {
         const checkDays = [7, 1];
         const now = new Date();
+        const today = new Date(now);
+        today.setHours(0, 0, 0, 0);
         const dateConditions = [];
         const dateMap = [];
 
         for (const days of checkDays) {
-            const targetDate = new Date();
-            targetDate.setDate(now.getDate() + days);
-            targetDate.setHours(0, 0, 0, 0);
+            const targetDate = new Date(today);
+            targetDate.setDate(today.getDate() + days);
 
             const nextDay = new Date(targetDate);
             nextDay.setDate(targetDate.getDate() + 1);
@@ -113,11 +114,10 @@ export async function checkPlanExpiries() {
             }]
         });
 
-        // ⚡ Bolt: Chunked execution to prevent unbounded concurrency memory spikes and SMTP rate limits
-        // Processing in batches of 20 balances performance with resource stability.
-        const CHUNK_SIZE = 20;
-        for (let i = 0; i < teams.length; i += CHUNK_SIZE) {
-            const chunk = teams.slice(i, i + CHUNK_SIZE);
+        // Use chunked execution to prevent unbounded concurrency
+        const chunkSize = 20;
+        for (let i = 0; i < teams.length; i += chunkSize) {
+            const chunk = teams.slice(i, i + chunkSize);
             await Promise.all(chunk.map(async (team) => {
                 const expiryTime = new Date(team.planExpiresAt).getTime();
                 const matchedDate = dateMap.find(d => expiryTime >= d.start && expiryTime < d.end);
