@@ -65,7 +65,7 @@ export async function checkPasswordExpiries() {
 
                 if (matchedDate) {
                     const days = matchedDate.days;
-                    const name = user.profile?.firstName || user.email.split('@')[0];
+                    const name = user.profile?.name || user.email.split('@')[0];
                     console.log(`CRON: Sending Password Expiry Reminder (${days} days) to ${user.email}`);
                     await emailService.sendPasswordExpiryReminder(user.email, name, days);
                 }
@@ -126,7 +126,7 @@ export async function checkPlanExpiries() {
                     const days = matchedDate.days;
                     const owner = team.owner;
                     if (owner) {
-                        const name = owner.profile?.firstName || owner.email.split('@')[0];
+                        const name = owner.profile?.name || owner.email.split('@')[0];
                         console.log(`CRON: Sending Plan Expiry Reminder (${days} days) to ${owner.email} for team ${team.name}`);
                         await emailService.sendPlanExpiryReminder(owner.email, name, team.name, days);
                     }

@@ -36,7 +36,7 @@ export const register = async (req, res) => {
 
         // Send verification email
         const verificationToken = generateToken(newUser.id, newUser.email);
-        await sendVerificationEmail(newUser.email, verificationToken);
+        await sendVerificationEmail(newUser.email, name, verificationToken);
 
         res.status(201).json({
             success: true,
@@ -60,9 +60,9 @@ export const login = async (req, res) => {
         // If the user signed up with OAuth, password might be empty.
         if (!user.password && password) {
             const providerName = user.provider ? (user.provider.charAt(0).toUpperCase() + user.provider.slice(1)) : 'your OAuth provider';
-            return res.status(401).json({ 
-                success: false, 
-                message: `Please login using ${providerName}.` 
+            return res.status(401).json({
+                success: false,
+                message: `Please login using ${providerName}.`
             });
         }
 
@@ -72,7 +72,7 @@ export const login = async (req, res) => {
         }
 
         const profile = await Profile.findOne({ where: { userId: user.id } });
-        
+
         // --- Password Expiry & Grace Period Enforcement ---
         if (user.passwordExpiresAt) {
             const now = new Date();
@@ -81,26 +81,26 @@ export const login = async (req, res) => {
             gracePeriodEnd.setDate(gracePeriodEnd.getDate() + 7);
 
             if (now > gracePeriodEnd) {
-                return res.status(403).json({ 
-                    success: false, 
+                return res.status(403).json({
+                    success: false,
                     message: 'Your password has expired and the 7-day grace period has ended. Please reset your password to continue.',
-                    needsPasswordReset: true 
+                    needsPasswordReset: true
                 });
             }
-            
+
             // If expired but within grace period, we allow login but could add a warning header/meta
             if (now > expiryDate) {
                 // Note: Frontend can check this flag to show a "Change Password" banner
-                res.set('X-Password-Expired', 'true'); 
+                res.set('X-Password-Expired', 'true');
             }
         }
         // --------------------------------------------------
 
         if (!profile.isVerified) {
-            return res.status(403).json({ 
-                success: false, 
+            return res.status(403).json({
+                success: false,
                 message: 'Please verify your email before logging in.',
-                needsVerification: true 
+                needsVerification: true
             });
         }
 
@@ -155,7 +155,7 @@ export const resendVerificationEmailController = async (req, res) => {
     try {
         const { email } = req.body;
         const user = await User.findOne({ where: { email } });
-        
+
         if (!user) {
             return res.status(404).json({ success: false, message: 'User not found' });
         }
@@ -166,7 +166,7 @@ export const resendVerificationEmailController = async (req, res) => {
         }
 
         const verificationToken = generateToken(user.id, user.email);
-        await sendVerificationEmail(user.email, verificationToken);
+        await sendVerificationEmail(user.email, profile.name || 'User', verificationToken);
 
         res.json({ success: true, message: 'Verification email resent successfully' });
     } catch (error) {
@@ -179,14 +179,15 @@ export const resetPasswordRequest = async (req, res) => {
     try {
         const { email } = req.body;
         const user = await User.findOne({ where: { email } });
-        
+
         if (!user) {
             // Return success even if user not found to prevent email gathering
             return res.json({ success: true, message: 'If an account exists, a reset link has been sent' });
         }
 
+        const profile = await Profile.findOne({ where: { userId: user.id } });
         const resetToken = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-        await sendPasswordResetEmail(user.email, resetToken);
+        await sendPasswordResetEmail(user.email, profile?.name || 'User', resetToken);
 
         res.json({ success: true, message: 'Password reset link sent to your email' });
     } catch (error) {
@@ -198,7 +199,7 @@ export const resetPasswordRequest = async (req, res) => {
 export const resetPasswordConfirm = async (req, res) => {
     try {
         const { token, newPassword } = req.body;
-        
+
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         const user = await User.findByPk(decoded.id);
 
@@ -213,7 +214,8 @@ export const resetPasswordConfirm = async (req, res) => {
         await user.save();
 
         // Send password changed confirmation email
-        await sendPasswordChangedEmail(user.email);
+        const profile = await Profile.findOne({ where: { userId: user.id } });
+        await sendPasswordChangedEmail(user.email, profile?.name || 'User');
 
         res.json({ success: true, message: 'Password updated successfully' });
     } catch (error) {
@@ -265,8 +267,8 @@ export const googleCallback = async (req, res) => {
 
         if (!user) {
             isNewUser = true;
-            user = await User.create({ 
-                email, 
+            user = await User.create({
+                email,
                 password: '',
                 provider: 'google'
             });
@@ -343,8 +345,8 @@ export const githubCallback = async (req, res) => {
 
         if (!user) {
             isNewUser = true;
-            user = await User.create({ 
-                email, 
+            user = await User.create({
+                email,
                 password: '',
                 provider: 'github'
             });
@@ -376,7 +378,7 @@ export const getSession = async (req, res) => {
         // req.user is populated by authMiddleware
         const user = await User.findByPk(req.user.id);
         const profile = await Profile.findOne({ where: { userId: req.user.id } });
-        
+
         if (!user) {
             return res.status(404).json({ success: false, message: 'User not found' });
         }
