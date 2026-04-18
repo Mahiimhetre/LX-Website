@@ -52,6 +52,7 @@ export const AuthProvider = ({ children }) => {
                     name: profile.name,
                     avatar: profile.avatarUrl,
                     plan: profile.plan || 'free',
+                    token: session?.token,
                     _lastUpdated: Date.now() // Force extension update
                 };
                 localStorage.setItem('locatorx_current_user', JSON.stringify(userData));

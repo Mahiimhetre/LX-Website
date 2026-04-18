@@ -84,14 +84,12 @@ const Register = () => {
     };
 
     const RequirementItem = ({ met, allMet, label }) => (
-        <div className={`flex items-center gap-1 text-[10px] font-medium transition-colors ${
-            met ? (allMet ? 'text-green-400' : 'text-blue-400') : 'text-red-500'
-        }`}>
-            <div className={`w-3 h-3 rounded-full flex items-center justify-center border transition-all ${
-                met 
-                    ? (allMet ? 'bg-green-500/20 border-green-500/50' : 'bg-blue-500/20 border-blue-500/50') 
-                    : 'border-red-500/50 bg-red-500/10'
+        <div className={`flex items-center gap-1 text-[10px] font-medium transition-colors ${met ? (allMet ? 'text-green-400' : 'text-blue-400') : 'text-red-500'
             }`}>
+            <div className={`w-3 h-3 rounded-full flex items-center justify-center border transition-all ${met
+                    ? (allMet ? 'bg-green-500/20 border-green-500/50' : 'bg-blue-500/20 border-blue-500/50')
+                    : 'border-red-500/50 bg-red-500/10'
+                }`}>
                 {met && <Check className="w-2 h-2" />}
             </div>
             {label}
@@ -107,7 +105,7 @@ const Register = () => {
 
             <div className="w-full max-w-sm relative z-10 animate-fade-in">
                 {/* Login Card */}
-                <div className="glass-dark rounded-3xl border border-white/5 shadow-2xl overflow-hidden backdrop-blur-xl">
+                <div className="liquid-glass rounded-3xl shadow-2xl overflow-hidden">
                     <div className="p-6 sm:p-8">
                         {/* Header Section */}
                         <div className="text-center mb-6">
@@ -148,9 +146,9 @@ const Register = () => {
                                 />
                                 <label
                                     htmlFor="name"
-                                    className="absolute left-10 top-1.5 text-[10px] font-medium text-muted-foreground transition-all duration-300 
+                                    className="absolute left-10 top-0.5 text-[10px] font-medium text-muted-foreground transition-all duration-300 
                                              peer-placeholder-shown:text-xs peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-muted-foreground/70
-                                             peer-focus:text-[10px] peer-focus:top-1.5 peer-focus:text-primary pointer-events-none"
+                                             peer-focus:text-[10px] peer-focus:top-0.5 peer-focus:text-primary pointer-events-none"
                                 >
                                     Full Name
                                 </label>
@@ -188,9 +186,9 @@ const Register = () => {
                                 />
                                 <label
                                     htmlFor="email"
-                                    className="absolute left-10 top-1.5 text-[10px] font-medium text-muted-foreground transition-all duration-300 
+                                    className="absolute left-10 top-0.5 text-[10px] font-medium text-muted-foreground transition-all duration-300 
                                              peer-placeholder-shown:text-xs peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-muted-foreground/70
-                                             peer-focus:text-[10px] peer-focus:top-1.5 peer-focus:text-primary pointer-events-none"
+                                             peer-focus:text-[10px] peer-focus:top-0.5 peer-focus:text-primary pointer-events-none"
                                 >
                                     Email Address
                                 </label>
@@ -225,9 +223,9 @@ const Register = () => {
                                 />
                                 <label
                                     htmlFor="password"
-                                    className="absolute left-10 top-1.5 text-[10px] font-medium text-muted-foreground transition-all duration-300 
+                                    className="absolute left-10 top-0.5 text-[10px] font-medium text-muted-foreground transition-all duration-300 
                                              peer-placeholder-shown:text-xs peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-muted-foreground/70
-                                             peer-focus:text-[10px] peer-focus:top-1.5 peer-focus:text-primary pointer-events-none"
+                                             peer-focus:text-[10px] peer-focus:top-0.5 peer-focus:text-primary pointer-events-none"
                                 >
                                     Password
                                 </label>
@@ -272,7 +270,7 @@ const Register = () => {
                                         {passwordStrength.label.replace('-', ' ')}
                                     </p>
 
-                                     <div className="grid grid-cols-3 gap-1 pt-1">
+                                    <div className="grid grid-cols-3 gap-1 pt-1">
                                         <RequirementItem met={passwordStrength.requirements.lowercase} allMet={passwordStrength.score === 5} label="Lowercase" />
                                         <RequirementItem met={passwordStrength.requirements.uppercase} allMet={passwordStrength.score === 5} label="Uppercase" />
                                         <RequirementItem met={passwordStrength.requirements.special} allMet={passwordStrength.score === 5} label="Special char" />
@@ -303,9 +301,9 @@ const Register = () => {
                                 />
                                 <label
                                     htmlFor="confirmPassword"
-                                    className="absolute left-10 top-1.5 text-[10px] font-medium text-muted-foreground transition-all duration-300 
+                                    className="absolute left-10 top-0.5 text-[10px] font-medium text-muted-foreground transition-all duration-300 
                                              peer-placeholder-shown:text-xs peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-muted-foreground/70
-                                             peer-focus:text-[10px] peer-focus:top-1.5 peer-focus:text-primary pointer-events-none"
+                                             peer-focus:text-[10px] peer-focus:top-0.5 peer-focus:text-primary pointer-events-none"
                                 >
                                     Confirm Password
                                 </label>

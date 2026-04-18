@@ -88,6 +88,13 @@ input::-ms-clear {
     @apply backdrop-blur-md bg-black/30 border border-white/5 shadow-glass;
   }
 
+  /* GPU-efficient liquid glass (gradient shine + inset shadow, no expensive blur needed) */
+  .liquid-glass {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0) 100%);
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.2), 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+    @apply border border-white/10 rounded-2xl;
+  }
+
   .text-gradient {
     @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500;
   }
@@ -96,8 +103,9 @@ input::-ms-clear {
     @apply h-9 w-9 flex items-center justify-start p-0 gap-0 transition-all duration-300 rounded-full overflow-hidden shrink-0 !important;
   }
 
-  .hover-expand > :first-child {
-    @apply ml-[10px] shrink-0 !important; /* Center 16px icon in 36px(w-9) container: (36-16)/2 = 10px */
+  .hover-expand> :first-child {
+    @apply ml-[10px] shrink-0 !important;
+    /* Center 16px icon in 36px(w-9) container: (36-16)/2 = 10px */
   }
 
   .hover-expand:hover,

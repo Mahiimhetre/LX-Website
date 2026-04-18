@@ -20,7 +20,7 @@ const navLinks = [
 
 const Header = () => {
     // Theme toggle removed as per latest design
-    const { user, logout, refreshProfile } = useAuth();
+    const { user, profile, logout, refreshProfile } = useAuth();
     const location = useLocation();
     const navigate = useNavigate();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -136,10 +136,16 @@ const Header = () => {
         }
     };
 
+    const handleSearch = () => {
+        if (!headerSearch.trim()) return;
+        navigate(`/documentation?search=${encodeURIComponent(headerSearch.trim())}`);
+        setHeaderSearch('');
+    };
+
     const toggleProfileSubmenu = () => {
         setIsProfileSubmenuOpen(!isProfileSubmenuOpen);
         if (!isProfileSubmenuOpen) {
-            setEditName(user?.user_metadata?.name || user?.email?.split('@')[0] || '');
+            setEditName(profile?.name || user?.email?.split('@')[0] || '');
         }
     };
 
@@ -220,6 +226,7 @@ const Header = () => {
                                 placeholder="Search..."
                                 value={headerSearch}
                                 onChange={(e) => setHeaderSearch(e.target.value)}
+                                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                                 className="hover-expand-text min-w-0 bg-transparent border-none outline-none text-xs text-foreground placeholder:text-muted-foreground/50 p-0"
                             />
                             {headerSearch && (
@@ -254,20 +261,29 @@ const Header = () => {
                                                 <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
                                             ) : (
                                                 <div className="w-full h-full bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center text-white text-xs font-black">
-                                                    {(user.user_metadata?.name || user.email || 'U').charAt(0).toUpperCase()}
+                                                    {(profile?.name || user?.email || 'U').charAt(0).toUpperCase()}
                                                 </div>
                                             )}
                                         </div>
 
                                         {/* Plan-Specific Banner Badge (Extension Style) */}
-                                        {user.user_metadata?.plan && (
-                                            <div className={cn(
-                                                "absolute -top-1.5 -right-2 px-1.5 py-0.4 rounded-md text-[8px] font-black uppercase tracking-tighter shadow-xl border border-black/5 ring-1 ring-white/20 animate-in zoom-in slide-in-from-bottom-1 duration-500",
-                                                "bg-primary text-white"
-                                            )}>
-                                                {user.user_metadata?.plan}
-                                            </div>
-                                        )}
+                                        {(() => {
+                                            if (!profile?.plan) return null;
+
+                                            const rawDate = user.created_at || user.createdAt;
+                                            const createdAt = rawDate ? new Date(rawDate) : new Date();
+                                            const trialEnd = new Date(createdAt.getTime() + 7 * 24 * 60 * 60 * 1000);
+                                            const isTrialActive = new Date() < trialEnd;
+
+                                            return (
+                                                <div className={cn(
+                                                    "absolute -top-1.5 -right-2 px-1.5 py-0.4 rounded-md text-[8px] font-black uppercase tracking-tighter shadow-xl border border-black/5 ring-1 ring-white/20 animate-in zoom-in slide-in-from-bottom-1 duration-500",
+                                                    isTrialActive ? "bg-amber-500 text-black" : "bg-primary text-white"
+                                                )}>
+                                                    {isTrialActive ? "Trial" : profile.plan}
+                                                </div>
+                                            );
+                                        })()}
                                     </div>
                                 </button>
 
@@ -366,11 +382,11 @@ const Header = () => {
                                                         </div>
                                                     ) : (
                                                         <div className="group/name flex items-center gap-2">
-                                                            <p className="text-sm font-bold text-foreground truncate">{user.user_metadata?.name || 'User Account'}</p>
+                                                            <p className="text-sm font-bold text-foreground truncate">{profile?.name || user?.email?.split('@')[0] || 'User Account'}</p>
                                                             <button
                                                                 onClick={() => {
                                                                     setIsEditingName(true);
-                                                                    setEditName(user.user_metadata?.name || '');
+                                                                    setEditName(profile?.name || '');
                                                                 }}
                                                                 aria-label="Edit Name"
                                                                 className="opacity-0 group-hover/name:opacity-100 text-muted-foreground hover:text-primary transition-opacity"

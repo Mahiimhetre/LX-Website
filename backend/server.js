@@ -42,13 +42,17 @@ import authRoutes from './routes/authRoutes.js';
 import profileRoutes from './routes/profileRoutes.js';
 import teamRoutes from './routes/teamRoutes.js';
 import promoRoutes from './routes/promoRoutes.js';
+import locatorRoutes from './routes/locatorRoutes.js';
 import paymentRoutes from './routes/paymentRoutes.js';
+import aiRoutes from './routes/aiRoutes.js';
 
 app.use('/api/auth', authRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/teams', teamRoutes);
 app.use('/api/promo', promoRoutes);
 app.use('/api/payment', paymentRoutes);
+app.use('/api/locators', locatorRoutes);
+app.use('/api/ai', aiRoutes);
 
 // --- GLOBAL ERROR HANDLER (MUST BE LAST) ---
 app.use(globalErrorHandler);
@@ -66,7 +70,7 @@ import { initCronJobs } from './utils/cronJobs.js';
 
 connectDB().then(async () => {
     // Sync models with database
-    await sequelize.sync({ alter: true });
+    await sequelize.sync();
     
     // Initialize Jobs
     initCleanupJob();

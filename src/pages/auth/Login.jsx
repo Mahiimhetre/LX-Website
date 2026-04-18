@@ -49,7 +49,7 @@ const Login = () => {
 
             <div className="w-full max-w-sm relative z-10 animate-fade-in">
                 {/* Login Card */}
-                <div className="glass-dark rounded-3xl border border-white/5 shadow-2xl overflow-hidden backdrop-blur-xl">
+                <div className="liquid-glass rounded-3xl shadow-2xl overflow-hidden">
                     <div className="p-5 sm:p-6">
                         {/* Header Section */}
                         <div className="text-center mb-6">
@@ -89,9 +89,9 @@ const Login = () => {
                                 />
                                 <label
                                     htmlFor="email"
-                                    className="absolute left-10 top-1.5 text-[10px] font-medium text-muted-foreground transition-all duration-300 
+                                    className="absolute left-10 top-0.5 text-[10px] font-medium text-muted-foreground transition-all duration-300 
                                              peer-placeholder-shown:text-xs peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-muted-foreground/70
-                                             peer-focus:text-[10px] peer-focus:top-1.5 peer-focus:text-primary pointer-events-none"
+                                             peer-focus:text-[10px] peer-focus:top-0.5 peer-focus:text-primary pointer-events-none"
                                 >
                                     Email address
                                 </label>
@@ -126,9 +126,9 @@ const Login = () => {
                                 />
                                 <label
                                     htmlFor="password"
-                                    className="absolute left-10 top-1.5 text-[10px] font-medium text-muted-foreground transition-all duration-300 
+                                    className="absolute left-10 top-0.5 text-[10px] font-medium text-muted-foreground transition-all duration-300 
                                              peer-placeholder-shown:text-xs peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-muted-foreground/70
-                                             peer-focus:text-[10px] peer-focus:top-1.5 peer-focus:text-primary pointer-events-none"
+                                             peer-focus:text-[10px] peer-focus:top-0.5 peer-focus:text-primary pointer-events-none"
                                 >
                                     Password
                                 </label>

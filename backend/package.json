@@ -9,6 +9,7 @@
     "dev": "nodemon --exec tsx server.js"
   },
   "dependencies": {
+    "@google/genai": "^1.49.0",
     "@react-email/components": "^1.0.10",
     "@react-email/render": "^2.0.4",
     "@react-email/tailwind": "^2.0.6",

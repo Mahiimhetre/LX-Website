@@ -34,13 +34,10 @@ const Dashboard = () => {
     const [trialDaysLeft, setTrialDaysLeft] = useState(0);
     const [uniqueOffer, setUniqueOffer] = useState(null);
 
-    const [projects, setProjects] = useState([]);
-    const [loadingProjects, setLoadingProjects] = useState(true);
-    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-    const [newProjectName, setNewProjectName] = useState("");
-    const [isCreating, setIsCreating] = useState(false);
+    const [locators, setLocators] = useState([]);
+    const [loadingLocators, setLoadingLocators] = useState(true);
 
-    const firstName = user?.user_metadata?.name?.split(' ')[0] || user?.email?.split('@')[0] || "User";
+    const firstName = profile?.name?.split(' ')[0] || user?.email?.split('@')[0] || "User";
     const currentHour = new Date().getHours();
 
     useEffect(() => {
@@ -72,59 +69,33 @@ const Dashboard = () => {
         else setLoadingProfile(false);
     }, [user]);
 
-    const fetchProjects = async () => {
+    const fetchLocators = async () => {
         if (!user) return;
-        setLoadingProjects(true);
+        setLoadingLocators(true);
         try {
-            // Check for individual projects
-            try {
-                const { data } = await apiClient.get('/projects');
-                setProjects(data.projects || []);
-            } catch (error) {
-                console.warn("Projects API might not exist yet");
-                setProjects([]);
-            }
+            const { data } = await apiClient.get('/locators');
+            setLocators(data.locators || []);
         } catch (error) {
-            console.error("Error fetching projects:", error);
+            console.error("Error fetching locators:", error);
+            setLocators([]);
         } finally {
-            setLoadingProjects(false);
+            setLoadingLocators(false);
         }
     };
 
     useEffect(() => {
-        if (user) fetchProjects();
+        if (user) fetchLocators();
     }, [user]);
 
-    const handleCreateProject = async () => {
-        if (!newProjectName.trim()) {
-            toast.error("Please enter a project name");
-            return;
-        }
-
-        setIsCreating(true);
-        try {
-            const { data } = await apiClient.post('/projects', { name: newProjectName.trim() });
-            toast.success("Project created successfully!");
-            setProjects([data.project, ...projects]);
-            setIsCreateModalOpen(false);
-            setNewProjectName("");
-        } catch (error) {
-            console.error("Error creating project:", error);
-            toast.error("Failed to create project. Please try again.");
-        } finally {
-            setIsCreating(false);
-        }
-    };
-
-    const handleDeleteProject = async (id) => {
-        if (!confirm("Are you sure you want to delete this project?")) return;
+    const handleDeleteLocator = async (id) => {
+        if (!confirm("Are you sure you want to delete this locator?")) return;
 
         try {
-            await apiClient.delete(`/projects/${id}`);
-            toast.success("Project deleted");
-            setProjects(projects.filter(p => p.id !== id));
+            await apiClient.delete(`/locators/${id}`);
+            toast.success("Locator deleted");
+            setLocators(locators.filter(l => l.id !== id));
         } catch (error) {
-            toast.error("Failed to delete project");
+            toast.error("Failed to delete locator");
         }
     };
 
@@ -135,9 +106,11 @@ const Dashboard = () => {
                 if (!user || isLoading) return;
 
                 // 1. Calculate Trial Status
-                const createdAt = new Date(user.created_at);
+                const rawDate = user.created_at || user.createdAt;
+                const createdAt = rawDate ? new Date(rawDate) : new Date();
+                
                 if (isNaN(createdAt.getTime())) {
-                    console.error("Invalid user creation date");
+                    console.error("Invalid user creation date", rawDate);
                     return;
                 }
 
@@ -183,25 +156,25 @@ const Dashboard = () => {
                             {greeting}, {firstName}
                         </h1>
                         <p className="text-muted-foreground text-lg max-w-xl">
-                            Ready to generate some locators today? Manage your projects and track your efficiency.
+                            Ready to generate some locators today? Your generated locators are listed below for easy access.
                         </p>
                     </div>
 
                     <div className="flex flex-wrap gap-3 justify-center md:justify-end">
-                        <button
-                            onClick={() => setIsCreateModalOpen(true)}
-                            className="flex items-center gap-2 px-5 py-3 rounded-full bg-primary text-white font-bold hover:bg-primary/90 hover:shadow-[0_0_20px_rgba(var(--primary),0.3)] transition-all transform hover:-translate-y-0.5"
-                        >
-                            <Plus size={18} />
-                            New Project
-                        </button>
-
                         <Link
                             to="/playground"
+                            className="flex items-center gap-2 px-6 py-3 rounded-full bg-primary text-white font-bold hover:bg-primary/90 hover:shadow-[0_0_20px_rgba(var(--primary),0.3)] transition-all transform hover:-translate-y-0.5"
+                        >
+                            <Plus size={18} />
+                            New Locator
+                        </Link>
+
+                        <Link
+                            to="/documentation"
                             className="flex items-center gap-2 px-5 py-3 rounded-full bg-secondary/30 text-white font-medium hover:bg-secondary/50 border border-white/10 transition-all hover:border-white/20"
                         >
-                            <Code size={18} />
-                            Playground
+                            <Clock size={18} />
+                            Documentation
                         </Link>
                     </div>
                 </div>
@@ -213,25 +186,25 @@ const Dashboard = () => {
                     icon={Shield}
                     color="text-blue-400"
                     bg="bg-blue-500/10"
-                    value={profile?.plan ? (profile.plan.charAt(0).toUpperCase() + profile.plan.slice(1) + ' Plan') : "Free Plan"}
+                    value={trialDaysLeft > 0 ? "Premium Trial" : (profile?.plan ? (profile.plan.charAt(0).toUpperCase() + profile.plan.slice(1) + ' Plan') : "Free Plan")}
                     label="Current Tier"
-                    subtext="Upgrade for unlimited"
+                    subtext={trialDaysLeft > 0 ? `${trialDaysLeft} days left` : "Upgrade for unlimited"}
                 />
                 <StatCard
                     icon={Zap}
                     color="text-yellow-400"
                     bg="bg-yellow-500/10"
-                    value="0"
-                    label="Locators Generated"
-                    subtext="Last 30 days"
+                    value={locators.length.toString()}
+                    label="Total Locators"
+                    subtext="Saved in your vault"
                 />
                 <StatCard
-                    icon={LayoutIcon}
+                    icon={Code}
                     color="text-purple-400"
                     bg="bg-purple-500/10"
                     value="0"
-                    label="Active Projects"
-                    subtext="Across all teams"
+                    label="Active Sessions"
+                    subtext="Extension connections"
                 />
                 <StatCard
                     icon={Activity}
@@ -250,40 +223,39 @@ const Dashboard = () => {
                     <div className="flex items-center justify-between">
                         <h2 className="text-xl font-bold flex items-center gap-2">
                             <Code className="w-5 h-5 text-primary" />
-                            Your Projects
+                            Your Locators
                         </h2>
-                        {projects.length > 0 && (
-                            <button
-                                onClick={() => setIsCreateModalOpen(true)}
+                        {locators.length > 0 && (
+                            <Link
+                                to="/playground"
                                 className="text-sm text-primary hover:text-primary/80 transition-colors flex items-center gap-1 group"
                             >
                                 <Plus size={14} /> Add New
-                            </button>
+                            </Link>
                         )}
                     </div>
 
-                    {/* Project List */}
                     <div className="grid gap-4">
-                        {loadingProjects ? (
+                        {loadingLocators ? (
                             <div className="flex items-center justify-center p-12">
                                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                             </div>
-                        ) : projects.length > 0 ? (
-                            projects.map((project) => (
-                                <ProjectCard
-                                    key={project.id}
-                                    project={project}
-                                    onDelete={() => handleDeleteProject(project.id)}
+                        ) : locators.length > 0 ? (
+                            locators.map((locator) => (
+                                <LocatorCard
+                                    key={locator.id}
+                                    locator={locator}
+                                    onDelete={() => handleDeleteLocator(locator.id)}
                                 />
                             ))
                         ) : (
-                            <div className="rounded-2xl border border-dashed border-white/10 bg-secondary/5 p-12 text-center flex flex-col items-center justify-center text-muted-foreground group hover:border-white/20 hover:bg-secondary/10 transition-all cursor-pointer" onClick={() => setIsCreateModalOpen(true)}>
+                            <Link to="/playground" className="rounded-2xl border border-dashed border-white/10 bg-secondary/5 p-12 text-center flex flex-col items-center justify-center text-muted-foreground group hover:border-white/20 hover:bg-secondary/10 transition-all cursor-pointer">
                                 <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-                                    <Plus className="w-8 h-8 opacity-50" />
+                                    <Code className="w-8 h-8 opacity-50" />
                                 </div>
-                                <h3 className="text-lg font-medium text-white mb-1">No projects yet</h3>
-                                <p className="text-sm max-w-xs mx-auto">Create your first project to start organizing your locators.</p>
-                            </div>
+                                <h3 className="text-lg font-medium text-white mb-1">No locators yet</h3>
+                                <p className="text-sm max-w-xs mx-auto">Visit the Playground or use the Extension to start saving locators.</p>
+                            </Link>
                         )}
                     </div>
                 </div>
@@ -325,70 +297,31 @@ const Dashboard = () => {
                 </div>
             </div>
 
-            {/* Create Project Modal */}
-            <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
-                <DialogContent className="glass border-white/10 sm:max-w-md">
-                    <DialogHeader>
-                        <DialogTitle>Create New Project</DialogTitle>
-                        <DialogDescription>
-                            Enter a name for your new project to start organizing locators.
-                        </DialogDescription>
-                    </DialogHeader>
-                    <div className="py-4">
-                        <Input
-                            placeholder="e.g. E-commerce Login"
-                            value={newProjectName}
-                            onChange={(e) => setNewProjectName(e.target.value)}
-                            className="bg-secondary/20 border-white/10 focus:border-primary/50 text-white"
-                            autoFocus
-                            onKeyDown={(e) => e.key === 'Enter' && handleCreateProject()}
-                        />
-                    </div>
-                    <DialogFooter>
-                        <Button
-                            variant="ghost"
-                            onClick={() => setIsCreateModalOpen(false)}
-                            className="text-muted-foreground hover:text-white"
-                        >
-                            Cancel
-                        </Button>
-                        <Button
-                            onClick={handleCreateProject}
-                            disabled={isCreating}
-                            className="bg-primary hover:bg-primary/90 text-white"
-                        >
-                            {isCreating ? "Creating..." : "Create Project"}
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
         </div>
     );
 };
 
-const ProjectCard = ({ project, onDelete }) => (
+const LocatorCard = ({ locator, onDelete }) => (
     <div className="flex items-center justify-between p-4 rounded-2xl bg-secondary/10 border border-white/5 hover:border-white/10 transition-all group">
-        <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-                <LayoutIcon size={20} />
+        <div className="flex items-center gap-4 flex-1 min-w-0">
+            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all">
+                <Code size={20} />
             </div>
-            <div>
-                <h4 className="font-semibold text-white group-hover:text-primary transition-colors">{project.name}</h4>
+            <div className="truncate">
+                <h4 className="font-semibold text-white group-hover:text-primary transition-colors truncate">{locator.name}</h4>
                 <p className="text-xs text-muted-foreground flex items-center gap-2">
-                    <Clock size={12} />
-                    Updated {format(new Date(project.updated_at), 'MMM d, yyyy')}
+                    <span className="px-1.5 py-0.5 rounded-md bg-white/5 text-[10px] font-mono group-hover:bg-white/10 transition-colors uppercase">{locator.type}</span>
+                    <span className="opacity-40">•</span>
+                    <span className="truncate">{locator.pageUrl || 'No URL'}</span>
                 </p>
             </div>
         </div>
 
         <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
-            <Button variant="ghost" size="icon" aria-label="Edit project" className="h-8 w-8 text-muted-foreground hover:text-white hover:bg-white/5">
-                <Edit size={14} />
-            </Button>
             <Button
                 variant="ghost"
                 size="icon"
-                aria-label="Delete project"
+                aria-label="Delete locator"
                 className="h-8 w-8 text-muted-foreground hover:text-red-400 hover:bg-red-500/10"
                 onClick={(e) => {
                     e.stopPropagation();
@@ -397,9 +330,11 @@ const ProjectCard = ({ project, onDelete }) => (
             >
                 <Trash2 size={14} />
             </Button>
-            <Button variant="ghost" size="icon" aria-label="Open project" className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10">
-                <ExternalLink size={14} />
-            </Button>
+            <Link to="/playground">
+                <Button variant="ghost" size="icon" aria-label="Open in Playground" className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10">
+                    <ExternalLink size={14} />
+                </Button>
+            </Link>
         </div>
     </div>
 );

@@ -22,7 +22,10 @@ export const updateProfile = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Profile not found' });
         }
 
-        if (name !== undefined) profile.name = name;
+        if (name !== undefined) {
+            // Simple XSS protection - strip HTML tags
+            profile.name = name.replace(/<\/?[^>]+(>|$)/g, "");
+        }
         await profile.save();
 
         res.json({ success: true, message: 'Profile updated', profile });

@@ -89,7 +89,7 @@ const Documentation = () => {
                                 <div className="grid sm:grid-cols-2 gap-6">
                                     <div className="bg-white/5 p-6 rounded-xl border border-white/10">
                                         <h3 className="text-lg font-semibold text-white mb-2 mt-0">Dual Interface</h3>
-                                        <p className="text-sm">Separate tabs for <strong>Home</strong> (rapid locator generation) and <strong>POM</strong> (Page Object Model management).</p>
+                                        <p className="text-sm">Seamlessly switch between rapid locator generation and managing your saved locator vault.</p>
                                     </div>
                                     <div className="bg-white/5 p-6 rounded-xl border border-white/10">
                                         <h3 className="text-lg font-semibold text-white mb-2 mt-0">Smart Filters</h3>
@@ -191,7 +191,7 @@ const Documentation = () => {
                                         <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center font-bold text-white shrink-0">4</div>
                                         <div>
                                             <h4 className="text-white font-bold text-lg m-0">Select & Manage</h4>
-                                            <p className="m-1">Click an element to generate locators, then Copy or Save them to your Project.</p>
+                                            <p className="m-1">Click an element to generate locators, then Copy or Save them to your vault.</p>
                                         </div>
                                     </div>
                                 </div>

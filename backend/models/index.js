@@ -2,6 +2,7 @@ import sequelize, { connectDB } from '../config/database.js';
 import User from './User.js';
 import Profile from './Profile.js';
 import { Team, TeamMember, TeamInvitation } from './Team.js';
+import Locator from './Locator.js';
 import PromoCode from './PromoCode.js';
 import { Payment } from './Payment.js';
 
@@ -41,6 +42,10 @@ TeamInvitation.belongsTo(User, { foreignKey: 'invitedBy', as: 'inviter' });
 User.hasMany(PromoCode, { foreignKey: 'specificUserId', as: 'personalPromos' });
 PromoCode.belongsTo(User, { foreignKey: 'specificUserId', as: 'user' });
 
+// Locator Associations
+User.hasMany(Locator, { foreignKey: 'userId', as: 'locators', onDelete: 'CASCADE' });
+Locator.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+
 export {
     sequelize,
     connectDB,
@@ -50,5 +55,6 @@ export {
     TeamMember,
     TeamInvitation,
     PromoCode,
+    Locator,
     Payment
 };
