@@ -13,7 +13,7 @@ import dotenv from 'dotenv';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.join(__dirname, '..', 'backend', '.env') });
 
-const BASE_URL = 'http://localhost:5000/api';
+const BASE_URL = 'http://localhost:5000/api/v1';
 const JWT_SECRET = process.env.JWT_SECRET;
 
 let authToken = null;

@@ -76,7 +76,11 @@ export const AuthProvider = ({ children }) => {
             }
             return { success: false, message: data.message };
         } catch (error) {
-            return { success: false, message: error.response?.data?.message || 'An error occurred' };
+            return { 
+                success: false, 
+                message: error.response?.data?.message || 'An error occurred',
+                needsVerification: error.response?.data?.needsVerification
+            };
         }
     };
 
@@ -115,11 +119,11 @@ export const AuthProvider = ({ children }) => {
     };
 
     const signInWithGoogle = async () => {
-        window.location.href = '/api/auth/google';
+        window.location.href = '/api/v1/auth/google';
     };
 
     const signInWithGithub = async () => {
-        window.location.href = '/api/auth/github';
+        window.location.href = '/api/v1/auth/github';
     };
 
     const loginWithToken = async (token) => {

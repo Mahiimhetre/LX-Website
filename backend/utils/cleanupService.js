@@ -46,7 +46,7 @@ export const performCleanup = async () => {
             const chunk = usersToRemind.slice(i, i + CHUNK_SIZE);
             const chunkResults = await Promise.all(chunk.map(async (user) => {
                 console.log(`Sending cleanup reminder to: ${user.email}`);
-                const success = await emailService.sendCleanupReminderEmail(user.email);
+                const success = await emailService.sendCleanupReminderEmail(user.email, user.profile?.name);
                 return { id: user.id, success };
             }));
 

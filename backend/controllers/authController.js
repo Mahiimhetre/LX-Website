@@ -97,9 +97,16 @@ export const login = async (req, res) => {
         // --------------------------------------------------
 
         if (!profile.isVerified) {
+            const verificationToken = generateToken(user.id, user.email);
+            try {
+                await sendVerificationEmail(user.email, profile.name || 'User', verificationToken);
+            } catch (err) {
+                console.error('Failed to send verification email during login:', err);
+            }
+
             return res.status(403).json({
                 success: false,
-                message: 'Please verify your email before logging in.',
+                message: 'Please verify your email to continue. A fresh verification link has been sent to your inbox.',
                 needsVerification: true
             });
         }
@@ -229,7 +236,7 @@ import axios from 'axios';
 // --- OAuth Google ---
 export const googleLogin = (req, res) => {
     const clientId = process.env.GOOGLE_CLIENT_ID;
-    const redirectUri = `${process.env.FRONTEND_URL}/api/auth/google/callback`;
+    const redirectUri = `${process.env.FRONTEND_URL}/api/v1/auth/google/callback`;
     const url = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=email profile`;
     res.redirect(url);
 };
@@ -241,7 +248,7 @@ export const googleCallback = async (req, res) => {
     try {
         const clientId = process.env.GOOGLE_CLIENT_ID;
         const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-        const redirectUri = `${process.env.FRONTEND_URL}/api/auth/google/callback`;
+        const redirectUri = `${process.env.FRONTEND_URL}/api/v1/auth/google/callback`;
 
         // Exchange code for token
         const tokenRes = await axios.post('https://oauth2.googleapis.com/token', {
@@ -298,7 +305,7 @@ export const googleCallback = async (req, res) => {
 // --- OAuth GitHub ---
 export const githubLogin = (req, res) => {
     const clientId = process.env.GITHUB_CLIENT_ID;
-    const redirectUri = `${process.env.FRONTEND_URL}/api/auth/github/callback`;
+    const redirectUri = `${process.env.FRONTEND_URL}/api/v1/auth/github/callback`;
     const url = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=user:email`;
     res.redirect(url);
 };
@@ -310,7 +317,7 @@ export const githubCallback = async (req, res) => {
     try {
         const clientId = process.env.GITHUB_CLIENT_ID;
         const clientSecret = process.env.GITHUB_CLIENT_SECRET;
-        const redirectUri = `${process.env.FRONTEND_URL}/api/auth/github/callback`;
+        const redirectUri = `${process.env.FRONTEND_URL}/api/v1/auth/github/callback`;
 
         // Exchange code
         const tokenRes = await axios.post('https://github.com/login/oauth/access_token', {

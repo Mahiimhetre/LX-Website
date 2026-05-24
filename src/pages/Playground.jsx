@@ -77,7 +77,8 @@ const Playground = () => {
                 </p>
             </div>
 
-            <UserProfile />
+            <div className="space-y-12 w-full fade-in">
+                    <UserProfile />
 
             {view === 'table' && (
                 <div className="bg-black/40 border border-white/10 rounded-2xl p-6 backdrop-blur-sm">
@@ -188,6 +189,7 @@ const Playground = () => {
             </div>
 
             <RatingSystem />
+            </div>
         </section>
     );
 };

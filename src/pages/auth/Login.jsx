@@ -38,6 +38,9 @@ const Login = () => {
             navigate('/dashboard');
         } else {
             toast.error(result.message);
+            if (result.needsVerification) {
+                navigate(`/auth/verify?email=${encodeURIComponent(email)}`);
+            }
         }
     };
 
