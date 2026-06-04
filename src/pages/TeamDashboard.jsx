@@ -10,11 +10,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { toast } from 'sonner';
-import { Users, Mail, Shield, Crown, UserPlus, Trash2, Clock, CheckCircle, XCircle, AlertCircle, Copy } from 'lucide-react';
+import { UsersIcon, MailIcon, ShieldIcon, CrownIcon, UserPlusIcon, Trash2Icon, ClockIcon, CheckCircleIcon, XCircleIcon, AlertCircleIcon, CopyIcon } from '@/components/icons';
 import { format } from 'date-fns';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import use3DTilt from '@/hooks/use3DTilt';
 
 const TeamDashboard = () => {
+    const teamCardRef = use3DTilt({ max: 4, scale: 1.01, speed: 300 });
+    const invitesCardRef = use3DTilt({ max: 4, scale: 1.01, speed: 300 });
+    const noTeamCardRef = use3DTilt({ max: 8, scale: 1.02, speed: 200 });
+
     const { user, isLoading } = useAuth();
     const navigate = useNavigate();
     const [team, setTeam] = useState(null);
@@ -143,10 +148,10 @@ const TeamDashboard = () => {
 
     const getStatusIcon = (status) => {
         switch (status) {
-            case 'pending': return <Clock className="h-4 w-4 text-yellow-500" />;
-            case 'accepted': return <CheckCircle className="h-4 w-4 text-green-500" />;
+            case 'pending': return <ClockIcon className="h-4 w-4 text-yellow-500" />;
+            case 'accepted': return <CheckCircleIcon className="h-4 w-4 text-green-500" />;
             case 'declined':
-            case 'expired': return <XCircle className="h-4 w-4 text-red-500" />;
+            case 'expired': return <XCircleIcon className="h-4 w-4 text-red-500" />;
             default: return null;
         }
     };
@@ -162,17 +167,30 @@ const TeamDashboard = () => {
     if (!team) {
         return (
             <DashboardLayout>
-                <div className="flex flex-col items-center justify-center min-h-[60vh] text-center max-w-lg mx-auto p-8 rounded-3xl glass border border-white/5 bg-white/5">
-                    <div className="w-20 h-20 rounded-full bg-secondary/50 flex items-center justify-center mb-6">
-                        <Users className="h-10 w-10 text-muted-foreground" />
+                <div 
+                    ref={noTeamCardRef}
+                    className="flex flex-col items-center justify-center min-h-[60vh] text-center max-w-lg mx-auto p-8 rounded-3xl glass border border-white/5 bg-white/5 relative overflow-hidden group transform-gpu"
+                    style={{ transformStyle: 'preserve-3d' }}
+                >
+                    {/* Spotlight Glare */}
+                    <div 
+                        className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-20"
+                        style={{
+                            background: `radial-gradient(250px circle at var(--glare-x, 50%) var(--glare-y, 50%), rgba(255, 255, 255, 0.05), transparent 50%)`
+                        }}
+                    />
+                    <div className="relative z-10 flex flex-col items-center" style={{ transform: 'translateZ(20px)' }}>
+                        <div className="w-20 h-20 rounded-full bg-secondary/50 flex items-center justify-center mb-6">
+                            <UsersIcon className="h-10 w-10 text-muted-foreground" />
+                        </div>
+                        <h1 className="text-2xl font-bold text-foreground mb-2">No active team</h1>
+                        <p className="text-muted-foreground mb-8">
+                            You don't have a team yet. Create one or upgrade your plan to start collaborating.
+                        </p>
+                        <Button onClick={() => navigate('/pricing')} className="rounded-xl px-8 bg-primary hover:bg-primary/90">
+                            View Pricing & Plans
+                        </Button>
                     </div>
-                    <h1 className="text-2xl font-bold text-foreground mb-2">No active team</h1>
-                    <p className="text-muted-foreground mb-8">
-                        You don't have a team yet. Create one or upgrade your plan to start collaborating.
-                    </p>
-                    <Button onClick={() => navigate('/pricing')} className="rounded-xl px-8 bg-primary hover:bg-primary/90">
-                        View Pricing & Plans
-                    </Button>
                 </div>
             </DashboardLayout>
         );
@@ -190,11 +208,11 @@ const TeamDashboard = () => {
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
                         <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
-                            <Users className="h-8 w-8 text-primary" />
+                            <UsersIcon className="h-8 w-8 text-primary" />
                             {team.name}
                         </h1>
                         <p className="text-muted-foreground text-sm mt-1 flex items-center gap-2">
-                            <Shield className="w-4 h-4 text-green-400" />
+                            <ShieldIcon className="w-4 h-4 text-green-400" />
                             {team.currency === 'INR' ? '₹' : '$'}{Number(team.total_paid).toLocaleString()} Plan
                             <span className="w-1 h-1 rounded-full bg-muted-foreground/50" />
                             {usedSlots} / {team.member_count} Members Used
@@ -204,7 +222,7 @@ const TeamDashboard = () => {
                         <Dialog open={inviteDialogOpen} onOpenChange={setInviteDialogOpen}>
                             <DialogTrigger asChild>
                                 <Button className="rounded-xl bg-primary hover:bg-primary/90 text-white shadow-glow">
-                                    <UserPlus className="h-4 w-4 mr-2" />
+                                    <UserPlusIcon className="h-4 w-4 mr-2" />
                                     Invite Member
                                 </Button>
                             </DialogTrigger>
@@ -250,11 +268,23 @@ const TeamDashboard = () => {
                 </div>
 
                 {/* Team Members List */}
-                <div className="rounded-3xl glass border border-white/5 overflow-hidden">
-                    <div className="p-6 border-b border-white/5 flex items-center justify-between">
-                        <h2 className="text-lg font-bold">Team Members</h2>
-                        <span className="text-xs px-2 py-1 rounded-full bg-secondary/50 text-muted-foreground">{usedSlots} Active</span>
-                    </div>
+                <div 
+                    ref={teamCardRef}
+                    className="rounded-3xl glass border border-white/5 overflow-hidden relative group transform-gpu"
+                    style={{ transformStyle: 'preserve-3d' }}
+                >
+                    {/* Spotlight Glare */}
+                    <div 
+                        className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-20"
+                        style={{
+                            background: `radial-gradient(400px circle at var(--glare-x, 50%) var(--glare-y, 50%), rgba(255, 255, 255, 0.04), transparent 50%)`
+                        }}
+                    />
+                    <div className="relative z-10">
+                        <div className="p-6 border-b border-white/5 flex items-center justify-between">
+                            <h2 className="text-lg font-bold">Team Members</h2>
+                            <span className="text-xs px-2 py-1 rounded-full bg-secondary/50 text-muted-foreground">{usedSlots} Active</span>
+                        </div>
 
                     <div className="overflow-x-auto">
                         <Table>
@@ -281,7 +311,7 @@ const TeamDashboard = () => {
                                                 <div>
                                                     <p className="font-medium text-foreground flex items-center gap-2">
                                                         {member.profile?.name || 'Unknown'}
-                                                        {member.user_id === team.owner_id && <Crown className="h-3 w-3 text-yellow-500" />}
+                                                        {member.user_id === team.owner_id && <CrownIcon className="h-3 w-3 text-yellow-500" />}
                                                     </p>
                                                     <p className="text-xs text-muted-foreground">{member.profile?.email}</p>
                                                 </div>
@@ -315,7 +345,7 @@ const TeamDashboard = () => {
                                                         className="h-8 w-8 text-muted-foreground hover:text-red-400 hover:bg-red-500/10"
                                                         onClick={() => handleRemoveMember(member.id, member.user_id)}
                                                     >
-                                                        <Trash2 className="h-4 w-4" />
+                                                        <Trash2Icon className="h-4 w-4" />
                                                     </Button>
                                                 )}
                                             </TableCell>
@@ -326,14 +356,27 @@ const TeamDashboard = () => {
                         </Table>
                     </div>
                 </div>
+            </div>
 
                 {/* Invitations List */}
                 {invitations.length > 0 && (
-                    <div className="rounded-3xl glass border border-white/5 overflow-hidden">
-                        <div className="p-6 border-b border-white/5 flex items-center justify-between">
-                            <h2 className="text-lg font-bold">Pending Invitations</h2>
-                            <span className="text-xs px-2 py-1 rounded-full bg-secondary/50 text-muted-foreground">{pendingInvites} Pending</span>
-                        </div>
+                    <div 
+                        ref={invitesCardRef}
+                        className="rounded-3xl glass border border-white/5 overflow-hidden relative group transform-gpu"
+                        style={{ transformStyle: 'preserve-3d' }}
+                    >
+                        {/* Spotlight Glare */}
+                        <div 
+                            className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-20"
+                            style={{
+                                background: `radial-gradient(400px circle at var(--glare-x, 50%) var(--glare-y, 50%), rgba(255, 255, 255, 0.04), transparent 50%)`
+                            }}
+                        />
+                        <div className="relative z-10">
+                            <div className="p-6 border-b border-white/5 flex items-center justify-between">
+                                <h2 className="text-lg font-bold">Pending Invitations</h2>
+                                <span className="text-xs px-2 py-1 rounded-full bg-secondary/50 text-muted-foreground">{pendingInvites} Pending</span>
+                            </div>
                         <Table>
                             <TableHeader className="bg-white/5">
                                 <TableRow className="hover:bg-transparent border-white/5">
@@ -373,10 +416,10 @@ const TeamDashboard = () => {
                                                             }}
                                                             title="Copy Invite Link"
                                                         >
-                                                            <Copy className="h-4 w-4" />
+                                                            <CopyIcon className="h-4 w-4" />
                                                         </Button>
                                                         <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-destructive/10 hover:text-destructive" onClick={() => handleCancelInvitation(invitation.id)}>
-                                                            <Trash2 className="h-4 w-4" />
+                                                            <Trash2Icon className="h-4 w-4" />
                                                         </Button>
                                                     </div>
                                                 )}
@@ -387,6 +430,7 @@ const TeamDashboard = () => {
                             </TableBody>
                         </Table>
                     </div>
+                </div>
                 )}
             </div>
         </DashboardLayout>

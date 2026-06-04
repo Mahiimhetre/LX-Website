@@ -13,11 +13,11 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import {
+import { 
     ShoppingCart as CartIcon,
     Trash2, Plus, Minus, ArrowLeft, ShoppingBag,
     CreditCard, Wallet, Landmark, QrCode, Smartphone, Building, Loader2
-} from 'lucide-react';
+ } from '@/components/icons';
 
 // --- Shopping Cart Component ---
 // ⚡ Bolt Optimization: Wrap component in React.memo so it only re-renders when its specific props (like `cart`) change.

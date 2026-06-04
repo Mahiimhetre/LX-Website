@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useSearchParams, useNavigate, useLocation } from 'react-router-dom';
-import { Mail, CheckCircle, ArrowRight, Loader2, RotateCcw } from 'lucide-react';
+import {  Mail, CheckCircle, ArrowRight, Loader2, RotateCcw  } from '@/components/icons';
 import { useAuth } from '@/contexts/AuthContext';
 import apiClient from '@/api/client';
 import { toast } from 'sonner';

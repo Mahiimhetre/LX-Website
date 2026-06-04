@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/componen
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { CheckCircle, XCircle, AlertCircle, RotateCcw } from 'lucide-react';
+import {  CheckCircle, XCircle, AlertCircle, RotateCcw  } from '@/components/icons';
 
 const FormValidation = () => {
     const [formData, setFormData] = useState({
@@ -123,6 +123,7 @@ const FormValidation = () => {
                             <Input
                                 id="phone"
                                 type="tel"
+                                pattern="^\+?[0-9]{10,15}$"
                                 placeholder="+91 1234567890"
                                 value={formData.phone}
                                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}

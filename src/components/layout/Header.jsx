@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Search, User, LogOut, ChevronDown, CreditCard, HelpCircle, Settings, Users, Pencil, Camera, Key, Menu, X } from 'lucide-react';
+import { SearchIcon, UserIcon, LogOutIcon, ChevronDownIcon, CreditCardIcon, HelpCircleIcon, SettingsIcon, UsersIcon, PencilIcon, CameraIcon, KeyIcon, MenuIcon, XIcon } from '@/components/icons';
 import { useTheme } from '@/hooks/useTheme';
+import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useOutsideClick } from '@/hooks/useOutsideClick';
 import { cn } from '@/lib/utils';
@@ -214,20 +215,16 @@ const Header = () => {
 
                     {/* Minimal Toolbar */}
                     <div className="flex items-center gap-3">
-                        {/* Search - Expandable Capsule */}
-                        <div className={cn(
-                            "flex hover-expand bg-white/5 backdrop-blur-md border border-white/10 transition-all shadow-lg cursor-pointer",
-                            "hover:bg-white/10 focus-within:ring-2 focus-within:ring-primary/20 focus-within:bg-white/10 focus-within:border-primary/40",
-                            headerSearch && "is-expanded"
-                        )}>
-                            <Search size={16} className="text-muted-foreground shrink-0" />
+                        {/* Search - Persistent Capsule */}
+                        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 backdrop-blur-md border border-white/10 transition-all shadow-lg hover:bg-white/10 focus-within:ring-2 focus-within:ring-primary/20 focus-within:bg-white/10 focus-within:border-primary/40 max-w-[150px] sm:max-w-[200px]">
+                            <SearchIcon size={16} className="text-muted-foreground shrink-0" />
                             <input
                                 type="text"
                                 placeholder="Search..."
                                 value={headerSearch}
                                 onChange={(e) => setHeaderSearch(e.target.value)}
                                 onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                                className="hover-expand-text min-w-0 bg-transparent border-none outline-none text-xs text-foreground placeholder:text-muted-foreground/50 p-0"
+                                className="w-full bg-transparent border-none outline-none text-xs text-foreground placeholder:text-muted-foreground/50 p-0"
                             />
                             {headerSearch && (
                                 <button
@@ -235,7 +232,7 @@ const Header = () => {
                                     aria-label="Clear Search"
                                     className="p-1 hover:bg-white/10 rounded-full text-muted-foreground hover:text-foreground transition-all shrink-0 ml-1 animate-in zoom-in duration-200"
                                 >
-                                    <X size={12} />
+                                    <XIcon size={12} />
                                 </button>
                             )}
                         </div>
@@ -307,13 +304,13 @@ const Header = () => {
                                                                 <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover transition-transform duration-500 group-hover/avatar:scale-110" />
                                                             ) : (
                                                                 <div className="w-full h-full bg-gradient-to-br from-primary/20 to-purple-600/20 flex items-center justify-center text-primary font-bold">
-                                                                    <Camera size={20} className="opacity-70" />
+                                                                    <CameraIcon size={20} className="opacity-70" />
                                                                 </div>
                                                             )}
 
                                                             {/* Glassmorphism Overlay on Hover */}
                                                             <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] opacity-0 group-hover/avatar:opacity-100 flex items-center justify-center transition-all duration-300">
-                                                                <Camera size={16} className="text-white/80" />
+                                                                <CameraIcon size={16} className="text-white/80" />
                                                             </div>
                                                         </div>
 
@@ -327,7 +324,7 @@ const Header = () => {
                                                             className="absolute -bottom-0.5 -right-0.5 w-6 h-6 bg-primary text-white rounded-full flex items-center justify-center shadow-lg border-2 border-[#1a1a1a] hover:scale-110 transition-transform z-10"
                                                             title="Change Avatar"
                                                         >
-                                                            <Pencil size={12} />
+                                                            <PencilIcon size={12} />
                                                         </button>
 
                                                         {/* Remove Button (Corner) */}
@@ -354,7 +351,7 @@ const Header = () => {
                                                                 className="absolute -top-1 -right-1 w-5 h-5 bg-black/50 backdrop-blur-md text-white/70 rounded-full flex items-center justify-center border border-white/10 opacity-0 group-hover/avatar:opacity-100 hover:bg-destructive hover:text-white transition-all duration-200"
                                                                 title="Remove Avatar"
                                                             >
-                                                                <X size={12} />
+                                                                <XIcon size={12} />
                                                             </button>
                                                         )}
                                                     </div>
@@ -377,7 +374,7 @@ const Header = () => {
                                                                 aria-label="Save Name"
                                                                 className="p-1.5 bg-primary hover:bg-primary/90 rounded-full text-white flex-shrink-0 shadow-lg shadow-primary/20 transition-all hover:scale-105"
                                                             >
-                                                                <Pencil size={12} />
+                                                                <PencilIcon size={12} />
                                                             </button>
                                                         </div>
                                                     ) : (
@@ -391,7 +388,7 @@ const Header = () => {
                                                                 aria-label="Edit Name"
                                                                 className="opacity-0 group-hover/name:opacity-100 text-muted-foreground hover:text-primary transition-opacity"
                                                             >
-                                                                <Pencil size={12} />
+                                                                <PencilIcon size={12} />
                                                             </button>
                                                         </div>
                                                     )}
@@ -409,20 +406,20 @@ const Header = () => {
 
                                             {isTeamAdmin && (
                                                 <Link to="/team" className="flex items-center gap-3 px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-white hover:bg-white/5 rounded-lg transition-colors group">
-                                                    <Users size={14} className="group-hover:text-blue-400 transition-colors" />
+                                                    <UsersIcon size={14} className="group-hover:text-blue-400 transition-colors" />
                                                     <span>Team Management</span>
                                                 </Link>
                                             )}
 
                                             <Link to="/billing" className="flex items-center gap-3 px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-white hover:bg-white/5 rounded-lg transition-colors group">
-                                                <CreditCard size={14} className="group-hover:text-purple-400 transition-colors" />
+                                                <CreditCardIcon size={14} className="group-hover:text-purple-400 transition-colors" />
                                                 <span>Billing & Usage</span>
                                             </Link>
                                         </div>
 
                                         <div className="border-t border-white/5 p-2 mt-1">
                                             <button onClick={handleLogout} className="w-full flex items-center gap-3 px-3 py-1.5 text-xs font-medium text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-colors border border-transparent hover:border-red-500/10">
-                                                <LogOut size={14} />
+                                                <LogOutIcon size={14} />
                                                 <span>Sign out</span>
                                             </button>
                                         </div>
@@ -430,22 +427,22 @@ const Header = () => {
                                 )}
                             </div>
                         ) : (
-                            <Link to="/auth/login" className="text-xs font-semibold bg-primary text-white px-4 py-1.5 rounded-full hover:bg-primary/90 transition-all shadow-sm">
-                                Get Started
+                            <Link to="/auth/login">
+                                <Button size="sm" className="shadow-sm">
+                                    Get Started
+                                </Button>
                             </Link>
                         )}
 
-                        <button
+                        <Button
+                            variant="secondary"
+                            size="icon"
                             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                             aria-label="Toggle Mobile Menu"
-                            className={cn(
-                                "xl:hidden hover-expand border border-white/10 transition-all",
-                                isMobileMenuOpen && "is-expanded"
-                            )}
+                            className="xl:hidden h-8 w-8 !p-0 rounded-full"
                         >
-                            {isMobileMenuOpen ? <X size={18} className="shrink-0" /> : <Menu size={18} className="shrink-0" />}
-                            <span className="hover-expand-text">Menu</span>
-                        </button>
+                            {isMobileMenuOpen ? <XIcon size={16} /> : <MenuIcon size={16} />}
+                        </Button>
                     </div>
                 </div>
 

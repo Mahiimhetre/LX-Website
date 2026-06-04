@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, Loader2, ArrowRight, Mail, Lock, Github, X } from 'lucide-react';
+import {  Eye, EyeOff, Loader2, ArrowRight, Mail, Lock, Github, X  } from '@/components/icons';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import Logo from '@/components/Logo';

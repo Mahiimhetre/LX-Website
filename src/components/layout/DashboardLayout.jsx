@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import Sidebar from './Sidebar';
-import { Menu } from 'lucide-react';
+import { MenuIcon } from '@/components/icons';
 import { useLocation } from 'react-router-dom';
 
 const DashboardLayout = ({ children }) => {
@@ -38,7 +38,7 @@ const DashboardLayout = ({ children }) => {
                 <div className="md:hidden h-16 border-b border-white/5 flex items-center px-4 justify-between bg-card/50 backdrop-blur-xl sticky top-0 z-30">
                     <span className="font-semibold">{getPageTitle()}</span>
                     <button onClick={() => setIsMobileMenuOpen(true)} aria-label="Open mobile menu" className="p-2 -mr-2 text-muted-foreground hover:text-foreground">
-                        <Menu className="w-5 h-5" />
+                        <MenuIcon className="w-5 h-5" />
                     </button>
                 </div>
 

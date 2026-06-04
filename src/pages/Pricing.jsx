@@ -1,16 +1,13 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
 import { useAuth } from '@/contexts/AuthContext';
 import apiClient from '@/api/client';
 import { toast } from 'sonner';
-import { Users, Check, Zap, Shield, Crown, HelpCircle } from 'lucide-react';
+import { UsersIcon, CheckIcon, ZapIcon, ShieldIcon, CrownIcon, HelpCircleIcon } from '@/components/icons';
 import { cn } from '@/lib/utils';
 import PaymentModal from '@/components/payment/PaymentModal';
-import PromoBanner from '@/components/marketing/PromoBanner';
+import use3DTilt from '@/hooks/use3DTilt';
 
 const BASE_PRICES = {
     USD: { free: 0, pro: 29, teamBase: 79, perMember: 15 },
@@ -18,6 +15,147 @@ const BASE_PRICES = {
 };
 
 const CURRENCY_SYMBOLS = { USD: '$', INR: '₹' };
+
+const PricingCard = ({ plan, index, symbol, teamTotalPrice, teamMemberCount, setTeamMemberCount, prices, handleInitiatePurchase, isCreatingTeam }) => {
+    // Enable 3D Tilt hook for the pricing cards
+    const cardRef = use3DTilt({ max: 6, scale: 1.02, speed: 200 });
+
+    return (
+        <div
+            ref={cardRef}
+            className={cn(
+                "relative rounded-[2rem] p-6 md:p-8 transition-all duration-500 flex flex-col group backdrop-blur-xl animate-in fade-in slide-in-from-bottom-8 transform-gpu",
+                plan.highlight
+                    ? "bg-gradient-to-b from-background/90 to-background/50 border border-primary/40 shadow-[0_0_50px_-15px_rgba(124,58,237,0.3)] scale-100 md:scale-[1.03] z-10"
+                    : "bg-background/40 border border-white/10 hover:border-white/30 hover:bg-background/60 shadow-xl"
+            )}
+            style={{ 
+                animationDelay: `${index * 150}ms`,
+                transformStyle: 'preserve-3d'
+            }}
+        >
+            {/* Dynamic Glass Glare Spotlight (moves with mouse) */}
+            <div 
+                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-20"
+                style={{
+                    background: `radial-gradient(400px circle at var(--glare-x, 50%) var(--glare-y, 50%), rgba(255, 255, 255, 0.06), transparent 45%)`
+                }}
+            />
+
+            {/* Pro Plan Glowing overlay */}
+            {plan.highlight && (
+                <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent rounded-[2rem] pointer-events-none"></div>
+            )}
+
+            {plan.highlight && (
+                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-5 py-1 bg-gradient-to-r from-primary flex items-center gap-1.5 to-blue-500 text-white text-[10px] font-bold uppercase tracking-widest rounded-full shadow-[0_0_15px_rgba(124,58,237,0.5)] border border-white/10">
+                    <ZapIcon className="w-3 h-3 fill-white/40" /> Most Popular
+                </div>
+            )}
+            {!plan.highlight && plan.isTeam && (
+                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-5 py-1 bg-secondary flex items-center gap-1.5 text-muted-foreground text-[9px] font-bold uppercase tracking-widest rounded-full border border-white/10">
+                    <CrownIcon className="w-3 h-3" /> Best Value
+                </div>
+            )}
+
+            {/* Raised content container for 3D depth */}
+            <div className="flex-1 flex flex-col" style={{ transform: 'translateZ(25px)' }}>
+                <div className="mb-5 relative z-10 flex items-center gap-4">
+                    <div className={cn(
+                        "w-12 h-12 rounded-[1rem] flex items-center justify-center transition-transform group-hover:scale-105 duration-500 shadow-sm shrink-0",
+                        plan.highlight ? "bg-gradient-to-br from-primary to-blue-600 text-white shadow-primary/20" : "bg-secondary/80 text-foreground"
+                    )}>
+                        <plan.icon className="w-5 h-5" />
+                    </div>
+                    <div>
+                        <h2 className="text-2xl font-display font-bold text-foreground leading-none">{plan.name}</h2>
+                        <p className="text-xs text-muted-foreground font-medium mt-1">{plan.description}</p>
+                    </div>
+                </div>
+
+                <div className="mb-6 relative z-10">
+                    {plan.isTeam ? (
+                        <div className="space-y-3">
+                            <div className="flex items-baseline gap-1.5">
+                                <span className="text-4xl md:text-5xl font-display font-bold text-foreground tracking-tight">
+                                    {symbol}{teamTotalPrice.toLocaleString()}
+                                </span>
+                                <span className="text-muted-foreground font-medium text-sm">{plan.period}</span>
+                            </div>
+
+                            <div className="p-3 bg-background/50 rounded-2xl border border-white/5 backdrop-blur-md">
+                                <div className="flex items-center justify-between">
+                                    <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Team Size</label>
+                                    <div className="flex items-center gap-2 bg-black/20 rounded-full p-0.5 border border-white/5">
+                                        <button onClick={() => setTeamMemberCount(Math.max(2, teamMemberCount - 1))} className="w-7 h-7 rounded-full bg-secondary/80 hover:bg-secondary flex items-center justify-center text-sm transition-colors shadow-sm text-foreground/80">-</button>
+                                        <span className="text-sm font-display font-bold w-6 text-center">{teamMemberCount}</span>
+                                        <button onClick={() => setTeamMemberCount(Math.min(100, teamMemberCount + 1))} className="w-7 h-7 rounded-full bg-secondary/80 hover:bg-secondary flex items-center justify-center text-sm transition-colors shadow-sm text-foreground/80">+</button>
+                                    </div>
+                                </div>
+                                <p className="text-[10px] text-muted-foreground mt-2 font-medium opacity-80">
+                                    {symbol}{prices.teamBase.toLocaleString()} base + {symbol}{prices.perMember.toLocaleString()}/seat
+                                </p>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="flex flex-col space-y-1">
+                            <div className="flex items-baseline gap-1.5">
+                                <span className="text-4xl md:text-5xl font-display font-bold text-foreground tracking-tight">
+                                    {plan.highlight ? Math.floor(prices.pro * 0.5) : plan.price}
+                                </span>
+                                <span className="text-muted-foreground font-medium text-sm">{plan.period}</span>
+                            </div>
+                            {plan.highlight && (
+                                <div className="flex items-center gap-2 mt-1">
+                                    <span className="text-base font-display text-muted-foreground/60 line-through decoration-red-500/40 font-medium">
+                                        {plan.price}
+                                    </span>
+                                    <span className="text-[10px] font-bold text-green-400 bg-green-400/10 border border-green-400/20 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                                        Save 50%
+                                    </span>
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
+
+                <div className="w-full h-px bg-gradient-to-r from-transparent via-border to-transparent mb-6 opacity-50"></div>
+
+                <ul className="space-y-3 mb-8 flex-1 relative z-10">
+                    {plan.features.map((feature) => (
+                        <li key={feature} className="flex items-center gap-2.5 text-[13px] text-foreground/90 font-medium">
+                            <div className={cn(
+                                "w-5 h-5 rounded-full flex items-center justify-center shrink-0 shadow-sm",
+                                plan.highlight ? "bg-primary/20 border border-primary/20" : "bg-secondary/50 border border-white/5"
+                            )}>
+                                <CheckIcon className={cn("w-3 h-3", plan.highlight ? "text-primary drop-shadow-sm" : "text-foreground/70")} />
+                            </div>
+                            {feature}
+                        </li>
+                    ))}
+                </ul>
+
+                <Button
+                    onClick={plan.isTeam ? () => handleInitiatePurchase(plan) : plan.action}
+                    disabled={isCreatingTeam}
+                    className={cn(
+                        "w-full py-5 rounded-2xl text-sm font-bold transition-all duration-300 relative z-10 overflow-hidden group/btn shadow-none",
+                        plan.highlight
+                            ? "bg-gradient-to-r from-primary to-blue-600 hover:scale-[1.01] hover:shadow-[0_0_20px_-5px_rgba(124,58,237,0.5)] text-white border-0"
+                            : "bg-secondary text-foreground hover:bg-secondary/80 hover:scale-[1.01] border border-white/10 hover:border-white/20"
+                    )}
+                >
+                    <span className="relative z-10 flex items-center justify-center gap-2">
+                        {isCreatingTeam ? 'Processing...' : plan.cta}
+                    </span>
+                    {plan.highlight && (
+                        <div className="absolute inset-0 bg-white/10 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300"></div>
+                    )}
+                </Button>
+            </div>
+        </div>
+    );
+};
 
 const Pricing = () => {
     const { user, profile, refreshProfile } = useAuth();
@@ -68,13 +206,11 @@ const Pricing = () => {
         setShowPaymentModal(true);
     };
 
-
     const handlePaymentSuccess = async (paymentDetails) => {
-        setIsCreatingTeam(true); // Reuse loading state logic
+        setIsCreatingTeam(true);
         setShowPaymentModal(false);
 
         try {
-            // For Team Plan
             if (selectedPlanDetails?.isTeam) {
                 const { data } = await apiClient.post('/teams', {
                     name: `${profile?.name || user.email?.split('@')[0]}'s Team`,
@@ -87,12 +223,10 @@ const Pricing = () => {
 
                 if (!data.success) throw new Error(data.message);
 
-                await refreshProfile(); // Sync local session
+                await refreshProfile();
                 toast.success(`Team created successfully! Payment ID: ${paymentDetails.paymentId}`);
                 navigate('/team');
-            }
-            // For Pro Plan
-            else {
+            } else {
                 const { data } = await apiClient.post('/profile/upgrade-plan', {
                     plan: 'pro',
                     paymentId: paymentDetails.paymentId,
@@ -101,16 +235,15 @@ const Pricing = () => {
 
                 if (!data.success) throw new Error(data.message);
 
-                await refreshProfile(); 
+                await refreshProfile();
                 toast.success("Pro Plan activated successfully! Welcome to Pro.");
                 setTimeout(() => navigate('/dashboard'), 1500);
             }
-
         } catch (error) {
             console.error('Error post-payment:', error);
             toast.error(error.message || "Payment successful but failed to update account. Please contact support.");
         } finally {
-            setIsCreatingTeam(false); // Reuse loading state logic
+            setIsCreatingTeam(false);
         }
     };
 
@@ -132,7 +265,7 @@ const Pricing = () => {
             features: ['1 workspace', '1 user', 'Basic locator generation', 'Community support'],
             cta: profile?.plan === 'free' ? 'Current Plan' : 'Get Started',
             highlight: false,
-            icon: Zap,
+            icon: ZapIcon,
             action: () => navigate('/auth/register'),
         },
         {
@@ -145,7 +278,7 @@ const Pricing = () => {
             features: ['Unlimited workspaces', '5 collaborator seats', 'Priority email support', 'Advanced AI Models', 'Dark mode syncing'],
             cta: profile?.plan === 'pro' ? 'Extend Pro Plan' : 'Upgrade to Pro',
             highlight: true,
-            icon: Shield,
+            icon: ShieldIcon,
             action: () => handleInitiatePurchase({ name: 'Pro', features: ['Unlimited workspaces', '5 collaborator seats', 'Priority email support'] }),
         },
         {
@@ -159,7 +292,7 @@ const Pricing = () => {
             cta: profile?.plan === 'team' ? 'Extend Team Plan' : 'Start Team Plan',
             highlight: false,
             isTeam: true,
-            icon: Crown,
+            icon: CrownIcon,
         },
     ];
 
@@ -183,7 +316,7 @@ const Pricing = () => {
                 {/* Header */}
                 <div className="text-center space-y-4 max-w-2xl mx-auto animate-in fade-in slide-in-from-bottom-5 duration-1000 mt-4">
                     <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-medium mb-1 shadow-sm shadow-primary/10">
-                        <Zap className="w-3.5 h-3.5 fill-primary/20" />
+                        <ZapIcon className="w-3.5 h-3.5 fill-primary/20" />
                         <span>Unlock your full potential</span>
                     </div>
                     <h1 className="text-4xl md:text-5xl font-display font-extrabold text-foreground tracking-tight leading-tight">
@@ -200,125 +333,18 @@ const Pricing = () => {
                 {/* Pricing Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
                     {pricingPlans.map((plan, index) => (
-                        <div
+                        <PricingCard 
                             key={plan.name}
-                            className={cn(
-                                "relative rounded-[2rem] p-6 md:p-8 transition-all duration-500 flex flex-col group backdrop-blur-xl animate-in fade-in slide-in-from-bottom-8",
-                                plan.highlight
-                                    ? "bg-gradient-to-b from-background/90 to-background/50 border border-primary/40 shadow-[0_0_50px_-15px_rgba(var(--primary),0.3)] scale-100 md:scale-[1.03] z-10"
-                                    : "bg-background/40 border border-white/10 hover:border-white/30 hover:bg-background/60 shadow-xl"
-                            )}
-                            style={{ animationDelay: `${index * 150}ms` }}
-                        >
-                            {/* Pro Plan Glowing overlay */}
-                            {plan.highlight && (
-                                <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent rounded-[2rem] pointer-events-none"></div>
-                            )}
-
-                            {plan.highlight && (
-                                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-5 py-1 bg-gradient-to-r from-primary flex items-center gap-1.5 to-blue-500 text-white text-[10px] font-bold uppercase tracking-widest rounded-full shadow-[0_0_15px_rgba(var(--primary),0.5)] border border-white/10">
-                                    <Zap className="w-3 h-3 fill-white/40" /> Most Popular
-                                </div>
-                            )}
-                            {!plan.highlight && plan.isTeam && (
-                                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-5 py-1 bg-secondary flex items-center gap-1.5 text-muted-foreground text-[9px] font-bold uppercase tracking-widest rounded-full border border-white/10">
-                                    <Crown className="w-3 h-3" /> Best Value
-                                </div>
-                            )}
-
-                            <div className="mb-5 relative z-10 flex items-center gap-4">
-                                <div className={cn(
-                                    "w-12 h-12 rounded-[1rem] flex items-center justify-center transition-transform group-hover:scale-105 duration-500 shadow-sm shrink-0",
-                                    plan.highlight ? "bg-gradient-to-br from-primary to-blue-600 text-white shadow-primary/20" : "bg-secondary/80 text-foreground"
-                                )}>
-                                    <plan.icon className="w-5 h-5" />
-                                </div>
-                                <div>
-                                    <h2 className="text-2xl font-display font-bold text-foreground leading-none">{plan.name}</h2>
-                                    <p className="text-xs text-muted-foreground font-medium mt-1">{plan.description}</p>
-                                </div>
-                            </div>
-
-                            <div className="mb-6 relative z-10">
-                                {plan.isTeam ? (
-                                    <div className="space-y-3">
-                                        <div className="flex items-baseline gap-1.5">
-                                            <span className="text-4xl md:text-5xl font-display font-bold text-foreground tracking-tight">
-                                                {symbol}{teamTotalPrice.toLocaleString()}
-                                            </span>
-                                            <span className="text-muted-foreground font-medium text-sm">{plan.period}</span>
-                                        </div>
-
-                                        <div className="p-3 bg-background/50 rounded-2xl border border-white/5 backdrop-blur-md">
-                                            <div className="flex items-center justify-between">
-                                                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Team Size</label>
-                                                <div className="flex items-center gap-2 bg-black/20 rounded-full p-0.5 border border-white/5">
-                                                    <button onClick={() => setTeamMemberCount(Math.max(2, teamMemberCount - 1))} className="w-7 h-7 rounded-full bg-secondary/80 hover:bg-secondary flex items-center justify-center text-sm transition-colors shadow-sm text-foreground/80">-</button>
-                                                    <span className="text-sm font-display font-bold w-6 text-center">{teamMemberCount}</span>
-                                                    <button onClick={() => setTeamMemberCount(Math.min(100, teamMemberCount + 1))} className="w-7 h-7 rounded-full bg-secondary/80 hover:bg-secondary flex items-center justify-center text-sm transition-colors shadow-sm text-foreground/80">+</button>
-                                                </div>
-                                            </div>
-                                            <p className="text-[10px] text-muted-foreground mt-2 font-medium opacity-80">
-                                                {symbol}{prices.teamBase.toLocaleString()} base + {symbol}{prices.perMember.toLocaleString()}/seat
-                                            </p>
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <div className="flex flex-col space-y-1">
-                                        <div className="flex items-baseline gap-1.5">
-                                            <span className="text-4xl md:text-5xl font-display font-bold text-foreground tracking-tight">
-                                                {plan.highlight ? Math.floor(prices.pro * 0.5) : plan.price}
-                                            </span>
-                                            <span className="text-muted-foreground font-medium text-sm">{plan.period}</span>
-                                        </div>
-                                        {plan.highlight && (
-                                            <div className="flex items-center gap-2 mt-1">
-                                                <span className="text-base font-display text-muted-foreground/60 line-through decoration-red-500/40 font-medium">
-                                                    {plan.price}
-                                                </span>
-                                                <span className="text-[10px] font-bold text-green-400 bg-green-400/10 border border-green-400/20 px-2 py-0.5 rounded-full uppercase tracking-wider">
-                                                    Save 50%
-                                                </span>
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-                            </div>
-
-                            <div className="w-full h-px bg-gradient-to-r from-transparent via-border to-transparent mb-6 opacity-50"></div>
-
-                            <ul className="space-y-3 mb-8 flex-1 relative z-10">
-                                {plan.features.map((feature) => (
-                                    <li key={feature} className="flex items-center gap-2.5 text-[13px] text-foreground/90 font-medium">
-                                        <div className={cn(
-                                            "w-5 h-5 rounded-full flex items-center justify-center shrink-0 shadow-sm",
-                                            plan.highlight ? "bg-primary/20 border border-primary/20" : "bg-secondary/50 border border-white/5"
-                                        )}>
-                                            <Check className={cn("w-3 h-3", plan.highlight ? "text-primary drop-shadow-sm" : "text-foreground/70")} />
-                                        </div>
-                                        {feature}
-                                    </li>
-                                ))}
-                            </ul>
-
-                            <Button
-                                onClick={plan.isTeam ? () => handleInitiatePurchase(plan) : plan.action}
-                                disabled={isCreatingTeam}
-                                className={cn(
-                                    "w-full py-5 rounded-2xl text-sm font-bold transition-all duration-300 relative z-10 overflow-hidden group/btn shadow-none",
-                                    plan.highlight
-                                        ? "bg-gradient-to-r from-primary to-blue-600 hover:scale-[1.01] hover:shadow-[0_0_20px_-5px_rgba(var(--primary),0.5)] text-white border-0"
-                                        : "bg-secondary text-foreground hover:bg-secondary/80 hover:scale-[1.01] border border-white/10 hover:border-white/20"
-                                )}
-                            >
-                                <span className="relative z-10 flex items-center justify-center gap-2">
-                                    {isCreatingTeam ? 'Processing...' : plan.cta}
-                                </span>
-                                {plan.highlight && (
-                                    <div className="absolute inset-0 bg-white/10 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300"></div>
-                                )}
-                            </Button>
-                        </div>
+                            plan={plan}
+                            index={index}
+                            symbol={symbol}
+                            teamTotalPrice={teamTotalPrice}
+                            teamMemberCount={teamMemberCount}
+                            setTeamMemberCount={setTeamMemberCount}
+                            prices={prices}
+                            handleInitiatePurchase={handleInitiatePurchase}
+                            isCreatingTeam={isCreatingTeam}
+                        />
                     ))}
                 </div>
 
@@ -334,7 +360,7 @@ const Pricing = () => {
                             <div key={i} className="p-6 rounded-[1.5rem] bg-background/30 backdrop-blur-md border border-white/5 hover:border-white/15 transition-all duration-300 group hover:bg-background/50 hover:shadow-md">
                                 <h3 className="font-semibold text-foreground mb-3 flex items-start gap-3 text-sm leading-snug">
                                     <div className="p-2 rounded-xl bg-secondary/60 text-foreground group-hover:bg-primary/20 group-hover:text-primary transition-colors shrink-0 shadow-sm border border-white/5 group-hover:border-primary/20">
-                                        <HelpCircle className="w-4 h-4" />
+                                        <HelpCircleIcon className="w-4 h-4" />
                                     </div>
                                     <span className="mt-1">{faq.q}</span>
                                 </h3>
@@ -343,7 +369,6 @@ const Pricing = () => {
                         ))}
                     </div>
                 </div>
-
             </div>
 
             {selectedPlanDetails && (

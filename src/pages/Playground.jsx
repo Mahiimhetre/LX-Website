@@ -1,8 +1,13 @@
 import { useState, useCallback, useMemo } from 'react';
+import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { ArrowLeftIcon } from '@/components/icons';
+import TiltCard from '@/components/ui/tilt-card';
 import UserProfile from '@/components/playground/UserProfile';
 import { ShoppingCart, AddressForm, PaymentGateway } from '@/components/playground/CheckoutSuite';
 import { DataTable, DataManagement } from '@/components/playground/DataSystem';
 import ModalSystem from '@/components/playground/ModalSystem';
+import SignaturePad from '@/components/playground/SignaturePad';
 import FormValidation from '@/components/playground/FormValidation';
 import RatingSystem from '@/components/playground/RatingSystem';
 
@@ -81,114 +86,110 @@ const Playground = () => {
                     <UserProfile />
 
             {view === 'table' && (
-                <div className="bg-black/40 border border-white/10 rounded-2xl p-6 backdrop-blur-sm">
-                    <DataTable
-                        onAddToCart={addToCart}
-                        cartCount={cart.reduce((sum, item) => sum + item.quantity, 0)}
-                        onViewCart={() => setView('cart')}
-                        onViewOrders={() => setView('orders')}
-                    />
-                </div>
+                <DataTable
+                    onAddToCart={addToCart}
+                    cartCount={cart.reduce((sum, item) => sum + item.quantity, 0)}
+                    onViewCart={() => setView('cart')}
+                    onViewOrders={() => setView('orders')}
+                />
             )}
 
             {view === 'cart' && (
-                <div className="bg-black/40 border border-white/10 rounded-2xl p-6 backdrop-blur-sm">
-                    <ShoppingCart
-                        cart={cart}
-                        onUpdateQuantity={updateQuantity}
-                        onRemoveItem={removeItem}
-                        onClearCart={clearCart}
-                        onContinueShopping={() => setView('table')}
-                        onCheckout={handleCheckout}
-                    />
-                </div>
+                <ShoppingCart
+                    cart={cart}
+                    onUpdateQuantity={updateQuantity}
+                    onRemoveItem={removeItem}
+                    onClearCart={clearCart}
+                    onContinueShopping={() => setView('table')}
+                    onCheckout={handleCheckout}
+                />
             )}
 
             {view === 'address' && (
-                <div className="bg-black/40 border border-white/10 rounded-2xl p-6 backdrop-blur-sm max-w-2xl mx-auto">
-                    <AddressForm
-                        onClose={() => setView('cart')}
-                        onProceedToPayment={handleProceedToPayment}
-                        cartTotal={totalWithTax}
-                    />
-                </div>
+                <AddressForm
+                    onClose={() => setView('cart')}
+                    onProceedToPayment={handleProceedToPayment}
+                    cartTotal={totalWithTax}
+                />
             )}
 
             {view === 'payment' && (
-                <div className="bg-black/40 border border-white/10 rounded-2xl p-6 backdrop-blur-sm max-w-2xl mx-auto">
-                    <PaymentGateway
-                        amount={paymentAmount}
-                        onClose={() => setView('address')}
-                        onPaymentComplete={handlePaymentComplete}
-                    />
-                </div>
+                <PaymentGateway
+                    amount={paymentAmount}
+                    onClose={() => setView('address')}
+                    onPaymentComplete={handlePaymentComplete}
+                />
             )}
 
             {view === 'orders' && (
-                <div className="bg-black/40 border border-white/10 rounded-2xl p-6 backdrop-blur-sm">
-                    <div className="flex items-center gap-4 mb-6">
-                        <button
-                            onClick={() => setView('table')}
-                            className="text-sm text-muted-foreground hover:text-white transition-colors"
-                        >
-                            ← Back
-                        </button>
-                        <h2 className="text-2xl font-semibold text-white">My Orders</h2>
-                    </div>
-                    <div className="text-center py-12 space-y-4">
-                        <div className="text-4xl">📦</div>
-                        <p className="text-muted-foreground">No orders found</p>
-                        <button
-                            className="bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded-lg transition-colors"
-                            onClick={() => setView('table')}
-                        >
-                            Start Shopping
-                        </button>
-                    </div>
-                </div>
+                <Card className="w-full bg-white/5 border-white/10 backdrop-blur-md">
+                    <CardHeader>
+                        <div className="flex items-center gap-4">
+                            <button
+                                onClick={() => setView('table')}
+                                className="text-sm text-muted-foreground hover:text-white transition-colors"
+                            >
+                                ← Back
+                            </button>
+                            <CardTitle>My Orders</CardTitle>
+                        </div>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-center py-12 space-y-4">
+                            <div className="text-4xl">📦</div>
+                            <p className="text-muted-foreground">No orders found</p>
+                            <Button onClick={() => setView('table')}>
+                                Start Shopping
+                            </Button>
+                        </div>
+                    </CardContent>
+                </Card>
             )}
 
-            <div className="grid md:grid-cols-2 gap-8">
-                <ModalSystem />
-                <DataManagement />
+            <div className="grid md:grid-cols-2 md:grid-rows-[auto_1fr] gap-8">
+                <ModalSystem className="md:col-start-1 md:row-start-1" />
+                <SignaturePad className="md:col-start-1 md:row-start-2 self-stretch" />
+                <DataManagement className="md:col-start-2 md:row-start-1 md:row-span-2" />
             </div>
 
             <FormValidation />
 
-            <div className="bg-black/40 border border-white/10 rounded-2xl p-8 backdrop-blur-sm relative overflow-hidden group hover:border-primary/50 transition-colors">
-                <div className="absolute top-0 right-0 p-32 bg-primary/5 blur-3xl rounded-full" />
-                <div className="relative z-10 space-y-6">
-                    <h2 className="text-2xl font-bold text-white">Selectors & XPath Challenges</h2>
+            <div className="grid md:grid-cols-2 gap-8 items-start">
+                <TiltCard className="bg-black/40 border border-white/10 rounded-2xl p-8 backdrop-blur-sm hover:border-primary/50 transition-all duration-300">
+                    <div className="absolute top-0 right-0 p-32 bg-primary/5 blur-3xl rounded-full" />
+                    <div className="relative z-10 space-y-6">
+                        <h2 className="text-2xl font-bold text-white">Selectors &amp; XPath Challenges</h2>
 
-                    <div className="glass-card p-6 rounded-xl bg-white/5 border border-white/5">
-                        <h3 className="text-lg font-semibold text-primary mb-4 flex items-center gap-2">
-                            <span className="w-2 h-2 rounded-full bg-primary" />
-                            Complex Scenarios Covered
-                        </h3>
-                        <ul className="grid md:grid-cols-2 gap-3 text-sm text-muted-foreground">
-                            {[
-                                'Shadow DOM (Open, Closed, Nested) - Payment Gateway',
-                                'Iframes (Simple, Nested, Sandboxed) - Address Form & Security',
-                                'Bottom Modal Overlay - Modal System',
-                                'Loading Spinner Animation - Payment Flow',
-                                'Native Form Validation - Form Verification',
-                                'Dynamic Cascading Dropdowns - Address Entry',
-                                'Input State Toggles - User Profile',
-                                'Advanced Data Table - Main Product Table',
-                                'File Upload / Import - Data Management',
-                                'Window Prompt Alerts - Payment Gateway completion'
-                            ].map((item, i) => (
-                                <li key={i} className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
-                                    <span className="w-1 h-1 rounded-full bg-primary/50" />
-                                    {item}
-                                </li>
-                            ))}
-                        </ul>
+                        <div className="glass-card p-6 rounded-xl bg-white/5 border border-white/5">
+                            <h3 className="text-lg font-semibold text-primary mb-4 flex items-center gap-2">
+                                <span className="w-2 h-2 rounded-full bg-primary" />
+                                Complex Scenarios Covered
+                            </h3>
+                            <ul className="grid gap-3 text-sm text-muted-foreground">
+                                {[
+                                    'Shadow DOM (Open, Closed, Nested) - Payment Gateway',
+                                    'Iframes (Simple, Nested, Sandboxed) - Address Form & Security',
+                                    'Bottom Modal Overlay - Modal System',
+                                    'Loading Spinner Animation - Payment Flow',
+                                    'Native Form Validation - Form Verification',
+                                    'Dynamic Cascading Dropdowns - Address Entry',
+                                    'Input State Toggles - User Profile',
+                                    'Advanced Data Table - Main Product Table',
+                                    'File Upload / Import - Data Management',
+                                    'Window Prompt Alerts - Payment Gateway completion'
+                                ].map((item, i) => (
+                                    <li key={i} className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
+                                        <span className="w-1 h-1 rounded-full bg-primary/50" />
+                                        {item}
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
                     </div>
-                </div>
-            </div>
+                </TiltCard>
 
-            <RatingSystem />
+                <RatingSystem />
+            </div>
             </div>
         </section>
     );

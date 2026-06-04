@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { Loader2 } from 'lucide-react';
+import {  Loader2  } from '@/components/icons';
 import { toast } from 'sonner';
 
 const OAuthCallback = () => {

@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import Logo from '@/components/Logo';
-import { Twitter, Github, Linkedin } from 'lucide-react';
+import { TwitterIcon, GithubIcon, LinkedinIcon } from '@/components/icons';
+import { Button } from '@/components/ui/button';
 
 const Footer = () => {
     return (
@@ -50,13 +51,12 @@ const Footer = () => {
                 </div>
             </div>
 
-            {/* Bottom Bar */}
             <div className="border-t border-border px-4 py-2 flex justify-between items-center text-muted-foreground text-[0.65rem] bg-secondary/20">
                 <p className="m-0">© @2026 Locator-X. All rights reserved.</p>
                 <div className="flex gap-1.5">
-                    <SocialLink href="#" icon={Twitter} />
-                    <SocialLink href="#" icon={Github} />
-                    <SocialLink href="#" icon={Linkedin} />
+                    <SocialLink href="#" icon={TwitterIcon} />
+                    <SocialLink href="#" icon={GithubIcon} />
+                    <SocialLink href="#" icon={LinkedinIcon} />
                 </div>
             </div>
         </footer>
@@ -73,11 +73,13 @@ const FooterLink = ({ to, children }) => (
 );
 
 const SocialLink = ({ href, icon: Icon }) => (
-    <a
-        href={href}
-        className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-background/50 text-muted-foreground transition-all hover:bg-primary/20 hover:text-primary hover:scale-110 border border-transparent hover:border-primary/30"
-    >
-        <Icon size={12} />
+    <a href={href} className="inline-block transform-gpu" style={{ transformStyle: 'preserve-3d' }}>
+        <Button
+            variant="secondary"
+            className="w-7 h-7 !p-0 rounded-full flex items-center justify-center border border-white/5 bg-white/5 hover:bg-primary/20 hover:text-primary hover:border-primary/30 shadow-sm"
+        >
+            <Icon size={12} />
+        </Button>
     </a>
 );
 

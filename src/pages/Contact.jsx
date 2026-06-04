@@ -1,9 +1,15 @@
 
 import { useState } from 'react';
-import { Mail, MessageSquare, Send, User, AlertCircle, CheckCircle2, MapPin, Clock } from 'lucide-react';
+import { MailIcon, MessageSquareIcon, SendIcon, UserIcon, AlertCircleIcon, CheckCircle2Icon, MapPinIcon, ClockIcon } from '@/components/icons';
 import { toast } from 'sonner';
+import use3DTilt from '@/hooks/use3DTilt';
+import { Button } from '@/components/ui/button';
 
 const Contact = () => {
+    const contactInfoRef = use3DTilt({ max: 6, scale: 1.015, speed: 250 });
+    const liveChatRef = use3DTilt({ max: 6, scale: 1.015, speed: 250 });
+    const formContainerRef = use3DTilt({ max: 3, scale: 1.005, speed: 300 });
+
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -47,49 +53,77 @@ const Contact = () => {
 
                 {/* Contact Info Column */}
                 <div className="space-y-8">
-                    <div className="bg-secondary/10 border border-white/5 rounded-2xl p-8 space-y-6">
-                        <h3 className="text-2xl font-bold text-white">Contact Information</h3>
+                    <div 
+                        ref={contactInfoRef}
+                        className="bg-secondary/10 border border-white/5 rounded-2xl p-8 space-y-6 relative overflow-hidden group transform-gpu"
+                        style={{ transformStyle: 'preserve-3d' }}
+                    >
+                        {/* Spotlight Glare */}
+                        <div 
+                            className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-20"
+                            style={{
+                                background: `radial-gradient(250px circle at var(--glare-x, 50%) var(--glare-y, 50%), rgba(255, 255, 255, 0.06), transparent 50%)`
+                            }}
+                        />
+                        <div className="relative z-10" style={{ transform: 'translateZ(20px)' }}>
+                            <h3 className="text-2xl font-bold text-white mb-6">Contact Information</h3>
 
-                        <div className="flex items-start gap-4">
-                            <div className="p-3 rounded-lg bg-primary/10 text-primary">
-                                <MapPin size={24} />
-                            </div>
-                            <div>
-                                <h4 className="font-semibold text-white">Our Office</h4>
-                                <p className="text-muted-foreground">123 Tech Park, Cyber City<br />Bangalore, India 560100</p>
-                            </div>
-                        </div>
+                            <div className="space-y-6">
+                                <div className="flex items-start gap-4">
+                                    <div className="p-3 rounded-lg bg-primary/10 text-primary">
+                                        <MapPinIcon size={24} />
+                                    </div>
+                                    <div>
+                                        <h4 className="font-semibold text-white">Our Office</h4>
+                                        <p className="text-muted-foreground">123 Tech Park, Cyber City<br />Bangalore, India 560100</p>
+                                    </div>
+                                </div>
 
-                        <div className="flex items-start gap-4">
-                            <div className="p-3 rounded-lg bg-primary/10 text-primary">
-                                <Mail size={24} />
-                            </div>
-                            <div>
-                                <h4 className="font-semibold text-white">Email Us</h4>
-                                <p className="text-muted-foreground">support@locator-x.com</p>
-                            </div>
-                        </div>
+                                <div className="flex items-start gap-4">
+                                    <div className="p-3 rounded-lg bg-primary/10 text-primary">
+                                        <MailIcon size={24} />
+                                    </div>
+                                    <div>
+                                        <h4 className="font-semibold text-white">Email Us</h4>
+                                        <p className="text-muted-foreground">support@locator-x.com</p>
+                                    </div>
+                                </div>
 
-                        <div className="flex items-start gap-4">
-                            <div className="p-3 rounded-lg bg-primary/10 text-primary">
-                                <Clock size={24} />
-                            </div>
-                            <div>
-                                <h4 className="font-semibold text-white">Business Hours</h4>
-                                <p className="text-muted-foreground">Mon - Fri: 9:00 AM - 6:00 PM IST<br />Sat - Sun: Closed</p>
+                                <div className="flex items-start gap-4">
+                                    <div className="p-3 rounded-lg bg-primary/10 text-primary">
+                                        <ClockIcon size={24} />
+                                    </div>
+                                    <div>
+                                        <h4 className="font-semibold text-white">Business Hours</h4>
+                                        <p className="text-muted-foreground">Mon - Fri: 9:00 AM - 6:00 PM IST<br />Sat - Sun: Closed</p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <div className="bg-blue-500/5 border border-blue-500/20 rounded-2xl p-8">
-                        <div className="flex items-center gap-3 mb-4 text-blue-400">
-                            <MessageSquare size={24} />
-                            <h3 className="text-xl font-bold">Live Chat Support</h3>
+                    <div 
+                        ref={liveChatRef}
+                        className="bg-blue-500/5 border border-blue-500/20 rounded-2xl p-8 relative overflow-hidden group transform-gpu"
+                        style={{ transformStyle: 'preserve-3d' }}
+                    >
+                        {/* Spotlight Glare */}
+                        <div 
+                            className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-20"
+                            style={{
+                                background: `radial-gradient(250px circle at var(--glare-x, 50%) var(--glare-y, 50%), rgba(30, 144, 255, 0.08), transparent 50%)`
+                            }}
+                        />
+                        <div className="relative z-10 space-y-4" style={{ transform: 'translateZ(20px)' }}>
+                            <div className="flex items-center gap-3 mb-2 text-blue-400">
+                                <MessageSquareIcon size={24} />
+                                <h3 className="text-xl font-bold">Live Chat Support</h3>
+                            </div>
+                            <p className="text-muted-foreground mb-6">Need immediate assistance? Our support team is available during business hours.</p>
+                            <Button className="px-6 py-2">
+                                Start Chat
+                            </Button>
                         </div>
-                        <p className="text-muted-foreground mb-6">Need immediate assistance? Our support team is available during business hours.</p>
-                        <button className="px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-semibold transition-colors">
-                            Start Chat
-                        </button>
                     </div>
                 </div>
 
@@ -98,13 +132,24 @@ const Contact = () => {
                     {/* Glow Effect */}
                     <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
 
-                    <div className="relative bg-card/50 backdrop-blur-xl border border-white/10 rounded-2xl p-6 sm:p-10 shadow-2xl">
-                        <form onSubmit={handleSubmit} className="space-y-6">
+                    <div 
+                        ref={formContainerRef}
+                        className="relative bg-card/50 backdrop-blur-xl border border-white/10 rounded-2xl p-6 sm:p-10 shadow-2xl overflow-hidden transform-gpu"
+                        style={{ transformStyle: 'preserve-3d' }}
+                    >
+                        {/* Spotlight Glare */}
+                        <div 
+                            className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-20"
+                            style={{
+                                background: `radial-gradient(400px circle at var(--glare-x, 50%) var(--glare-y, 50%), rgba(255, 255, 255, 0.04), transparent 50%)`
+                            }}
+                        />
+                        <form onSubmit={handleSubmit} className="space-y-6 relative z-10" style={{ transform: 'translateZ(10px)' }}>
 
                             {/* Name Input */}
                             <div className="space-y-2">
                                 <label htmlFor="name" className="text-sm font-medium text-foreground flex items-center gap-2">
-                                    <User className="w-4 h-4 text-primary" /> Name
+                                    <UserIcon className="w-4 h-4 text-primary" /> Name
                                 </label>
                                 <input
                                     type="text"
@@ -121,7 +166,7 @@ const Contact = () => {
                             {/* Email Input */}
                             <div className="space-y-2">
                                 <label htmlFor="email" className="text-sm font-medium text-foreground flex items-center gap-2">
-                                    <Mail className="w-4 h-4 text-primary" /> Email
+                                    <MailIcon className="w-4 h-4 text-primary" /> Email
                                 </label>
                                 <input
                                     type="email"
@@ -138,7 +183,7 @@ const Contact = () => {
                             {/* Subject Input */}
                             <div className="space-y-2">
                                 <label htmlFor="subject" className="text-sm font-medium text-foreground flex items-center gap-2">
-                                    <AlertCircle className="w-4 h-4 text-primary" /> Subject
+                                    <AlertCircleIcon className="w-4 h-4 text-primary" /> Subject
                                 </label>
                                 <select
                                     name="subject"
@@ -159,7 +204,7 @@ const Contact = () => {
                             {/* Message Input */}
                             <div className="space-y-2">
                                 <label htmlFor="message" className="text-sm font-medium text-foreground flex items-center gap-2">
-                                    <MessageSquare className="w-4 h-4 text-primary" /> Message
+                                    <MessageSquareIcon className="w-4 h-4 text-primary" /> Message
                                 </label>
                                 <textarea
                                     name="message"
@@ -184,7 +229,7 @@ const Contact = () => {
                                 ) : (
                                     <>
                                         Send Message
-                                        <Send className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                                        <SendIcon className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                                     </>
                                 )}
                             </button>

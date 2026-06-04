@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { Camera, Loader2, X, Pencil } from 'lucide-react';
+import {  Camera, Loader2, X, Pencil  } from '@/components/icons';
 import apiClient from '@/api/client';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';

@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, Terminal } from 'lucide-react';
+import { ArrowRightIcon, TerminalIcon } from '@/components/icons';
+import { Button } from '@/components/ui/button';
 
 const Hero = () => {
     return (
@@ -32,20 +33,18 @@ const Hero = () => {
                 </p>
 
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-slide-up [animation-delay:300ms]">
-                    <Link
-                        to="/auth/login"
-                        className="h-10 px-6 flex items-center justify-center rounded-full bg-primary text-white font-semibold text-sm hover:bg-primary/90 hover:shadow-glow hover:-translate-y-0.5 transition-all duration-300 w-full sm:w-auto"
-                    >
-                        Start for Free
-                        <ArrowRight className="ml-2 w-4 h-4" />
-                    </Link>
-                    <Link
-                        to="/documentation"
-                        className="h-10 px-6 flex items-center justify-center rounded-full bg-secondary/50 text-foreground font-medium text-sm hover:bg-secondary border border-white/5 hover:border-white/20 transition-all duration-300 w-full sm:w-auto"
-                    >
-                        Read Documentation
-                        <Terminal className="ml-2 w-4 h-4 text-muted-foreground" />
-                    </Link>
+                    <Button asChild size="lg" className="w-full sm:w-auto">
+                        <Link to="/auth/login">
+                            Start for Free
+                            <ArrowRightIcon className="w-4 h-4 ml-1" />
+                        </Link>
+                    </Button>
+                    <Button asChild variant="secondary" size="lg" className="w-full sm:w-auto">
+                        <Link to="/documentation">
+                            Read Documentation
+                            <TerminalIcon className="w-4 h-4 ml-1 text-muted-foreground" />
+                        </Link>
+                    </Button>
                 </div>
             </div>
         </section>

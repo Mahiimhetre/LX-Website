@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Tag, Loader2, X } from 'lucide-react';
+import {  Tag, Loader2, X  } from '@/components/icons';
 import { toast } from 'sonner';
 import apiClient from '@/api/client';
 

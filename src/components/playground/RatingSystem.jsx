@@ -3,7 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/componen
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Star, Upload, Trash2, Send } from 'lucide-react';
+import {  Star, Upload, Trash2, Send  } from '@/components/icons';
+import TiltCard from "@/components/ui/tilt-card";
 
 const RatingSystem = () => {
     const [ratings, setRatings] = useState({
@@ -62,7 +63,7 @@ const RatingSystem = () => {
     };
 
     return (
-        <Card className="w-full max-w-2xl mx-auto bg-white/5 border-white/10 backdrop-blur-md">
+        <TiltCard className="w-full rounded-xl border border-white/10 bg-white/5 backdrop-blur-md">
             <CardHeader>
                 <CardTitle>Submit Your Review</CardTitle>
             </CardHeader>
@@ -139,7 +140,7 @@ const RatingSystem = () => {
                     <Send className="h-4 w-4" /> Submit Review
                 </Button>
             </CardFooter>
-        </Card>
+        </TiltCard>
     );
 };
 

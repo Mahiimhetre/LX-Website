@@ -9,3 +9,7 @@
 tmp/
 temp/
 dist/
+*_output.txt
+merge_result.txt
+gemini_models.json
+models.json

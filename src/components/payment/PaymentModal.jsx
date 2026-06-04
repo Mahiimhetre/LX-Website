@@ -10,7 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import RazorpayButton from "./RazorpayButton";
 import PromoCodeInput from "./PromoCodeInput";
 import { useState, useEffect } from "react";
-import { Check, Clock, CheckCircle2, Copy, Download } from "lucide-react";
+import {  Check, Clock, CheckCircle2, Copy, Download  } from '@/components/icons';
 import { toast } from "sonner";
 import { generateReceipt } from "@/services/receiptService";
 

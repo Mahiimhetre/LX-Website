@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, Check, Loader2, ArrowRight, User, Mail, Lock, X, Github } from 'lucide-react';
+import {  Eye, EyeOff, Check, Loader2, ArrowRight, User, Mail, Lock, X, Github  } from '@/components/icons';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import Logo from '@/components/Logo';

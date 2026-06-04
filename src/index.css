@@ -98,32 +98,34 @@ input::-ms-clear {
   .text-gradient {
     @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500;
   }
+}
 
-  .hover-expand {
-    @apply h-9 w-9 flex items-center justify-start p-0 gap-0 transition-all duration-300 rounded-full overflow-hidden shrink-0 !important;
+
+/* Premium 3D & Neon Glow Utilities */
+@layer utilities {
+  .shadow-glow {
+    box-shadow: 0 0 30px -5px rgba(124, 58, 237, 0.4), 0 0 20px -5px rgba(6, 182, 212, 0.4);
   }
-
-  .hover-expand> :first-child {
-    @apply ml-[10px] shrink-0 !important;
-    /* Center 16px icon in 36px(w-9) container: (36-16)/2 = 10px */
+  .shadow-glow-cyan {
+    box-shadow: 0 0 30px -5px rgba(6, 182, 212, 0.4);
   }
-
-  .hover-expand:hover,
-  .hover-expand:focus-within,
-  .hover-expand.is-expanded {
-    @apply w-auto pr-4 gap-2 !important;
-  }
-
-  .hover-expand-text {
-    @apply max-w-0 overflow-hidden transition-all duration-300 whitespace-nowrap opacity-0;
-  }
-
-  .hover-expand:hover .hover-expand-text,
-  .hover-expand:focus-within .hover-expand-text,
-  .hover-expand.is-expanded .hover-expand-text {
-    @apply max-w-xs opacity-100 ml-1;
+  .shadow-glow-purple {
+    box-shadow: 0 0 30px -5px rgba(124, 58, 237, 0.4);
   }
 }
+
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.transform-style-3d {
+  transform-style: preserve-3d;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+}
+
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {

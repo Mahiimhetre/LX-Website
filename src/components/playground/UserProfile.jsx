@@ -8,7 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
 import { Separator } from "@/components/ui/separator";
-import { User, Lock, Save, Edit2, PenTool, Eraser, UserCircle, X } from 'lucide-react';
+import { UserIcon, LockIcon, SaveIcon, Edit2Icon, PenToolIcon, EraserIcon, UserCircleIcon, XIcon } from '@/components/icons';;
 import { cn } from "@/lib/utils";
 
 const UserProfile = () => {
@@ -26,63 +26,6 @@ const UserProfile = () => {
         confirmPassword: ''
     });
 
-    const canvasRef = useRef(null);
-    const [isDrawing, setIsDrawing] = useState(false);
-    const [penColor, setPenColor] = useState('#000000');
-    const [penSize, setPenSize] = useState([2]);
-
-    useEffect(() => {
-        const canvas = canvasRef.current;
-        if (!canvas) return;
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
-            ctx.fillStyle = 'white';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-        }
-    }, [isEditing]);
-
-    const startDrawing = (e) => {
-        setIsDrawing(true);
-        const canvas = canvasRef.current;
-        if (!canvas) return;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return;
-        const rect = canvas.getBoundingClientRect();
-        ctx.beginPath();
-        ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
-    };
-
-    const draw = (e) => {
-        if (!isDrawing) return;
-        const canvas = canvasRef.current;
-        if (!canvas) return;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return;
-        const rect = canvas.getBoundingClientRect();
-        ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
-        ctx.strokeStyle = penColor;
-        ctx.lineWidth = penSize[0];
-        ctx.lineCap = 'round';
-        ctx.stroke();
-    };
-
-    const stopDrawing = () => setIsDrawing(false);
-
-    const clearSignature = () => {
-        const canvas = canvasRef.current;
-        if (!canvas) return;
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
-            ctx.fillStyle = 'white';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-        }
-    };
-
-    const saveSignature = () => {
-        const canvas = canvasRef.current;
-        if (!canvas) return;
-        // Signature saved logic goes here
-    };
 
     const toggleEdit = () => {
         setIsEditing(!isEditing);
@@ -114,13 +57,10 @@ const UserProfile = () => {
                     <Button
                         variant={isEditing ? "destructive" : "outline"}
                         onClick={toggleEdit}
-                        className={cn(
-                            "hover-expand border-white/10 transition-all shadow-lg",
-                            isEditing && "is-expanded"
-                        )}
+                        className="border-white/10 transition-all shadow-lg rounded-full flex items-center gap-2"
                     >
-                        {isEditing ? <X className="h-4 w-4 shrink-0" /> : <Edit2 className="h-4 w-4 shrink-0" />}
-                        <span className="hover-expand-text">
+                        {isEditing ? <XIcon className="h-4 w-4 shrink-0" /> : <Edit2Icon className="h-4 w-4 shrink-0" />}
+                        <span>
                             {isEditing ? 'Cancel Edit' : 'Edit Profile'}
                         </span>
                     </Button>
@@ -131,8 +71,8 @@ const UserProfile = () => {
                 <CardContent>
                     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                         <TabsList className="grid w-full grid-cols-2 mb-6">
-                            <TabsTrigger value="personal" className="gap-2"><User className="h-4 w-4" /> Personal</TabsTrigger>
-                            <TabsTrigger value="security" className="gap-2"><Lock className="h-4 w-4" /> Security</TabsTrigger>
+                            <TabsTrigger value="personal" className="gap-2"><UserIcon className="h-4 w-4" /> Personal</TabsTrigger>
+                            <TabsTrigger value="security" className="gap-2"><LockIcon className="h-4 w-4" /> Security</TabsTrigger>
                         </TabsList>
 
                         <TabsContent value="personal" className="space-y-4">
@@ -170,6 +110,7 @@ const UserProfile = () => {
                                     <Label>Phone</Label>
                                     <Input
                                         type="tel"
+                                        pattern="^\+?[0-9]{10,15}$"
                                         value={profile.phone}
                                         onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
                                     />
@@ -228,67 +169,6 @@ const UserProfile = () => {
                         </TabsContent>
                     </Tabs>
 
-                    <Separator className="my-6" />
-
-                    <div className="space-y-4">
-                        <div className="flex items-center justify-between">
-                            <Label className="flex items-center gap-2"><PenTool className="h-4 w-4" /> Digital Signature</Label>
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={clearSignature}
-                                className="hover-expand h-8 border-transparent hover:bg-white/5"
-                            >
-                                <Eraser className="h-3 w-3 shrink-0" />
-                                <span className="hover-expand-text">Clear</span>
-                            </Button>
-                        </div>
-
-                        <div className="border border-white/10 rounded-md p-1 bg-white">
-                            <canvas
-                                ref={canvasRef}
-                                width={300}
-                                height={100}
-                                className="w-full h-[100px] cursor-crosshair touch-none"
-                                onMouseDown={startDrawing}
-                                onMouseMove={draw}
-                                onMouseUp={stopDrawing}
-                                onMouseLeave={stopDrawing}
-                            />
-                        </div>
-
-                        <div className="flex flex-wrap items-center gap-4 p-3 bg-white/5 rounded-lg border border-white/10">
-                            <div className="flex items-center gap-2">
-                                <Label className="text-xs">Color:</Label>
-                                <input
-                                    type="color"
-                                    value={penColor}
-                                    onChange={(e) => setPenColor(e.target.value)}
-                                    className="h-6 w-8 p-0 bg-transparent border-none cursor-pointer"
-                                />
-                            </div>
-                            <div className="flex items-center gap-2 flex-1 min-w-[120px]">
-                                <Label className="text-xs whitespace-nowrap">Size: {penSize[0]}px</Label>
-                                <Slider
-                                    value={penSize}
-                                    min={1}
-                                    max={5}
-                                    step={1}
-                                    onValueChange={setPenSize}
-                                    className="w-full"
-                                />
-                            </div>
-                            <Button
-                                variant="secondary"
-                                size="sm"
-                                onClick={saveSignature}
-                                className="hover-expand h-7 border-transparent"
-                            >
-                                <Save className="h-3 w-3 shrink-0" />
-                                <span className="hover-expand-text">Save Sign</span>
-                            </Button>
-                        </div>
-                    </div>
                 </CardContent>
             )}
 
@@ -308,33 +188,17 @@ const UserProfile = () => {
                         onClick={saveProfile}
                         disabled={!agreeTerms}
                         className={cn(
-                            "hover-expand w-full sm:w-auto transition-all shadow-lg",
+                            "w-full sm:w-auto transition-all shadow-lg rounded-full flex items-center justify-center gap-2",
                             agreeTerms && "bg-primary text-white shadow-primary/20"
                         )}
                     >
-                        <Save className="h-4 w-4 shrink-0" />
-                        <span className="hover-expand-text">Save Changes</span>
+                        <SaveIcon className="h-4 w-4 shrink-0" />
+                        <span>Save Changes</span>
                     </Button>
                 </CardFooter>
             )}
         </Card>
     );
 };
-
-const XIcon = ({ className }) => (
-    <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className={className}
-    >
-        <path d="M18 6 6 18" />
-        <path d="m6 6 18 18" />
-    </svg>
-)
 
 export default UserProfile;

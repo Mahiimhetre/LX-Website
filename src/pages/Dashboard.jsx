@@ -1,35 +1,25 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import apiClient from "@/api/client";
-import {
-    Plus,
-    Code,
-    Activity,
-    ArrowRight,
-    Clock,
-    Shield,
-    Settings,
-    Zap,
-    Layout as LayoutIcon,
-    Users,
-    Trash2,
-    Edit,
-    ExternalLink,
-    X as CloseIcon
-} from "lucide-react";
+import { 
+    PlusIcon, CodeIcon, ActivityIcon, ArrowRightIcon, ClockIcon, ShieldIcon, 
+    SettingsIcon, ZapIcon, UsersIcon, Trash2Icon, ExternalLinkIcon 
+} from '@/components/icons';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import Countdown from "@/components/ui/Countdown";
+import use3DTilt from "@/hooks/use3DTilt";
 
 const Dashboard = () => {
     const { user, isLoading } = useAuth();
     const navigate = useNavigate();
     const [profile, setProfile] = useState(null);
     const [loadingProfile, setLoadingProfile] = useState(true);
+    const heroRef = use3DTilt({ max: 2, scale: 1.005, speed: 300 });
 
     const [trialDaysLeft, setTrialDaysLeft] = useState(0);
     const [uniqueOffer, setUniqueOffer] = useState(null);
@@ -144,7 +134,7 @@ const Dashboard = () => {
     return (
         <div className="flex-1 w-full max-w-[1400px] mx-auto px-6 py-6 flex flex-col gap-6">
             {/* Hero Section */}
-            <div className="relative overflow-hidden rounded-3xl bg-secondary/10 border border-white/5 p-6 md:p-8">
+            <div ref={heroRef} className="relative overflow-hidden rounded-3xl bg-secondary/10 border border-white/5 p-6 md:p-8 transform-gpu" style={{ transformStyle: 'preserve-3d' }}>
                 <div className="absolute top-0 right-0 w-96 h-96 bg-primary/20 blur-[150px] rounded-full mix-blend-screen opacity-30 pointer-events-none -mt-20 -mr-20" />
 
                 <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
@@ -165,7 +155,7 @@ const Dashboard = () => {
                             to="/playground"
                             className="flex items-center gap-2 px-6 py-3 rounded-full bg-primary text-white font-bold hover:bg-primary/90 hover:shadow-[0_0_20px_rgba(var(--primary),0.3)] transition-all transform hover:-translate-y-0.5"
                         >
-                            <Plus size={18} />
+                            <PlusIcon size={18} />
                             New Locator
                         </Link>
 
@@ -173,7 +163,7 @@ const Dashboard = () => {
                             to="/documentation"
                             className="flex items-center gap-2 px-5 py-3 rounded-full bg-secondary/30 text-white font-medium hover:bg-secondary/50 border border-white/10 transition-all hover:border-white/20"
                         >
-                            <Clock size={18} />
+                            <ClockIcon size={18} />
                             Documentation
                         </Link>
                     </div>
@@ -183,7 +173,7 @@ const Dashboard = () => {
             {/* Stats Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <StatCard
-                    icon={Shield}
+                    icon={ShieldIcon}
                     color="text-blue-400"
                     bg="bg-blue-500/10"
                     value={trialDaysLeft > 0 ? "Premium Trial" : (profile?.plan ? (profile.plan.charAt(0).toUpperCase() + profile.plan.slice(1) + ' Plan') : "Free Plan")}
@@ -191,7 +181,7 @@ const Dashboard = () => {
                     subtext={trialDaysLeft > 0 ? `${trialDaysLeft} days left` : "Upgrade for unlimited"}
                 />
                 <StatCard
-                    icon={Zap}
+                    icon={ZapIcon}
                     color="text-yellow-400"
                     bg="bg-yellow-500/10"
                     value={locators.length.toString()}
@@ -199,7 +189,7 @@ const Dashboard = () => {
                     subtext="Saved in your vault"
                 />
                 <StatCard
-                    icon={Code}
+                    icon={CodeIcon}
                     color="text-purple-400"
                     bg="bg-purple-500/10"
                     value="0"
@@ -207,7 +197,7 @@ const Dashboard = () => {
                     subtext="Extension connections"
                 />
                 <StatCard
-                    icon={Activity}
+                    icon={ActivityIcon}
                     color="text-green-400"
                     bg="bg-green-500/10"
                     value="100%"
@@ -222,7 +212,7 @@ const Dashboard = () => {
                 <div className="lg:col-span-2 space-y-6">
                     <div className="flex items-center justify-between">
                         <h2 className="text-xl font-bold flex items-center gap-2">
-                            <Code className="w-5 h-5 text-primary" />
+                            <CodeIcon className="w-5 h-5 text-primary" />
                             Your Locators
                         </h2>
                         {locators.length > 0 && (
@@ -230,7 +220,7 @@ const Dashboard = () => {
                                 to="/playground"
                                 className="text-sm text-primary hover:text-primary/80 transition-colors flex items-center gap-1 group"
                             >
-                                <Plus size={14} /> Add New
+                                <PlusIcon size={14} /> Add New
                             </Link>
                         )}
                     </div>
@@ -251,7 +241,7 @@ const Dashboard = () => {
                         ) : (
                             <Link to="/playground" className="rounded-2xl border border-dashed border-white/10 bg-secondary/5 p-12 text-center flex flex-col items-center justify-center text-muted-foreground group hover:border-white/20 hover:bg-secondary/10 transition-all cursor-pointer">
                                 <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-                                    <Code className="w-8 h-8 opacity-50" />
+                                    <CodeIcon className="w-8 h-8 opacity-50" />
                                 </div>
                                 <h3 className="text-lg font-medium text-white mb-1">No locators yet</h3>
                                 <p className="text-sm max-w-xs mx-auto">Visit the Playground or use the Extension to start saving locators.</p>
@@ -263,21 +253,21 @@ const Dashboard = () => {
                 {/* Sidebar / Quick Links */}
                 <div className="space-y-6">
                     <h2 className="text-xl font-bold flex items-center gap-2">
-                        <Clock className="w-5 h-5 text-primary" />
+                        <ClockIcon className="w-5 h-5 text-primary" />
                         Quick Actions
                     </h2>
 
                     <div className="rounded-2xl border border-white/5 bg-secondary/10 overflow-hidden divide-y divide-white/5">
-                        <ActionLink to="/team" icon={Users} title="Manage Team" desc="Invite members & roles" />
-                        <ActionLink to="/settings" icon={Settings} title="Settings" desc="Profile & preferences" />
-                        <ActionLink to="/pricing" icon={Shield} title="Billing" desc="Manage subscription" />
+                        <ActionLink to="/team" icon={UsersIcon} title="Manage Team" desc="Invite members & roles" />
+                        <ActionLink to="/settings" icon={SettingsIcon} title="Settings" desc="Profile & preferences" />
+                        <ActionLink to="/pricing" icon={ShieldIcon} title="Billing" desc="Manage subscription" />
                     </div>
 
                     {/* Dynamic Offer Card */}
                     {trialDaysLeft > 0 ? (
                         <div className="rounded-2xl bg-gradient-to-br from-green-500/20 to-emerald-600/20 p-6 border border-green-500/30">
                             <h3 className="font-bold text-white mb-2 flex items-center gap-2">
-                                <Shield className="w-5 h-5 text-green-400" /> Premium Trial Active
+                                <ShieldIcon className="w-5 h-5 text-green-400" /> Premium Trial Active
                             </h3>
                             <p className="text-sm text-muted-foreground mb-4">
                                 You have <strong>{trialDaysLeft} days</strong> left of full access. Enjoy!
@@ -305,7 +295,7 @@ const LocatorCard = ({ locator, onDelete }) => (
     <div className="flex items-center justify-between p-4 rounded-2xl bg-secondary/10 border border-white/5 hover:border-white/10 transition-all group">
         <div className="flex items-center gap-4 flex-1 min-w-0">
             <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all">
-                <Code size={20} />
+                <CodeIcon size={20} />
             </div>
             <div className="truncate">
                 <h4 className="font-semibold text-white group-hover:text-primary transition-colors truncate">{locator.name}</h4>
@@ -328,32 +318,50 @@ const LocatorCard = ({ locator, onDelete }) => (
                     onDelete();
                 }}
             >
-                <Trash2 size={14} />
+                <Trash2Icon size={14} />
             </Button>
             <Link to="/playground">
                 <Button variant="ghost" size="icon" aria-label="Open in Playground" className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10">
-                    <ExternalLink size={14} />
+                    <ExternalLinkIcon size={14} />
                 </Button>
             </Link>
         </div>
     </div>
 );
 
-const StatCard = ({ icon: Icon, color, bg, value, label, subtext }) => (
-    <div className="p-5 rounded-3xl bg-secondary/10 border border-white/5 hover:border-white/10 hover:bg-secondary/20 transition-all group">
-        <div className="flex items-start justify-between mb-4">
-            <div className={`p-3 rounded-2xl ${bg} ${color}`}>
-                <Icon size={20} />
+const StatCard = ({ icon: Icon, color, bg, value, label, subtext }) => {
+    // Enable 3D Tilt hook for dashboard stats card
+    const cardRef = use3DTilt({ max: 8, scale: 1.02, speed: 200 });
+
+    return (
+        <div 
+            ref={cardRef}
+            className="p-5 rounded-3xl bg-secondary/10 border border-white/5 hover:border-white/10 hover:bg-secondary/20 transition-all group transform-gpu"
+            style={{ transformStyle: 'preserve-3d' }}
+        >
+            {/* Dynamic Glass Glare Spotlight */}
+            <div 
+                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-20 pointer-events-none"
+                style={{
+                    background: `radial-gradient(300px circle at var(--glare-x, 50%) var(--glare-y, 50%), rgba(255, 255, 255, 0.05), transparent 45%)`
+                }}
+            />
+            
+            <div style={{ transform: 'translateZ(20px)' }}>
+                <div className="flex items-start justify-between mb-4">
+                    <div className={`p-3 rounded-2xl ${bg} ${color}`}>
+                        <Icon size={20} />
+                    </div>
+                </div>
+                <div>
+                    <h3 className="text-3xl font-display font-bold text-white mb-1 group-hover:scale-105 origin-left transition-transform">{value}</h3>
+                    <p className="text-sm font-medium text-white/80">{label}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{subtext}</p>
+                </div>
             </div>
-            {/* Optional Trend Indicator could go here */}
         </div>
-        <div>
-            <h3 className="text-3xl font-display font-bold text-white mb-1 group-hover:scale-105 origin-left transition-transform">{value}</h3>
-            <p className="text-sm font-medium text-white/80">{label}</p>
-            <p className="text-xs text-muted-foreground mt-1">{subtext}</p>
-        </div>
-    </div>
-);
+    );
+};
 
 const ActionLink = ({ to, icon: Icon, title, desc }) => (
     <Link to={to} className="flex items-center gap-4 p-4 hover:bg-white/5 transition-colors group">
@@ -364,7 +372,7 @@ const ActionLink = ({ to, icon: Icon, title, desc }) => (
             <h4 className="text-sm font-medium text-white group-hover:text-primary transition-colors">{title}</h4>
             <p className="text-xs text-muted-foreground">{desc}</p>
         </div>
-        <ArrowRight size={14} className="text-muted-foreground opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all" />
+        <ArrowRightIcon size={14} className="text-muted-foreground opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all" />
     </Link>
 );
 

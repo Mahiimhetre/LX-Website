@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import apiClient from '@/api/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
-import { Loader2 } from 'lucide-react';
+import {  Loader2  } from '@/components/icons';
 
 const JoinTeam = () => {
     const [searchParams] = useSearchParams();

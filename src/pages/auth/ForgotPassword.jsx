@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Mail, ArrowRight, Loader2, CheckCircle, X } from 'lucide-react';
+import {  Mail, ArrowRight, Loader2, CheckCircle, X  } from '@/components/icons';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import Logo from '@/components/Logo';

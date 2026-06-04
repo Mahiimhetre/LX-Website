@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { MessageSquare, X, Send, Bot, User, Loader2 } from 'lucide-react';
+import {  MessageSquare, X, Send, Bot, User, Loader2  } from '@/components/icons';
 import apiClient from '@/api/client';
 import { useOutsideClick } from '@/hooks/useOutsideClick';
 import { cn } from '@/lib/utils';

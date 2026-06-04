@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useLocation, Link } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import {  ArrowLeft  } from '@/components/icons';
 import Header from './Header';
 import Footer from './Footer';
 import PromoBanner from '../marketing/PromoBanner';

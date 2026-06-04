@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import TiltCard from "@/components/ui/tilt-card";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -20,20 +21,21 @@ import {
     DrawerTitle,
     DrawerTrigger,
 } from "@/components/ui/drawer";
-import { X } from 'lucide-react';
+import { X } from '@/components/icons';
 
-const ModalSystem = () => {
+import { cn } from "@/lib/utils";
+
+const ModalSystem = ({ className }) => {
     const [isInfoOpen, setIsInfoOpen] = useState(false);
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
     const [isBottomOpen, setIsBottomOpen] = useState(false);
 
     const confirmAction = () => {
-        alert('Action confirmed!');
         setIsConfirmOpen(false);
     };
 
     return (
-        <Card className="w-full bg-white/5 border-white/10 backdrop-blur-md">
+        <TiltCard className={cn("w-full rounded-xl border border-white/10 bg-white/5 backdrop-blur-md", className)}>
             <CardHeader>
                 <CardTitle>Modal System</CardTitle>
             </CardHeader>
@@ -93,7 +95,7 @@ const ModalSystem = () => {
                                         <X size={16} className="text-muted-foreground hover:text-foreground" />
                                     </button>
                                 </DrawerClose>
-
+ 
                                 <div className="space-y-4 pr-8">
                                     <h3 className="text-lg font-bold text-foreground">
                                         Scale Your Test Automation
@@ -107,7 +109,7 @@ const ModalSystem = () => {
                     </Drawer>
                 </div>
             </CardContent>
-        </Card>
+        </TiltCard>
     );
 };
 
