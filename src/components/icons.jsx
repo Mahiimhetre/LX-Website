@@ -59,6 +59,7 @@ import {
     Settings,
     Share2,
     Shield,
+    ShieldAlert,
     ShieldCheck,
     ShoppingBag,
     ShoppingCart,
@@ -101,6 +102,7 @@ export const MousePointer2Icon = MousePointer2;
 export const Share2Icon = Share2;
 export const ShieldCheckIcon = ShieldCheck;
 export const ShieldIcon = Shield;
+export const ShieldAlertIcon = ShieldAlert;
 export const ZapIcon = Zap;
 export const LayersIcon = Layers;
 export const ActivityIcon = Activity;
@@ -225,6 +227,7 @@ export {
     Settings,
     Share2,
     Shield,
+    ShieldAlert,
     ShieldCheck,
     ShoppingBag,
     ShoppingCart,

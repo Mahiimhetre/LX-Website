@@ -74,12 +74,22 @@ export const AuthProvider = ({ children }) => {
                 await initAuth();
                 return { success: true, message: 'Login successful' };
             }
-            return { success: false, message: data.message };
-        } catch (error) {
             return { 
                 success: false, 
-                message: error.response?.data?.message || 'An error occurred',
-                needsVerification: error.response?.data?.needsVerification
+                message: data.message,
+                remainingAttempts: data.remainingAttempts,
+                retryAfterSeconds: data.retryAfterSeconds,
+                lockedUntil: data.lockedUntil
+            };
+        } catch (error) {
+            const errData = error.response?.data;
+            return { 
+                success: false, 
+                message: errData?.message || 'An error occurred',
+                needsVerification: errData?.needsVerification,
+                remainingAttempts: errData?.remainingAttempts,
+                retryAfterSeconds: errData?.retryAfterSeconds,
+                lockedUntil: errData?.lockedUntil
             };
         }
     };

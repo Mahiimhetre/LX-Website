@@ -5,6 +5,9 @@ import { Team, TeamMember, TeamInvitation } from './Team.js';
 import Locator from './Locator.js';
 import PromoCode from './PromoCode.js';
 import { Payment } from './Payment.js';
+import PersonalAccessToken from './PersonalAccessToken.js';
+import SecurityAuditLog from './SecurityAuditLog.js';
+import UserSession from './UserSession.js';
 
 // User and Profile
 User.hasOne(Profile, { foreignKey: 'userId', as: 'profile', onDelete: 'CASCADE' });
@@ -46,6 +49,18 @@ PromoCode.belongsTo(User, { foreignKey: 'specificUserId', as: 'user' });
 User.hasMany(Locator, { foreignKey: 'userId', as: 'locators', onDelete: 'CASCADE' });
 Locator.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 
+// User and PersonalAccessToken
+User.hasMany(PersonalAccessToken, { foreignKey: 'userId', as: 'personalAccessTokens', onDelete: 'CASCADE' });
+PersonalAccessToken.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+
+// User and SecurityAuditLog
+User.hasMany(SecurityAuditLog, { foreignKey: 'userId', as: 'securityAuditLogs', onDelete: 'SET NULL' });
+SecurityAuditLog.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+
+// User and UserSession
+User.hasMany(UserSession, { foreignKey: 'userId', as: 'userSessions', onDelete: 'CASCADE' });
+UserSession.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+
 export {
     sequelize,
     connectDB,
@@ -56,5 +71,8 @@ export {
     TeamInvitation,
     PromoCode,
     Locator,
-    Payment
+    Payment,
+    PersonalAccessToken,
+    SecurityAuditLog,
+    UserSession
 };

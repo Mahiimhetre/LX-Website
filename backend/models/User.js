@@ -26,6 +26,19 @@ const User = sequelize.define('User', {
   passwordExpiresAt: {
     type: DataTypes.DATE,
     allowNull: true
+  },
+  failedLoginAttempts: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0,
+    allowNull: false
+  },
+  lastFailedLoginAt: {
+    type: DataTypes.DATE,
+    allowNull: true
+  },
+  lockedUntil: {
+    type: DataTypes.DATE,
+    allowNull: true
   }
 }, {
   timestamps: true,

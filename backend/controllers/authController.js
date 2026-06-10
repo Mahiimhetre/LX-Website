@@ -1,17 +1,63 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { User, Profile } from '../models/index.js';
+import crypto from 'crypto';
+import { User, Profile, UserSession, SecurityAuditLog } from '../models/index.js';
 import { sendVerificationEmail, sendPasswordResetEmail } from '../utils/emailService.js';
 
-const generateToken = (userId, email) => {
-    return jwt.sign({ id: userId, email }, process.env.JWT_SECRET, {
+const generateToken = (userId, email, jti) => {
+    return jwt.sign({ id: userId, email, jti }, process.env.JWT_SECRET, {
         expiresIn: process.env.JWT_EXPIRES_IN || '7d'
     });
+};
+
+const logSecurityEvent = async (userId, eventType, description, req) => {
+    try {
+        await SecurityAuditLog.create({
+            userId: userId || null,
+            eventType,
+            description,
+            ipAddress: req ? (req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress) : null,
+            userAgent: req ? (req.headers['user-agent'] || null) : null
+        });
+    } catch (err) {
+        console.error('Failed to log security event:', err);
+    }
+};
+
+const parseUserAgent = (uaString) => {
+    if (!uaString) return { browser: 'unknown', os: 'unknown', deviceType: 'unknown' };
+    
+    let deviceType = 'desktop';
+    if (/tablet|ipad|playbook|silk/i.test(uaString)) {
+        deviceType = 'tablet';
+    } else if (/mobile|iphone|ipod|android|blackberry|iemobile|kindle/i.test(uaString)) {
+        deviceType = 'mobile';
+    }
+    
+    let os = 'unknown';
+    if (/windows/i.test(uaString)) os = 'Windows';
+    else if (/macintosh|mac os x/i.test(uaString)) os = 'macOS';
+    else if (/iphone|ipad|ipod/i.test(uaString)) os = 'iOS';
+    else if (/android/i.test(uaString)) os = 'Android';
+    else if (/linux/i.test(uaString)) os = 'Linux';
+    
+    let browser = 'unknown';
+    if (/chrome|crios/i.test(uaString)) browser = 'Chrome';
+    else if (/firefox|fxios/i.test(uaString)) browser = 'Firefox';
+    else if (/safari/i.test(uaString) && !/chrome|crios/i.test(uaString)) browser = 'Safari';
+    else if (/msie|trident/i.test(uaString)) browser = 'Internet Explorer';
+    else if (/edg/i.test(uaString)) browser = 'Edge';
+    
+    return { browser, os, deviceType };
 };
 
 export const register = async (req, res) => {
     try {
         const { name, email, password } = req.body;
+
+        if (!name || !email || !password || typeof name !== 'string' || typeof email !== 'string' || typeof password !== 'string') {
+            return res.status(400).json({ success: false, message: 'All fields (name, email, password) are required and must be strings.' });
+        }
 
         const existingUser = await User.findOne({ where: { email } });
         if (existingUser) {
@@ -38,6 +84,9 @@ export const register = async (req, res) => {
         const verificationToken = generateToken(newUser.id, newUser.email);
         await sendVerificationEmail(newUser.email, name, verificationToken);
 
+        // --- Log audit event ---
+        await logSecurityEvent(newUser.id, 'REGISTER_SUCCESS', `User registered successfully under name "${name}"`, req);
+
         res.status(201).json({
             success: true,
             message: 'Registration successful. Please check your email to verify your account.'
@@ -52,14 +101,52 @@ export const login = async (req, res) => {
     try {
         const { email, password } = req.body;
 
+        if (!email || !password || typeof email !== 'string' || typeof password !== 'string') {
+            return res.status(400).json({ success: false, message: 'Valid email and password are required.' });
+        }
+
         const user = await User.findOne({ where: { email } });
         if (!user) {
+            await logSecurityEvent(null, 'LOGIN_FAILURE', `Failed login attempt with non-existent email "${email}"`, req);
             return res.status(401).json({ success: false, message: 'Invalid credentials' });
+        }
+
+        // --- Brute-Force Lockout Check ---
+        const now = new Date();
+        const LOCKOUT_DURATION_MS = 15 * 60 * 1000; // 15 minutes
+        const MAX_FAILED_ATTEMPTS = 5;
+        const ATTEMPT_WINDOW_MS = 30 * 60 * 1000; // 30-minute sliding window
+
+        // Check if account is currently locked
+        if (user.lockedUntil && now < new Date(user.lockedUntil)) {
+            const remainingMs = new Date(user.lockedUntil).getTime() - now.getTime();
+            const remainingSeconds = Math.ceil(remainingMs / 1000);
+            const remainingMinutes = Math.ceil(remainingSeconds / 60);
+            res.set('Retry-After', String(remainingSeconds));
+            await logSecurityEvent(user.id, 'LOGIN_FAILURE', `Blocked login attempt: Account locked until ${user.lockedUntil.toISOString()}`, req);
+            return res.status(423).json({
+                success: false,
+                message: `Account temporarily locked due to too many failed login attempts. Please try again in ${remainingMinutes} minute${remainingMinutes !== 1 ? 's' : ''}.`,
+                lockedUntil: user.lockedUntil,
+                retryAfterSeconds: remainingSeconds
+            });
+        }
+
+        // Reset stale attempt counters if outside the sliding window
+        if (user.failedLoginAttempts > 0 && user.lastFailedLoginAt) {
+            const timeSinceLastFailure = now.getTime() - new Date(user.lastFailedLoginAt).getTime();
+            if (timeSinceLastFailure > ATTEMPT_WINDOW_MS) {
+                user.failedLoginAttempts = 0;
+                user.lastFailedLoginAt = null;
+                user.lockedUntil = null;
+                await user.save();
+            }
         }
 
         // If the user signed up with OAuth, password might be empty.
         if (!user.password && password) {
             const providerName = user.provider ? (user.provider.charAt(0).toUpperCase() + user.provider.slice(1)) : 'your OAuth provider';
+            await logSecurityEvent(user.id, 'LOGIN_FAILURE', `Rejected password login: user registered using OAuth (${providerName})`, req);
             return res.status(401).json({
                 success: false,
                 message: `Please login using ${providerName}.`
@@ -68,19 +155,57 @@ export const login = async (req, res) => {
 
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
-            return res.status(401).json({ success: false, message: 'Invalid credentials' });
+            // Increment failed attempts
+            user.failedLoginAttempts = (user.failedLoginAttempts || 0) + 1;
+            user.lastFailedLoginAt = now;
+
+            const remainingAttempts = MAX_FAILED_ATTEMPTS - user.failedLoginAttempts;
+
+            // Lock account if threshold reached
+            if (user.failedLoginAttempts >= MAX_FAILED_ATTEMPTS) {
+                user.lockedUntil = new Date(now.getTime() + LOCKOUT_DURATION_MS);
+                await user.save();
+
+                await logSecurityEvent(user.id, 'ACCOUNT_LOCKED', `Account locked for 15 minutes due to reaching maximum login failures (${MAX_FAILED_ATTEMPTS})`, req);
+
+                const lockoutSeconds = Math.ceil(LOCKOUT_DURATION_MS / 1000);
+                res.set('Retry-After', String(lockoutSeconds));
+                return res.status(423).json({
+                    success: false,
+                    message: `Too many failed login attempts. Account locked for 15 minutes.`,
+                    lockedUntil: user.lockedUntil,
+                    retryAfterSeconds: lockoutSeconds,
+                    remainingAttempts: 0
+                });
+            }
+
+            await user.save();
+            await logSecurityEvent(user.id, 'LOGIN_FAILURE', `Invalid credentials entered. Attempts remaining before lockout: ${remainingAttempts}`, req);
+            return res.status(401).json({
+                success: false,
+                message: `Invalid credentials. ${remainingAttempts} attempt${remainingAttempts !== 1 ? 's' : ''} remaining before lockout.`,
+                remainingAttempts
+            });
+        }
+
+        // --- Successful login: reset lockout counters ---
+        if (user.failedLoginAttempts > 0 || user.lockedUntil) {
+            user.failedLoginAttempts = 0;
+            user.lastFailedLoginAt = null;
+            user.lockedUntil = null;
+            await user.save();
         }
 
         const profile = await Profile.findOne({ where: { userId: user.id } });
 
         // --- Password Expiry & Grace Period Enforcement ---
         if (user.passwordExpiresAt) {
-            const now = new Date();
             const expiryDate = new Date(user.passwordExpiresAt);
             const gracePeriodEnd = new Date(expiryDate);
             gracePeriodEnd.setDate(gracePeriodEnd.getDate() + 7);
 
             if (now > gracePeriodEnd) {
+                await logSecurityEvent(user.id, 'LOGIN_FAILURE', 'Login blocked: Password has expired and grace period ended', req);
                 return res.status(403).json({
                     success: false,
                     message: 'Your password has expired and the 7-day grace period has ended. Please reset your password to continue.',
@@ -104,6 +229,7 @@ export const login = async (req, res) => {
                 console.error('Failed to send verification email during login:', err);
             }
 
+            await logSecurityEvent(user.id, 'LOGIN_FAILURE', 'Login blocked: Email is not verified', req);
             return res.status(403).json({
                 success: false,
                 message: 'Please verify your email to continue. A fresh verification link has been sent to your inbox.',
@@ -111,7 +237,24 @@ export const login = async (req, res) => {
             });
         }
 
-        const token = generateToken(user.id, user.email);
+        // --- Session Creation & Token Generation ---
+        const jti = crypto.randomUUID();
+        const token = generateToken(user.id, user.email, jti);
+
+        const ua = parseUserAgent(req.headers['user-agent']);
+        const ipAddress = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+
+        await UserSession.create({
+            userId: user.id,
+            jwtJti: jti,
+            deviceType: ua.deviceType,
+            browser: ua.browser,
+            os: ua.os,
+            ipAddress,
+            lastActiveAt: new Date()
+        });
+
+        await logSecurityEvent(user.id, 'LOGIN_SUCCESS', 'User logged in successfully', req);
 
         res.json({
             success: true,
@@ -161,6 +304,11 @@ export const verifyEmail = async (req, res) => {
 export const resendVerificationEmailController = async (req, res) => {
     try {
         const { email } = req.body;
+
+        if (!email || typeof email !== 'string') {
+            return res.status(400).json({ success: false, message: 'Valid email is required.' });
+        }
+
         const user = await User.findOne({ where: { email } });
 
         if (!user) {
@@ -185,9 +333,15 @@ export const resendVerificationEmailController = async (req, res) => {
 export const resetPasswordRequest = async (req, res) => {
     try {
         const { email } = req.body;
+
+        if (!email || typeof email !== 'string') {
+            return res.status(400).json({ success: false, message: 'Valid email is required.' });
+        }
+
         const user = await User.findOne({ where: { email } });
 
         if (!user) {
+            await logSecurityEvent(null, 'PASSWORD_RESET_FAILURE', `Password reset requested for non-existent email "${email}"`, req);
             // Return success even if user not found to prevent email gathering
             return res.json({ success: true, message: 'If an account exists, a reset link has been sent' });
         }
@@ -195,6 +349,8 @@ export const resetPasswordRequest = async (req, res) => {
         const profile = await Profile.findOne({ where: { userId: user.id } });
         const resetToken = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
         await sendPasswordResetEmail(user.email, profile?.name || 'User', resetToken);
+
+        await logSecurityEvent(user.id, 'PASSWORD_RESET_REQUESTED', `Password reset link requested for user ${user.email}`, req);
 
         res.json({ success: true, message: 'Password reset link sent to your email' });
     } catch (error) {
@@ -211,6 +367,7 @@ export const resetPasswordConfirm = async (req, res) => {
         const user = await User.findByPk(decoded.id);
 
         if (!user) {
+            await logSecurityEvent(null, 'PASSWORD_RESET_FAILURE', 'Password reset confirmation failed: Invalid token', req);
             return res.status(400).json({ success: false, message: 'Invalid token' });
         }
 
@@ -224,10 +381,30 @@ export const resetPasswordConfirm = async (req, res) => {
         const profile = await Profile.findOne({ where: { userId: user.id } });
         await sendPasswordChangedEmail(user.email, profile?.name || 'User');
 
+        await logSecurityEvent(user.id, 'PASSWORD_RESET_SUCCESS', `Password successfully updated by user`, req);
+
         res.json({ success: true, message: 'Password updated successfully' });
     } catch (error) {
         console.error('Reset confirm error:', error);
+        await logSecurityEvent(null, 'PASSWORD_RESET_FAILURE', `Password reset confirmation error: ${error.message}`, req);
         res.status(400).json({ success: false, message: 'Invalid or expired token' });
+    }
+};
+
+export const logout = async (req, res) => {
+    try {
+        if (req.user && req.user.jti) {
+            const session = await UserSession.findOne({ where: { jwtJti: req.user.jti } });
+            if (session) {
+                session.isRevoked = true;
+                await session.save();
+            }
+            await logSecurityEvent(req.user.id, 'LOGOUT_SUCCESS', 'User logged out successfully', req);
+        }
+        res.json({ success: true, message: 'Logged out successfully' });
+    } catch (error) {
+        console.error('Logout error:', error);
+        res.status(500).json({ success: false, message: 'Server error during logout' });
     }
 };
 

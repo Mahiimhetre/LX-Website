@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import {  Eye, EyeOff, Loader2, ArrowRight, Mail, Lock, Github, X  } from '@/components/icons';
+import {  Eye, EyeOff, Loader2, ArrowRight, Mail, Lock, Github, X, ShieldAlert, Clock  } from '@/components/icons';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import Logo from '@/components/Logo';
@@ -15,12 +15,40 @@ const Login = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [focusedField, setFocusedField] = useState(null);
 
+    // Brute-force lockout state
+    const [lockoutSeconds, setLockoutSeconds] = useState(0);
+    const [remainingAttempts, setRemainingAttempts] = useState(null);
+    const lockoutTimerRef = useRef(null);
+
     // Redirect if already logged in
     useEffect(() => {
         if (user) {
             navigate('/dashboard');
         }
     }, [user, navigate]);
+
+    // Lockout countdown timer
+    useEffect(() => {
+        if (lockoutSeconds > 0) {
+            lockoutTimerRef.current = setInterval(() => {
+                setLockoutSeconds(prev => {
+                    if (prev <= 1) {
+                        clearInterval(lockoutTimerRef.current);
+                        setRemainingAttempts(null);
+                        return 0;
+                    }
+                    return prev - 1;
+                });
+            }, 1000);
+            return () => clearInterval(lockoutTimerRef.current);
+        }
+    }, [lockoutSeconds]);
+
+    const formatLockoutTime = useCallback((seconds) => {
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${mins}:${secs.toString().padStart(2, '0')}`;
+    }, []);
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -29,15 +57,33 @@ const Login = () => {
             return;
         }
 
+        if (lockoutSeconds > 0) {
+            toast.error(`Account locked. Try again in ${formatLockoutTime(lockoutSeconds)}`);
+            return;
+        }
+
         setIsLoading(true);
         const result = await login(email, password);
         setIsLoading(false);
 
         if (result.success) {
+            setRemainingAttempts(null);
+            setLockoutSeconds(0);
             toast.success('Welcome back!');
             navigate('/dashboard');
         } else {
-            toast.error(result.message);
+            // Handle lockout
+            if (result.retryAfterSeconds) {
+                setLockoutSeconds(result.retryAfterSeconds);
+                setRemainingAttempts(0);
+                toast.error(result.message, { duration: 5000 });
+            } else if (result.remainingAttempts !== undefined && result.remainingAttempts !== null) {
+                setRemainingAttempts(result.remainingAttempts);
+                toast.warning(result.message, { duration: 4000 });
+            } else {
+                toast.error(result.message);
+            }
+
             if (result.needsVerification) {
                 navigate(`/auth/verify?email=${encodeURIComponent(email)}`);
             }
@@ -167,18 +213,55 @@ const Login = () => {
                                 </Link>
                             </div>
 
+                            {/* Lockout Warning Banner */}
+                            {lockoutSeconds > 0 && (
+                                <div className="animate-fade-in rounded-2xl bg-red-500/10 border border-red-500/20 p-3 flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center flex-shrink-0">
+                                        <ShieldAlert className="w-5 h-5 text-red-400" />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-[10px] font-bold text-red-400 uppercase tracking-wider">Account Locked</p>
+                                        <p className="text-xs text-red-300/70">Too many failed attempts</p>
+                                    </div>
+                                    <div className="flex items-center gap-1.5 bg-red-500/20 px-3 py-1.5 rounded-full">
+                                        <Clock className="w-3 h-3 text-red-400" />
+                                        <span className="text-sm font-mono font-bold text-red-400 tabular-nums">
+                                            {formatLockoutTime(lockoutSeconds)}
+                                        </span>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Remaining Attempts Warning */}
+                            {remainingAttempts !== null && remainingAttempts > 0 && remainingAttempts <= 3 && lockoutSeconds === 0 && (
+                                <div className="animate-fade-in flex items-center gap-2 px-3 py-2 rounded-full bg-amber-500/10 border border-amber-500/20">
+                                    <ShieldAlert className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
+                                    <p className="text-[10px] font-medium text-amber-400">
+                                        {remainingAttempts} attempt{remainingAttempts !== 1 ? 's' : ''} remaining before lockout
+                                    </p>
+                                </div>
+                            )}
+
                             {/* Submit Button */}
                             <button
                                 type="submit"
-                                disabled={isLoading}
-                                className="w-full relative group overflow-hidden rounded-full bg-gradient-to-r from-primary to-blue-600 p-[1px] transition-all hover:shadow-[0_0_40px_rgba(var(--primary),0.4)] disabled:opacity-50 disabled:hover:shadow-none"
+                                disabled={isLoading || lockoutSeconds > 0}
+                                className={`w-full relative group overflow-hidden rounded-full p-[1px] transition-all disabled:opacity-50 disabled:hover:shadow-none ${
+                                    lockoutSeconds > 0
+                                        ? 'bg-gradient-to-r from-red-600 to-red-800'
+                                        : 'bg-gradient-to-r from-primary to-blue-600 hover:shadow-[0_0_40px_rgba(var(--primary),0.4)]'
+                                }`}
                             >
                                 <div className="relative flex items-center justify-center gap-2 bg-black/20 backdrop-blur-sm px-4 py-2.5 rounded-full transition-all group-hover:bg-transparent">
                                     <span className="font-semibold text-white tracking-wide text-xs">
-                                        {isLoading ? 'Signing In...' : 'Sign In'}
+                                        {lockoutSeconds > 0
+                                            ? `Locked · ${formatLockoutTime(lockoutSeconds)}`
+                                            : isLoading ? 'Signing In...' : 'Sign In'}
                                     </span>
                                     {isLoading ? (
                                         <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />
+                                    ) : lockoutSeconds > 0 ? (
+                                        <ShieldAlert className="w-3.5 h-3.5 text-red-300" />
                                     ) : (
                                         <ArrowRight className="w-3.5 h-3.5 text-white transition-transform group-hover:translate-x-1" />
                                     )}
