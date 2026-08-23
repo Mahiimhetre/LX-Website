@@ -12,14 +12,12 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { format } from "date-fns";
 import { toast } from "sonner";
 import Countdown from "@/components/ui/Countdown";
-import use3DTilt from "@/hooks/use3DTilt";
 
 const Dashboard = () => {
     const { user, isLoading } = useAuth();
     const navigate = useNavigate();
     const [profile, setProfile] = useState(null);
     const [loadingProfile, setLoadingProfile] = useState(true);
-    const heroRef = use3DTilt({ max: 2, scale: 1.005, speed: 300 });
 
     const [trialDaysLeft, setTrialDaysLeft] = useState(0);
     const [uniqueOffer, setUniqueOffer] = useState(null);
@@ -128,14 +126,13 @@ const Dashboard = () => {
         checkTrialAndOffer();
     }, [user, isLoading]);
 
-    // Trial Calculation & Offer Generation
     const greeting = currentHour < 12 ? "Good morning" : currentHour < 18 ? "Good afternoon" : "Good evening";
 
     return (
         <div className="flex-1 w-full max-w-[1400px] mx-auto px-6 py-6 flex flex-col gap-6">
             {/* Hero Section */}
-            <div ref={heroRef} className="relative overflow-hidden rounded-3xl bg-secondary/10 border border-white/5 p-6 md:p-8 transform-gpu" style={{ transformStyle: 'preserve-3d' }}>
-                <div className="absolute top-0 right-0 w-96 h-96 bg-primary/20 blur-[150px] rounded-full mix-blend-screen opacity-30 pointer-events-none -mt-20 -mr-20" />
+            <div className="relative overflow-hidden rounded-3xl glass-dark p-6 md:p-8 transform-gpu">
+                <div className="absolute top-0 right-0 w-96 h-96 bg-primary/20 blur-[150px] rounded-full mix-blend-screen opacity-20 pointer-events-none -mt-20 -mr-20" />
 
                 <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
                     <div>
@@ -179,6 +176,7 @@ const Dashboard = () => {
                     value={trialDaysLeft > 0 ? "Premium Trial" : (profile?.plan ? (profile.plan.charAt(0).toUpperCase() + profile.plan.slice(1) + ' Plan') : "Free Plan")}
                     label="Current Tier"
                     subtext={trialDaysLeft > 0 ? `${trialDaysLeft} days left` : "Upgrade for unlimited"}
+                    glow="hover:shadow-glow-cyan"
                 />
                 <StatCard
                     icon={ZapIcon}
@@ -187,6 +185,7 @@ const Dashboard = () => {
                     value={locators.length.toString()}
                     label="Total Locators"
                     subtext="Saved in your vault"
+                    glow="hover:shadow-glow-purple"
                 />
                 <StatCard
                     icon={CodeIcon}
@@ -195,6 +194,7 @@ const Dashboard = () => {
                     value="0"
                     label="Active Sessions"
                     subtext="Extension connections"
+                    glow="hover:shadow-glow"
                 />
                 <StatCard
                     icon={ActivityIcon}
@@ -203,6 +203,7 @@ const Dashboard = () => {
                     value="100%"
                     label="System Status"
                     subtext="Operational"
+                    glow="hover:shadow-glow-cyan"
                 />
             </div>
 
@@ -227,8 +228,10 @@ const Dashboard = () => {
 
                     <div className="grid gap-4">
                         {loadingLocators ? (
-                            <div className="flex items-center justify-center p-12">
-                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                            <div className="space-y-3">
+                                {[1, 2, 3].map((n) => (
+                                    <div key={n} className="h-[74px] rounded-2xl border border-white/5 bg-white/2 shimmer-skeleton" />
+                                ))}
                             </div>
                         ) : locators.length > 0 ? (
                             locators.map((locator) => (
@@ -239,8 +242,8 @@ const Dashboard = () => {
                                 />
                             ))
                         ) : (
-                            <Link to="/playground" className="rounded-2xl border border-dashed border-white/10 bg-secondary/5 p-12 text-center flex flex-col items-center justify-center text-muted-foreground group hover:border-white/20 hover:bg-secondary/10 transition-all cursor-pointer">
-                                <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                            <Link to="/playground" className="rounded-2xl border border-dashed border-white/8 bg-white/2 p-12 text-center flex flex-col items-center justify-center text-muted-foreground group hover:border-white/20 hover:bg-white/4 transition-all cursor-pointer">
+                                <div className="w-16 h-16 rounded-full bg-white/3 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
                                     <CodeIcon className="w-8 h-8 opacity-50" />
                                 </div>
                                 <h3 className="text-lg font-medium text-white mb-1">No locators yet</h3>
@@ -257,7 +260,7 @@ const Dashboard = () => {
                         Quick Actions
                     </h2>
 
-                    <div className="rounded-2xl border border-white/5 bg-secondary/10 overflow-hidden divide-y divide-white/5">
+                    <div className="rounded-2xl glass-dark overflow-hidden divide-y divide-white/8">
                         <ActionLink to="/team" icon={UsersIcon} title="Manage Team" desc="Invite members & roles" />
                         <ActionLink to="/settings" icon={SettingsIcon} title="Settings" desc="Profile & preferences" />
                         <ActionLink to="/pricing" icon={ShieldIcon} title="Billing" desc="Manage subscription" />
@@ -292,7 +295,7 @@ const Dashboard = () => {
 };
 
 const LocatorCard = ({ locator, onDelete }) => (
-    <div className="flex items-center justify-between p-4 rounded-2xl bg-secondary/10 border border-white/5 hover:border-white/10 transition-all group">
+    <div className="flex items-center justify-between p-4 rounded-2xl glass-panel group shadow-sm hover:translate-y-0">
         <div className="flex items-center gap-4 flex-1 min-w-0">
             <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all">
                 <CodeIcon size={20} />
@@ -329,25 +332,12 @@ const LocatorCard = ({ locator, onDelete }) => (
     </div>
 );
 
-const StatCard = ({ icon: Icon, color, bg, value, label, subtext }) => {
-    // Enable 3D Tilt hook for dashboard stats card
-    const cardRef = use3DTilt({ max: 8, scale: 1.02, speed: 200 });
-
+const StatCard = ({ icon: Icon, color, bg, value, label, subtext, glow }) => {
     return (
         <div 
-            ref={cardRef}
-            className="p-5 rounded-3xl bg-secondary/10 border border-white/5 hover:border-white/10 hover:bg-secondary/20 transition-all group transform-gpu"
-            style={{ transformStyle: 'preserve-3d' }}
+            className={`p-5 rounded-3xl glass-panel group transform-gpu transition-all duration-300 hover:-translate-y-1 ${glow || ''}`}
         >
-            {/* Dynamic Glass Glare Spotlight */}
-            <div 
-                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-20 pointer-events-none"
-                style={{
-                    background: `radial-gradient(300px circle at var(--glare-x, 50%) var(--glare-y, 50%), rgba(255, 255, 255, 0.05), transparent 45%)`
-                }}
-            />
-            
-            <div style={{ transform: 'translateZ(20px)' }}>
+            <div>
                 <div className="flex items-start justify-between mb-4">
                     <div className={`p-3 rounded-2xl ${bg} ${color}`}>
                         <Icon size={20} />

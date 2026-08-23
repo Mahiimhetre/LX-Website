@@ -7,7 +7,6 @@ import { toast } from 'sonner';
 import { UsersIcon, CheckIcon, ZapIcon, ShieldIcon, CrownIcon, HelpCircleIcon } from '@/components/icons';
 import { cn } from '@/lib/utils';
 import PaymentModal from '@/components/payment/PaymentModal';
-import use3DTilt from '@/hooks/use3DTilt';
 
 const BASE_PRICES = {
     USD: { free: 0, pro: 29, teamBase: 79, perMember: 15 },
@@ -17,34 +16,21 @@ const BASE_PRICES = {
 const CURRENCY_SYMBOLS = { USD: '$', INR: '₹' };
 
 const PricingCard = ({ plan, index, symbol, teamTotalPrice, teamMemberCount, setTeamMemberCount, prices, handleInitiatePurchase, isCreatingTeam }) => {
-    // Enable 3D Tilt hook for the pricing cards
-    const cardRef = use3DTilt({ max: 6, scale: 1.02, speed: 200 });
-
     return (
         <div
-            ref={cardRef}
             className={cn(
-                "relative rounded-[2rem] p-6 md:p-8 transition-all duration-500 flex flex-col group backdrop-blur-xl animate-in fade-in slide-in-from-bottom-8 transform-gpu",
+                "relative rounded-3xl p-6 md:p-8 transition-all duration-500 flex flex-col group animate-in fade-in slide-in-from-bottom-8 transform-gpu",
                 plan.highlight
-                    ? "bg-gradient-to-b from-background/90 to-background/50 border border-primary/40 shadow-[0_0_50px_-15px_rgba(124,58,237,0.3)] scale-100 md:scale-[1.03] z-10"
-                    : "bg-background/40 border border-white/10 hover:border-white/30 hover:bg-background/60 shadow-xl"
+                    ? "glass-panel bg-gradient-to-b from-primary/15 to-primary/5 border border-primary/50 shadow-[0_0_50px_-15px_rgba(124,58,237,0.35)] scale-100 md:scale-[1.03] z-10"
+                    : "glass-panel"
             )}
-            style={{ 
-                animationDelay: `${index * 150}ms`,
-                transformStyle: 'preserve-3d'
+            style={{
+                animationDelay: `${index * 150}ms`
             }}
         >
-            {/* Dynamic Glass Glare Spotlight (moves with mouse) */}
-            <div 
-                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-20"
-                style={{
-                    background: `radial-gradient(400px circle at var(--glare-x, 50%) var(--glare-y, 50%), rgba(255, 255, 255, 0.06), transparent 45%)`
-                }}
-            />
-
             {/* Pro Plan Glowing overlay */}
             {plan.highlight && (
-                <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent rounded-[2rem] pointer-events-none"></div>
+                <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent rounded-3xl pointer-events-none"></div>
             )}
 
             {plan.highlight && (
@@ -58,8 +44,8 @@ const PricingCard = ({ plan, index, symbol, teamTotalPrice, teamMemberCount, set
                 </div>
             )}
 
-            {/* Raised content container for 3D depth */}
-            <div className="flex-1 flex flex-col" style={{ transform: 'translateZ(25px)' }}>
+            {/* Content container */}
+            <div className="flex-1 flex flex-col">
                 <div className="mb-5 relative z-10 flex items-center gap-4">
                     <div className={cn(
                         "w-12 h-12 rounded-[1rem] flex items-center justify-center transition-transform group-hover:scale-105 duration-500 shadow-sm shrink-0",
@@ -83,7 +69,7 @@ const PricingCard = ({ plan, index, symbol, teamTotalPrice, teamMemberCount, set
                                 <span className="text-muted-foreground font-medium text-sm">{plan.period}</span>
                             </div>
 
-                            <div className="p-3 bg-background/50 rounded-2xl border border-white/5 backdrop-blur-md">
+                            <div className="p-3 glass rounded-2xl">
                                 <div className="flex items-center justify-between">
                                     <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Team Size</label>
                                     <div className="flex items-center gap-2 bg-black/20 rounded-full p-0.5 border border-white/5">
@@ -218,6 +204,8 @@ const Pricing = () => {
                     currency,
                     totalPaid: selectedPlanDetails.finalAmount,
                     paymentId: paymentDetails.paymentId,
+                    orderId: paymentDetails.orderId,
+                    signature: paymentDetails.signature,
                     discountCode: paymentDetails.discountCode
                 });
 
@@ -230,6 +218,8 @@ const Pricing = () => {
                 const { data } = await apiClient.post('/profile/upgrade-plan', {
                     plan: 'pro',
                     paymentId: paymentDetails.paymentId,
+                    orderId: paymentDetails.orderId,
+                    signature: paymentDetails.signature,
                     discountCode: paymentDetails.discountCode
                 });
 
@@ -333,7 +323,7 @@ const Pricing = () => {
                 {/* Pricing Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
                     {pricingPlans.map((plan, index) => (
-                        <PricingCard 
+                        <PricingCard
                             key={plan.name}
                             plan={plan}
                             index={index}
@@ -357,7 +347,7 @@ const Pricing = () => {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 relative z-10">
                         {faqs.map((faq, i) => (
-                            <div key={i} className="p-6 rounded-[1.5rem] bg-background/30 backdrop-blur-md border border-white/5 hover:border-white/15 transition-all duration-300 group hover:bg-background/50 hover:shadow-md">
+                            <div key={i} className="p-6 rounded-[1.5rem] glass-panel group">
                                 <h3 className="font-semibold text-foreground mb-3 flex items-start gap-3 text-sm leading-snug">
                                     <div className="p-2 rounded-xl bg-secondary/60 text-foreground group-hover:bg-primary/20 group-hover:text-primary transition-colors shrink-0 shadow-sm border border-white/5 group-hover:border-primary/20">
                                         <HelpCircleIcon className="w-4 h-4" />

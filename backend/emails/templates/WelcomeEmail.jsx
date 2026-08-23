@@ -3,27 +3,33 @@ import BaseEmail, { headingStyle, textStyle, buttonStyle } from '../BaseEmail.js
 
 export default function WelcomeEmail({ name, provider, resetUrl }) {
   return (
-    <BaseEmail title={`Welcome to Locator-X, ${name}!`} name={name}>
-      <h2 style={headingStyle}>
-        Welcome to Locator-X!
+    <BaseEmail 
+      title={`Welcome to LocatorX, ${name}!`} 
+      name={name}
+      categoryBadge="Welcome Onboard"
+      fallbackUrl={resetUrl}
+      securityNote="Authenticated via OAuth • Instant setup completed"
+    >
+      <h2 className="text-heading" style={headingStyle}>
+        Welcome to LocatorX, {name}!
       </h2>
       
-      <p style={textStyle}>
-        Thank you for joining us! We've successfully created your account using your <strong style={{ color: '#f8fafc' }}>{provider}</strong> profile.
+      <p className="text-body" style={textStyle}>
+        Your account was successfully created using your <strong className="text-heading">{provider}</strong> profile. You now have full access to the LocatorX test automation playground and suite tools.
       </p>
       
-      <p style={textStyle}>
-        Since you signed in via {provider}, you don't need a password. However, if you'd like to set a dedicated password for manual login later, you can do so anytime using the button below:
+      <p className="text-body" style={textStyle}>
+        Since you authenticated via {provider}, no password is required. If you ever want to set a standalone password for direct login later, you can do so anytime below:
       </p>
       
       <div style={{ textAlign: 'center' }}>
         <a href={resetUrl} style={buttonStyle}>
-          Set a Password (Optional)
+          Set Optional Password &rarr;
         </a>
       </div>
       
-      <p style={{ ...textStyle, margin: '16px 0 0 0' }}>
-        We're excited to have you on board! If you have any questions, just reply to this email.
+      <p className="text-body" style={{ ...textStyle, fontSize: '13px', margin: '16px 0 0 0' }}>
+        We're excited to have you on board! If you have any questions, feel free to contact our support team.
       </p>
     </BaseEmail>
   );

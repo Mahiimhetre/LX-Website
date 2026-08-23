@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import {  Mail, ArrowRight, Loader2, CheckCircle, X  } from '@/components/icons';
+import { Mail, ArrowRight, Loader2, CheckCircle, X, ShieldAlert } from '@/components/icons';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import Logo from '@/components/Logo';
@@ -14,15 +14,17 @@ const ForgotPassword = () => {
     const [emailError, setEmailError] = useState(null);
     const [emailSent, setEmailSent] = useState(false);
     const [focusedField, setFocusedField] = useState(null);
+    const [formError, setFormError] = useState('');
 
     const handleResetPassword = async (e) => {
         e.preventDefault();
+        setFormError('');
 
         const emailErr = validateField(emailSchema, email);
         setEmailError(emailErr);
 
         if (emailErr) {
-            toast.error(emailErr);
+            setFormError(emailErr);
             return;
         }
 
@@ -34,19 +36,19 @@ const ForgotPassword = () => {
             toast.success(result.message);
             setEmailSent(true);
         } else {
-            toast.error(result.message);
+            setFormError(result.message || 'Failed to send reset email. Please try again.');
         }
     };
 
     return (
         <div className="flex-1 flex items-center justify-center relative overflow-hidden py-4 px-4 sm:px-6 lg:px-8">
             {/* Ambient Background Effects */}
-            <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 blur-[128px] rounded-full mix-blend-screen opacity-20 pointer-events-none animate-pulse" />
-            <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/10 blur-[128px] rounded-full mix-blend-screen opacity-20 pointer-events-none animate-pulse delay-1000" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-[65%] -translate-y-[55%] w-[450px] h-[450px] bg-primary/35 blur-[120px] rounded-full mix-blend-screen pointer-events-none animate-pulse -z-10" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-[35%] -translate-y-[45%] w-[450px] h-[450px] bg-purple-500/25 blur-[120px] rounded-full mix-blend-screen pointer-events-none animate-pulse delay-1000 -z-10" />
 
-            <div className="w-full max-w-sm relative z-10 px-6">
+            <div className="w-full max-w-sm relative z-10 px-6 animate-fade-in">
                 {/* Login Card */}
-                <div className="glass-dark rounded-3xl border border-white/5 shadow-2xl overflow-hidden backdrop-blur-xl">
+                <div className="glass-panel rounded-3xl shadow-2xl overflow-hidden">
                     <div className="p-6 sm:p-8">
                         {!emailSent ? (
                             <>
@@ -73,16 +75,17 @@ const ForgotPassword = () => {
                                             onChange={(e) => {
                                                 setEmail(e.target.value);
                                                 if (emailError) setEmailError(null);
+                                                if (formError) setFormError('');
                                             }}
                                             onFocus={() => setFocusedField('email')}
                                             onBlur={() => setFocusedField(null)}
                                             placeholder="Email Address"
-                                            className={`peer w-full pl-10 pr-12 pt-5 pb-1.5 bg-secondary/30 rounded-full border focus:border-primary/50 outline-none transition-all duration-300 placeholder-transparent text-xs text-foreground focus:bg-secondary/50 focus:shadow-[0_0_20px_rgba(var(--primary),0.1)] ${emailError ? 'border-destructive/50' : 'border-white/5'}`}
+                                            className={`peer w-full pl-10 pr-12 pt-5 pb-1.5 glass-input rounded-full border focus:border-primary/50 outline-none transition-all duration-300 placeholder-transparent text-xs text-foreground ${emailError ? 'border-destructive/50' : 'border-white/5'}`}
                                             required
                                         />
                                         <label
                                             htmlFor="email"
-                                            className="absolute left-10 top-1.5 text-[10px] font-medium text-muted-foreground transition-all duration-300 
+                                            className="absolute left-10 top-1.5 text-[10px] font-medium text-muted-foreground transition-all duration-300
                                                      peer-placeholder-shown:text-xs peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-muted-foreground/70
                                                      peer-focus:text-[10px] peer-focus:top-1.5 peer-focus:text-primary pointer-events-none"
                                         >
@@ -100,21 +103,25 @@ const ForgotPassword = () => {
                                         {emailError && <p className="absolute -bottom-5 left-4 text-[10px] text-destructive font-medium">{emailError}</p>}
                                     </div>
 
+                                    {/* Form Error */}
+                                    {formError && (
+                                        <div className="animate-fade-in flex items-center gap-2 px-3.5 py-2.5 rounded-full bg-red-500/10 border border-red-500/20">
+                                            <ShieldAlert className="w-3.5 h-3.5 text-red-400 flex-shrink-0" />
+                                            <p className="text-[10px] font-medium text-red-400 leading-tight">{formError}</p>
+                                        </div>
+                                    )}
+
                                     <button
                                         type="submit"
                                         disabled={isLoading}
-                                        className="w-full relative group overflow-hidden rounded-full bg-gradient-to-r from-primary to-blue-600 p-[1px] transition-all hover:shadow-[0_0_40px_rgba(var(--primary),0.4)] disabled:opacity-50 disabled:hover:shadow-none"
+                                        className="w-full primary-glass-button font-bold py-3.5 rounded-full flex items-center justify-center gap-2 transition-all active:scale-98 disabled:opacity-70 disabled:cursor-not-allowed group text-xs text-white"
                                     >
-                                        <div className="relative flex items-center justify-center gap-2 bg-black/20 backdrop-blur-sm px-4 py-2.5 rounded-full transition-all group-hover:bg-transparent">
-                                            <span className="font-semibold text-white tracking-wide">
-                                                {isLoading ? 'Sending Link...' : 'Send Reset Link'}
-                                            </span>
-                                            {isLoading ? (
-                                                <Loader2 className="w-4 h-4 animate-spin text-white" />
-                                            ) : (
-                                                <ArrowRight className="w-4 h-4 text-white transition-transform group-hover:translate-x-1" />
-                                            )}
-                                        </div>
+                                        <span>{isLoading ? 'Sending Link...' : 'Send Reset Link'}</span>
+                                        {isLoading ? (
+                                            <Loader2 className="w-4 h-4 animate-spin text-white" />
+                                        ) : (
+                                            <ArrowRight className="w-4 h-4 text-white transition-transform group-hover:translate-x-1" />
+                                        )}
                                     </button>
                                 </form>
                             </>

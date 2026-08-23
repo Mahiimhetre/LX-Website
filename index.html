@@ -5,13 +5,18 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+  <!-- Resource hints: warm up API server connection before JS loads -->
+  <link rel="dns-prefetch" href="//localhost:5000" />
+  <link rel="preconnect" href="http://localhost:5000" crossorigin />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
   <title>LocatorX | Intelligent Locator Generation</title>
   <meta name="description" content="AI-Powered Locator Generation for Selenium, Cypress, and Playwright" />
   <meta name="author" content="LocatorX" />
   <meta property="og:image" content="/og-image.png" />
 
-  <link rel="icon" type="image/png" href="/favicon.png" />
+  <link rel="icon" type="image/png" href="/favicon.png" sizes="32x32" />
 </head>
 
 <body>

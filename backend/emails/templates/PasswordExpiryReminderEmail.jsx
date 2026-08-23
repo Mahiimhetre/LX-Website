@@ -3,27 +3,33 @@ import BaseEmail, { headingStyle, textStyle, buttonStyle } from '../BaseEmail.js
 
 export default function PasswordExpiryReminderEmail({ name, daysRemaining, resetUrl }) {
   return (
-    <BaseEmail title="Password Expiry Reminder" name={name}>
-      <h2 style={headingStyle}>
-        Security Reminder
+    <BaseEmail 
+      title="Password Expiry Notice" 
+      name={name}
+      categoryBadge="Security Notice"
+      fallbackUrl={resetUrl}
+      securityNote="Security policy enforcement • 7-day grace period applies"
+    >
+      <h2 className="text-heading" style={headingStyle}>
+        Password Expiry Notice
       </h2>
 
-      <p style={textStyle}>
-        Your Locator-X account password is set to expire in <strong style={{ color: '#f8fafc' }}>{daysRemaining} days</strong>.
+      <p className="text-body" style={textStyle}>
+        Your LocatorX account password is scheduled to expire in <strong style={{ color: '#d97706' }}>{daysRemaining} days</strong>.
       </p>
       
-      <p style={textStyle}>
-        To maintain account security, please update your password before it expires. We provide a <strong style={{ color: '#f8fafc' }}>7-day allowance</strong> after the expiry date to ensure you aren't locked out immediately, but the account will be restricted after that period.
+      <p className="text-body" style={textStyle}>
+        To ensure uninterrupted access for your team, please update your password before the expiry date. We include a 7-day grace period, after which account access will be restricted.
       </p>
       
       <div style={{ textAlign: 'center' }}>
         <a href={resetUrl} style={buttonStyle}>
-          Update Password Now
+          Update Password Now &rarr;
         </a>
       </div>
       
-      <p style={{ ...textStyle, margin: '16px 0 0 0' }}>
-        If you've already updated your password recently, please ignore this email.
+      <p className="text-body" style={{ ...textStyle, fontSize: '13px', margin: '16px 0 0 0' }}>
+        If you've already updated your password recently, you can safely ignore this email.
       </p>
     </BaseEmail>
   );

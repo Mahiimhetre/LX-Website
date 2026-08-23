@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LocatorX — Email Redesign (Tightly Fitted Text Gradient)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: #030712;
+      color: #f8fafc;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      padding: 40px 20px;
+      line-height: 1.5;
+    }
+
+    .preview-header {
+      max-width: 1200px;
+      margin: 0 auto 36px auto;
+      text-align: center;
+    }
+
+    .preview-badge {
+      display: inline-block;
+      padding: 6px 18px;
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.18) 0%, rgba(139, 92, 246, 0.18) 100%);
+      border: 1px solid rgba(139, 92, 246, 0.35);
+      color: #a78bfa;
+      border-radius: 9999px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+      box-shadow: 0 0 25px rgba(139, 92, 246, 0.2);
+    }
+
+    .preview-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 40px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: #ffffff;
+      margin-bottom: 10px;
+    }
+
+    .preview-title span {
+      background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .preview-subtitle {
+      color: #94a3b8;
+      font-size: 15px;
+      max-width: 760px;
+      margin: 0 auto 28px auto;
+      line-height: 1.6;
+    }
+
+    .controls-row {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 36px;
+      flex-wrap: wrap;
+    }
+
+    .tabs {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      max-width: 1050px;
+    }
+
+    .tab-btn {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: #94a3b8;
+      padding: 9px 18px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+
+    .tab-btn.active,
+    .tab-btn:hover {
+      background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+      border-color: #8b5cf6;
+      color: #ffffff;
+      box-shadow: 0 4px 20px rgba(59, 130, 246, 0.45);
+      transform: translateY(-1px);
+    }
+
+    .theme-toggle-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #f8fafc;
+      padding: 9px 18px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .theme-toggle-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .preview-container {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      flex-wrap: wrap;
+      max-width: 1300px;
+      margin: 0 auto;
+    }
+
+    .device-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .device-label {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #64748b;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .desktop-frame {
+      width: 620px;
+      background: #000000;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 22px;
+      overflow: hidden;
+      box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.8), 0 0 50px rgba(59, 130, 246, 0.12);
+    }
+
+    .mobile-frame {
+      width: 375px;
+      background: #000000;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 38px;
+      padding: 12px 8px;
+      overflow: hidden;
+      box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.9), 0 0 50px rgba(139, 92, 246, 0.12);
+    }
+
+    .mobile-screen {
+      background: #060814;
+      border-radius: 30px;
+      overflow: hidden;
+    }
+
+    /* ── EMAIL EMBED STYLES (Pure, Email-Safe HTML/CSS) ── */
+    .email-body {
+      background-color: #030712;
+      margin: 0;
+      padding: 40px 16px;
+      width: 100%;
+      transition: background-color 0.3s;
+    }
+
+    /* Light Mode Simulator Override */
+    .light-mode .email-body {
+      background-color: #e2e8f0;
+    }
+
+    .light-mode .email-card {
+      background-color: #ffffff;
+      border-color: #cbd5e1;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .light-mode .brand-header {
+      border-bottom-color: #e2e8f0;
+    }
+
+    .light-mode .email-heading {
+      color: #0f172a;
+    }
+
+    .light-mode .email-text {
+      color: #475569;
+    }
+
+    .light-mode .email-text strong {
+      color: #0f172a;
+    }
+
+    .light-mode .info-card {
+      background-color: #f8fafc;
+      border-color: #e2e8f0;
+    }
+
+    .light-mode .info-label {
+      color: #64748b;
+    }
+
+    .light-mode .info-val {
+      color: #0f172a;
+    }
+
+    .light-mode .fallback-box {
+      background: #f1f5f9;
+      border-color: #cbd5e1;
+      color: #475569;
+    }
+
+    .light-mode .security-note {
+      border-top-color: #f1f5f9;
+      color: #64748b;
+    }
+
+    .light-mode .email-footer {
+      background-color: #f8fafc;
+      border-top-color: #e2e8f0;
+    }
+
+    .light-mode .footer-link {
+      color: #475569;
+    }
+
+    .light-mode .footer-copy {
+      color: #64748b;
+    }
+
+    .email-card {
+      max-width: 540px;
+      margin: 0 auto;
+      background-color: #080c14;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.7);
+    }
+
+    .email-top-bar {
+      height: 4px;
+      background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+    }
+
+    .email-inner {
+      padding: 36px 32px;
+    }
+
+    .brand-header {
+      margin-bottom: 28px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    }
+
+    .brand-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .brand-logo-cell {
+      width: 44px;
+      vertical-align: middle;
+    }
+
+    .footer-logo-glow {
+      position: relative;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      padding: 1px;
+      background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+      box-shadow: 0 0 16px rgba(59, 130, 246, 0.35);
+      display: inline-block;
+    }
+
+    .footer-logo-img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+      display: block;
+      background-color: #030712;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .brand-name-cell {
+      padding-left: 12px;
+      vertical-align: middle;
+    }
+
+    /* Tightly fitted text gradient without extra width space */
+    .brand-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 24px;
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -0.025em;
+      margin: 0;
+      display: inline-block;
+      width: fit-content;
+      background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      color: #3b82f6;
+    }
+
+    .brand-title span {
+      background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-tagline {
+      font-size: 11px;
+      color: #94a3b8;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      margin-top: 3px;
+    }
+
+    .brand-status-cell {
+      text-align: right;
+      vertical-align: middle;
+    }
+
+    .live-status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      background: rgba(34, 197, 94, 0.1);
+      border: 1px solid rgba(34, 197, 94, 0.25);
+      color: #4ade80;
+      border-radius: 9999px;
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    .live-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background-color: #22c55e;
+      box-shadow: 0 0 8px #22c55e;
+    }
+
+    .category-badge {
+      display: inline-block;
+      padding: 5px 12px;
+      background: rgba(59, 130, 246, 0.1);
+      border: 1px solid rgba(59, 130, 246, 0.25);
+      color: #60a5fa;
+      border-radius: 9999px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+
+    .email-heading {
+      font-family: 'Outfit', sans-serif;
+      font-size: 24px;
+      font-weight: 700;
+      color: #ffffff;
+      line-height: 1.28;
+      letter-spacing: -0.02em;
+      margin-bottom: 16px;
+    }
+
+    .email-text {
+      font-size: 14px;
+      line-height: 1.7;
+      color: #94a3b8;
+      margin-bottom: 20px;
+    }
+
+    .email-text strong {
+      color: #f8fafc;
+      font-weight: 600;
+    }
+
+    .info-card {
+      background-color: rgba(255, 255, 255, 0.025);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-left: 3px solid #3b82f6;
+      border-radius: 14px;
+      padding: 18px 20px;
+      margin-bottom: 24px;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 7px 0;
+      font-size: 13px;
+    }
+
+    .info-row:not(:last-child) {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    .info-label {
+      color: #64748b;
+      font-weight: 500;
+    }
+
+    .info-val {
+      color: #f8fafc;
+      font-weight: 600;
+    }
+
+    .avatar-preview {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: 12px;
+      margin-bottom: 20px;
+    }
+
+    .avatar-circle {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%);
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .cta-container {
+      text-align: center;
+      margin: 28px 0;
+    }
+
+    .btn-primary {
+      display: inline-block;
+      background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+      color: #ffffff !important;
+      font-weight: 700;
+      font-size: 14px;
+      letter-spacing: 0.01em;
+      padding: 15px 36px;
+      border-radius: 9999px;
+      text-decoration: none;
+      box-shadow: 0 8px 25px -4px rgba(59, 130, 246, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+    }
+
+    .fallback-box {
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px dashed rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      padding: 14px;
+      font-size: 11px;
+      color: #64748b;
+      word-break: break-all;
+      font-family: 'JetBrains Mono', monospace;
+      margin-top: 22px;
+      line-height: 1.5;
+    }
+
+    .security-note {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      color: #64748b;
+      margin-top: 22px;
+      padding-top: 18px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .email-footer {
+      padding: 26px 32px;
+      background-color: rgba(0, 0, 0, 0.3);
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      text-align: center;
+    }
+
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 18px;
+      margin-bottom: 14px;
+    }
+
+    .footer-link {
+      color: #64748b;
+      font-size: 11px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.2s;
+    }
+
+    .footer-copy {
+      font-size: 11px;
+      color: #475569;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="preview-header">
+    <span class="preview-badge">Tightly Fitted Text Gradient</span>
+    <h1 class="preview-title">Proposed Email UI with <span>display: inline-block (width: fit-content)</span></h1>
+    <p class="preview-subtitle">
+      Added <code style="color:#60a5fa; font-family:'JetBrains Mono';">display: inline-block; width: fit-content;</code>
+      to <code style="color:#a78bfa; font-family:'JetBrains Mono';">.brand-title</code> so the linear gradient spans
+      tightly across the text <strong style="color:#fff;">LocatorX</strong> without extra width.
+    </p>
+
+    <!-- Controls Row -->
+    <div class="controls-row">
+      <button class="theme-toggle-btn" onclick="toggleTheme()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="5" />
+          <line x1="12" y1="1" x2="12" y2="3" />
+          <line x1="12" y1="21" x2="12" y2="23" />
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+          <line x1="1" y1="12" x2="3" y2="12" />
+          <line x1="21" y1="12" x2="23" y2="12" />
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+        </svg>
+        Toggle Light/Dark Client Mode
+      </button>
+
+      <!-- Template Selector Tabs (All 9 Templates) -->
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchTemplate('verification', this)">1. Verification</button>
+        <button class="tab-btn" onclick="switchTemplate('invitation', this)">2. Team Invite</button>
+        <button class="tab-btn" onclick="switchTemplate('welcome', this)">3. OAuth Welcome</button>
+        <button class="tab-btn" onclick="switchTemplate('passwordReset', this)">4. Password Reset</button>
+        <button class="tab-btn" onclick="switchTemplate('passwordChanged', this)">5. Password Changed</button>
+        <button class="tab-btn" onclick="switchTemplate('planChanged', this)">6. Plan Changed</button>
+        <button class="tab-btn" onclick="switchTemplate('cleanup', this)">7. Cleanup Reminder</button>
+        <button class="tab-btn" onclick="switchTemplate('passExpiry', this)">8. Password Expiry</button>
+        <button class="tab-btn" onclick="switchTemplate('planExpiry', this)">9. Plan Expiry</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="preview-container" id="preview-wrapper">
+
+    <!-- DESKTOP PREVIEW FRAME -->
+    <div class="device-wrapper">
+      <div class="device-label">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="2" y="3" width="20" height="14" rx="2" />
+          <line x1="8" y1="21" x2="16" y2="21" />
+          <line x1="12" y1="17" x2="12" y2="21" />
+        </svg>
+        Desktop Render (540px Email Shell)
+      </div>
+      <div class="desktop-frame" id="desktop-render"></div>
+    </div>
+
+    <!-- MOBILE PREVIEW FRAME -->
+    <div class="device-wrapper">
+      <div class="device-label">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="5" y="2" width="14" height="20" rx="3" />
+          <line x1="12" y1="18" x2="12.01" y2="18" />
+        </svg>
+        Mobile Render (375px Viewport)
+      </div>
+      <div class="mobile-frame">
+        <div class="mobile-screen" id="mobile-render"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const TEMPLATE_SHELL = (badgeText, badgeColor, cardBorderColor, heading, bodyContent, ctaHtml = '', fallbackUrl = '', securityText = '') => `
+      <div class="email-body">
+        <div class="email-card">
+          <div class="email-top-bar"></div>
+          <div class="email-inner">
+            <div class="brand-header">
+              <table class="brand-table">
+                <tr>
+                  <td style="vertical-align: middle;">
+                    <table border="0" cellPadding="0" cellSpacing="0">
+                      <tr>
+                        <td class="brand-logo-cell">
+                          <div class="footer-logo-glow">
+                            <img src="favicon.png" alt="LocatorX Logo" class="footer-logo-img" />
+                          </div>
+                        </td>
+                        <td class="brand-name-cell">
+                          <h1 class="brand-title">Locator<span>X</span></h1>
+                          <div class="brand-tagline">Consistent locators. Consistent teams.</div>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                  <td class="brand-status-cell">
+                    <div class="live-status-badge">
+                      <span class="live-dot"></span> Verified
+                    </div>
+                  </td>
+                </tr>
+              </table>
+            </div>
+
+            <span class="category-badge" style="${badgeColor}">${badgeText}</span>
+
+            <h2 class="email-heading">${heading}</h2>
+
+            ${bodyContent}
+
+            ${ctaHtml ? `<div class="cta-container">${ctaHtml}</div>` : ''}
+
+            ${fallbackUrl ? `
+              <div class="fallback-box">
+                Button not working? Copy &amp; paste this URL:<br>
+                <span style="color:#3b82f6;">${fallbackUrl}</span>
+              </div>
+            ` : ''}
+
+            <div class="security-note">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              <span>${securityText || 'Signed by locatorx.dev • 256-bit SSL Encrypted • DKIM Verified'}</span>
+            </div>
+          </div>
+
+          <div class="email-footer">
+            <div class="footer-links">
+              <a href="#" class="footer-link">Documentation</a>
+              <a href="#" class="footer-link">Playground</a>
+              <a href="#" class="footer-link">Pricing</a>
+              <a href="#" class="footer-link">Support</a>
+            </div>
+            <div class="footer-copy">
+              &copy; 2026 LocatorX Inc. Consistent locators. Consistent teams.<br>
+              San Francisco, CA • All rights reserved.
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    const TEMPLATES = {
+      verification: TEMPLATE_SHELL(
+        'Account Verification',
+        'background:rgba(59,130,246,0.1); border-color:rgba(59,130,246,0.25); color:#60a5fa;',
+        '#3b82f6',
+        'Verify your LocatorX account',
+        `<p class="email-text">Hello <strong>Mahesh</strong>,</p>
+         <p class="email-text">Welcome to LocatorX! You're one click away from building robust, auto-healing test automation selectors for your web applications.</p>
+         <p class="email-text">Please verify your email address to activate your 14-day full-featured trial (no credit card required):</p>`,
+        `<a href="https://locatorx.dev/auth/verify?token=demo_token" class="btn-primary">Verify Email Address &rarr;</a>`,
+        'https://locatorx.dev/auth/verify?token=demo_token_xyz987',
+        'Automated security message • Link expires in 24 hours'
+      ),
+
+      invitation: TEMPLATE_SHELL(
+        'Team Invitation',
+        'background:rgba(139,92,246,0.12); border-color:rgba(139,92,246,0.3); color:#c084fc;',
+        '#8b5cf6',
+        'You\'ve been invited to join QA Core Team',
+        `<p class="email-text">Hello <strong>Team Member</strong>,</p>
+         <div class="avatar-preview">
+           <div class="avatar-circle">AR</div>
+           <div>
+             <div style="font-size:13px; font-weight:700; color:#f8fafc;">Alex Rivera</div>
+             <div style="font-size:11px; color:#64748b;">alex@company.com</div>
+           </div>
+         </div>
+         <p class="email-text"><strong>Alex Rivera</strong> has invited you to join the workspace on LocatorX to collaborate on automated locators and suite management.</p>
+         <div class="info-card" style="border-left-color:#8b5cf6;">
+           <div class="info-row"><span class="info-label">Invited By</span><span class="info-val">Alex Rivera</span></div>
+           <div class="info-row"><span class="info-label">Team Workspace</span><span class="info-val">QA Core Automation</span></div>
+           <div class="info-row"><span class="info-label">Assigned Role</span><span class="info-val" style="color:#c084fc;">Member (Full Access)</span></div>
+         </div>`,
+        `<a href="https://locatorx.dev/join-team?token=invite_token" class="btn-primary">Accept &amp; Join Workspace &rarr;</a>`,
+        'https://locatorx.dev/join-team?token=invite_token_123',
+        'Invitation valid for 7 days'
+      ),
+
+      welcome: TEMPLATE_SHELL(
+        'Welcome Onboard',
+        'background:rgba(34,197,94,0.12); border-color:rgba(34,197,94,0.3); color:#4ade80;',
+        '#22c55e',
+        'Welcome to LocatorX, Mahesh!',
+        `<p class="email-text">Hello <strong>Mahesh</strong>,</p>
+         <p class="email-text">Your account was successfully created using your <strong>Google</strong> profile. You now have full access to the LocatorX test automation playground and suite tools.</p>
+         <p class="email-text">Since you authenticated via Google, no password is required. If you ever want to set a standalone password for direct login later, you can do so anytime below:</p>`,
+        `<a href="https://locatorx.dev/auth/reset" class="btn-primary">Set Optional Password &rarr;</a>`,
+        'https://locatorx.dev/auth/reset-password-request',
+        'Authenticated via Google OAuth • Instant setup completed'
+      ),
+
+      passwordReset: TEMPLATE_SHELL(
+        'Security Action',
+        'background:rgba(239,68,68,0.12); border-color:rgba(239,68,68,0.3); color:#f87171;',
+        '#ef4444',
+        'Password Reset Request',
+        `<p class="email-text">Hello <strong>Mahesh</strong>,</p>
+         <p class="email-text">We received a request to reset the password for your LocatorX account (<strong>mahesh@example.com</strong>).</p>
+         <p class="email-text">If you initiated this request, please click the button below to establish a new password:</p>`,
+        `<a href="https://locatorx.dev/auth/reset-password?token=reset_tok" class="btn-primary">Reset Password &rarr;</a>`,
+        'https://locatorx.dev/auth/reset-password?token=reset_tok_99',
+        'If you didn\'t request this, you can safely ignore this email.'
+      ),
+
+      passwordChanged: TEMPLATE_SHELL(
+        'Account Protection',
+        'background:rgba(59,130,246,0.12); border-color:rgba(59,130,246,0.3); color:#60a5fa;',
+        '#3b82f6',
+        'Password Changed Successfully',
+        `<p class="email-text">Hello <strong>Mahesh</strong>,</p>
+         <p class="email-text">This is an automated confirmation that the password for your LocatorX account was successfully updated on <strong>Aug 11, 2026 at 19:50 UTC</strong>.</p>
+         <div class="info-card" style="border-left-color:#3b82f6;">
+           <div class="info-row"><span class="info-label">Action</span><span class="info-val">Password Update</span></div>
+           <div class="info-row"><span class="info-label">Status</span><span class="info-val" style="color:#4ade80;">Successful</span></div>
+           <div class="info-row"><span class="info-label">Device IP</span><span class="info-val">192.168.1.1</span></div>
+         </div>
+         <p class="email-text">If you did not perform this change, please contact support immediately to lock your account.</p>`,
+        '',
+        '',
+        'Security event logged • Contact support if unrecognized'
+      ),
+
+      planChanged: TEMPLATE_SHELL(
+        'Billing Update',
+        'background:rgba(139,92,246,0.12); border-color:rgba(139,92,246,0.3); color:#c084fc;',
+        '#8b5cf6',
+        'Subscription Plan Updated',
+        `<p class="email-text">Hello <strong>Mahesh</strong>,</p>
+         <p class="email-text">Great news! Your subscription plan has been successfully updated to <strong>Pro Plan</strong>.</p>
+         <div class="info-card" style="border-left-color:#8b5cf6;">
+           <div class="info-row"><span class="info-label">New Tier</span><span class="info-val" style="color:#c084fc;">Pro Plan</span></div>
+           <div class="info-row"><span class="info-label">Billing Cycle</span><span class="info-val">Monthly</span></div>
+           <div class="info-row"><span class="info-label">Status</span><span class="info-val" style="color:#4ade80;">Active</span></div>
+         </div>
+         <p class="email-text">Thank you for choosing LocatorX for your team\'s locator consistency and automation!</p>`,
+        `<a href="https://locatorx.dev/dashboard" class="btn-primary">Go to Dashboard &rarr;</a>`,
+        '',
+        'Transaction verified via Razorpay'
+      ),
+
+      cleanup: TEMPLATE_SHELL(
+        'Action Required',
+        'background:rgba(245,158,11,0.12); border-color:rgba(245,158,11,0.3); color:#fbbf24;',
+        '#f59e0b',
+        'Final Account Verification Reminder',
+        `<p class="email-text">Hello <strong>Mahesh</strong>,</p>
+         <p class="email-text">Your LocatorX account remains unverified. To prevent unused account clutter, unverified accounts are automatically removed after 7 days.</p>
+         <p class="email-text">You have <strong style="color:#f59e0b;">24 hours remaining</strong> to verify your account and retain your saved locators:</p>`,
+        `<a href="https://locatorx.dev/auth/verify?token=final_token" class="btn-primary">Verify Account Now &rarr;</a>`,
+        'https://locatorx.dev/auth/verify?token=final_token_123',
+        'Unverified accounts purged automatically after 24h'
+      ),
+
+      passExpiry: TEMPLATE_SHELL(
+        'Security Notice',
+        'background:rgba(245,158,11,0.12); border-color:rgba(245,158,11,0.3); color:#fbbf24;',
+        '#f59e0b',
+        'Password Expiry Notice',
+        `<p class="email-text">Hello <strong>Mahesh</strong>,</p>
+         <p class="email-text">Your LocatorX password is scheduled to expire in <strong style="color:#fbbf24;">3 days</strong>.</p>
+         <p class="email-text">To ensure uninterrupted access for your team, please update your password before the expiry date. We include a 7-day grace period, after which account access will be restricted.</p>`,
+        `<a href="https://locatorx.dev/settings" class="btn-primary">Update Password Now &rarr;</a>`,
+        'https://locatorx.dev/settings',
+        'Security policy enforcement • 7-day grace period applies'
+      ),
+
+      planExpiry: TEMPLATE_SHELL(
+        'Subscription Notice',
+        'background:rgba(239,68,68,0.12); border-color:rgba(239,68,68,0.3); color:#f87171;',
+        '#ef4444',
+        'Team Subscription Expiring Soon',
+        `<p class="email-text">Hello <strong>Mahesh</strong>,</p>
+         <p class="email-text">The subscription for your team workspace <strong>QA Core Automation</strong> will expire in <strong style="color:#f87171;">7 days</strong>.</p>
+         <p class="email-text">Renew your plan now to prevent any downtime or feature restrictions for your team members.</p>`,
+        `<a href="https://locatorx.dev/pricing" class="btn-primary">Renew Subscription &rarr;</a>`,
+        'https://locatorx.dev/pricing',
+        'Automated billing notice for workspace owner'
+      )
+    };
+
+    function switchTemplate(key, btnEl) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      btnEl.classList.add('active');
+
+      const content = TEMPLATES[key];
+      document.getElementById('desktop-render').innerHTML = content;
+      document.getElementById('mobile-render').innerHTML = content;
+    }
+
+    function toggleTheme() {
+      document.getElementById('preview-wrapper').classList.toggle('light-mode');
+    }
+
+    // Default load
+    document.getElementById('desktop-render').innerHTML = TEMPLATES.verification;
+    document.getElementById('mobile-render').innerHTML = TEMPLATES.verification;
+  </script>
+</body>
+
+</html>

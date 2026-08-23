@@ -1,7 +1,8 @@
 import { User, Profile } from '../models/index.js';
 import { Op } from 'sequelize';
-import * as emailService from './emailService.js';
+import * as emailService from './emailService.jsx';
 import cron from 'node-cron';
+import jwt from 'jsonwebtoken';
 
 /**
  * Cleanup Service
@@ -46,7 +47,12 @@ export const performCleanup = async () => {
             const chunk = usersToRemind.slice(i, i + CHUNK_SIZE);
             const chunkResults = await Promise.all(chunk.map(async (user) => {
                 console.log(`Sending cleanup reminder to: ${user.email}`);
-                const success = await emailService.sendCleanupReminderEmail(user.email, user.profile?.name);
+                const token = jwt.sign(
+                    { id: user.id, email: user.email },
+                    process.env.JWT_SECRET || 'secret',
+                    { expiresIn: '7d' }
+                );
+                const success = await emailService.sendCleanupReminderEmail(user.email, user.profile?.name, token);
                 return { id: user.id, success };
             }));
 

@@ -3,27 +3,33 @@ import BaseEmail, { headingStyle, textStyle, buttonStyle } from '../BaseEmail.js
 
 export default function PlanExpiryReminderEmail({ name, teamName, daysRemaining, renewUrl }) {
   return (
-    <BaseEmail title="Plan Expiry Reminder" name={name}>
-      <h2 style={headingStyle}>
-        Subscription Reminder
+    <BaseEmail 
+      title="Team Subscription Expiring Soon" 
+      name={name}
+      categoryBadge="Subscription Notice"
+      fallbackUrl={renewUrl}
+      securityNote="Automated billing notice for workspace owner"
+    >
+      <h2 className="text-heading" style={headingStyle}>
+        Team Subscription Expiring Soon
       </h2>
 
-      <p style={textStyle}>
-        Your subscription for team <strong style={{ color: '#f8fafc' }}>{teamName}</strong> is set to expire in <strong style={{ color: '#f8fafc' }}>{daysRemaining} days</strong>.
+      <p className="text-body" style={textStyle}>
+        The subscription for your team workspace <strong className="text-heading">{teamName}</strong> will expire in <strong style={{ color: '#dc2626' }}>{daysRemaining} days</strong>.
       </p>
       
-      <p style={textStyle}>
-        Renew your plan now to ensure uninterrupted access to all of Locator-X's premium features for your team.
+      <p className="text-body" style={textStyle}>
+        Renew your plan now to prevent any downtime or feature restrictions for your team members.
       </p>
       
       <div style={{ textAlign: 'center' }}>
         <a href={renewUrl} style={buttonStyle}>
-          Renew Subscription
+          Renew Subscription &rarr;
         </a>
       </div>
       
-      <p style={{ ...textStyle, margin: '16px 0 0 0' }}>
-        If you have any questions about your billing or plan, feel free to contact our support team.
+      <p className="text-body" style={{ ...textStyle, fontSize: '13px', margin: '16px 0 0 0' }}>
+        If you have any questions regarding billing or plan options, feel free to contact our support team.
       </p>
     </BaseEmail>
   );

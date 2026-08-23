@@ -2,7 +2,8 @@ import { PromoCode } from '../models/index.js';
 
 export const validatePromoCode = async (req, res) => {
     try {
-        const { code, plan } = req.body;
+        const { code, plan, planName } = req.body;
+        const targetPlan = plan || planName;
         
         if (!code) {
             return res.status(400).json({ success: false, message: 'Promo code is required' });
@@ -30,16 +31,24 @@ export const validatePromoCode = async (req, res) => {
             return res.status(400).json({ success: false, message: 'This promo code is not valid for your account' });
         }
 
-        if (plan && promo.allowedPlans && promo.allowedPlans.length > 0) {
-            if (!promo.allowedPlans.includes(plan)) {
-                return res.status(400).json({ success: false, message: `This promo code is not valid for the ${plan} plan` });
+        if (targetPlan && promo.allowedPlans && promo.allowedPlans.length > 0) {
+            // Convert everything to lowercase to make checking plan compatibility robust
+            const allowed = promo.allowedPlans.map(p => p.toLowerCase());
+            if (!allowed.includes(targetPlan.toLowerCase())) {
+                return res.status(400).json({ success: false, message: `This promo code is not valid for the ${targetPlan} plan` });
             }
         }
 
+        // Return the format expected by the frontend (both flat discountType/discountValue and nested promo object with snake_case keys)
         res.json({
             success: true,
             discountType: promo.discountType,
-            discountValue: promo.discountValue
+            discountValue: promo.discountValue,
+            promo: {
+                code: promo.code,
+                discount_type: promo.discountType,
+                discount_value: promo.discountValue
+            }
         });
 
     } catch (error) {
@@ -47,3 +56,47 @@ export const validatePromoCode = async (req, res) => {
         res.status(500).json({ success: false, message: 'Server Error' });
     }
 };
+
+// Generate a personalized trial offer for expired trial users
+export const generateTrialOffer = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const code = `TRIAL50_${userId.substring(0, 6).toUpperCase()}`;
+
+        // Find or create active trial offer promo code for this user
+        let promo = await PromoCode.findOne({
+            where: {
+                specificUserId: userId,
+                code,
+                isActive: true
+            }
+        });
+
+        if (!promo) {
+            promo = await PromoCode.create({
+                code,
+                discountType: 'percent',
+                discountValue: 50.00,
+                validUntil: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), // Valid for 3 days
+                maxUses: 1,
+                currentUses: 0,
+                isActive: true,
+                specificUserId: userId,
+                allowedPlans: ['pro', 'premium', 'team']
+            });
+        }
+
+        res.json({
+            success: true,
+            promo: {
+                code: promo.code,
+                discount_type: promo.discountType,
+                discount_value: promo.discountValue
+            }
+        });
+    } catch (error) {
+        console.error('generateTrialOffer error:', error);
+        res.status(500).json({ success: false, message: 'Server Error' });
+    }
+};
+

@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LocatorX Click Interaction Sandbox</title>
+    <style>
+        /* ======================================================= */
+        /* 🌌 Global Styling matched to LocatorX Website Design     */
+        /* ======================================================= */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            /* Exact background color and top ambient radial gradient from our index.css */
+            background: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(99, 102, 241, 0.18), rgba(255, 255, 255, 0)), hsl(240, 10%, 3.5%);
+            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            overflow: hidden;
+            position: relative;
+            padding: 24px;
+        }
+
+        /* Ambient glowing blobs that float behind the glass to show off the backdrop filter */
+        .ambient-blob-1 {
+            position: absolute;
+            top: 15%;
+            left: 20%;
+            width: 380px;
+            height: 380px;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.22) 0%, rgba(99, 102, 241, 0) 70%);
+            border-radius: 50%;
+            filter: blur(60px);
+            z-index: 1;
+            pointer-events: none;
+            animation: drift 15s infinite ease-in-out;
+        }
+
+        .ambient-blob-2 {
+            position: absolute;
+            bottom: 10%;
+            right: 15%;
+            width: 420px;
+            height: 420px;
+            background: radial-gradient(circle, rgba(6, 182, 212, 0.16) 0%, rgba(6, 182, 212, 0) 70%);
+            border-radius: 50%;
+            filter: blur(70px);
+            z-index: 1;
+            pointer-events: none;
+            animation: drift 18s infinite ease-in-out -3s;
+        }
+
+        @keyframes drift {
+
+            0%,
+            100% {
+                transform: translate(0, 0) scale(1);
+            }
+
+            50% {
+                transform: translate(50px, -60px) scale(1.15);
+            }
+        }
+
+        .container {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+            width: 100%;
+        }
+
+        .header-section {
+            margin-bottom: 8px;
+        }
+
+        h1 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: rgba(255, 255, 255, 0.95);
+            margin-bottom: 6px;
+            text-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        p.desc {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.5);
+            max-width: 380px;
+            margin: 0 auto;
+            line-height: 1.4;
+        }
+
+        /* ======================================================= */
+        /* 🏆 Apple Liquid Glass Capsule Button Styling            */
+        /* ======================================================= */
+        .antigravity-apple-button {
+            position: relative;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            height: 40px;
+            padding: 0 24px;
+
+            /* Precise Apple Typography */
+            font-size: 14px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.95);
+            letter-spacing: -0.15px;
+
+            /* Liquid Glass Capsule Properties (matching our site's theme) */
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.02) 100%), rgba(12, 12, 18, 0.45);
+            backdrop-filter: blur(28px) saturate(240%);
+            -webkit-backdrop-filter: blur(28px) saturate(240%);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            border-radius: 999px;
+            /* Capsule pill shape */
+
+            /* 3D Specular Highlight Edge Reflections */
+            box-shadow:
+                inset 0 1.5px 0 0 rgba(255, 255, 255, 0.25),
+                inset 0 -1.5px 0 0 rgba(0, 0, 0, 0.35),
+                0 4px 15px rgba(0, 0, 0, 0.35);
+
+            transition: background-color 0.3s ease, transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
+            overflow: hidden;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        /* Refractive glass diagonal shine sweep on hover */
+        .antigravity-apple-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -150%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg,
+                    transparent,
+                    rgba(255, 255, 255, 0.24),
+                    transparent);
+            transform: skewX(-25deg);
+            transition: 0.75s ease;
+        }
+
+        .antigravity-apple-button:hover::before {
+            left: 150%;
+        }
+
+        /* Interactive Hover State */
+        .antigravity-apple-button:hover {
+            transform: translateY(-2px) scale(1.02);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.04) 100%), rgba(18, 18, 26, 0.55);
+            border-color: rgba(255, 255, 255, 0.22);
+            box-shadow:
+                inset 0 2px 0 0 rgba(255, 255, 255, 0.35),
+                inset 0 -1.5px 0 0 rgba(0, 0, 0, 0.2),
+                0 10px 22px rgba(0, 0, 0, 0.45),
+                0 0 20px rgba(99, 102, 241, 0.2);
+        }
+
+        /* Bouncy active pressed compression */
+        .antigravity-apple-button:active {
+            transform: scale(0.97);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.01) 100%), rgba(8, 8, 12, 0.55);
+            box-shadow:
+                inset 0 1px 0 0 rgba(255, 255, 255, 0.12),
+                0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .apple-svg {
+            width: 14px;
+            height: 14px;
+            stroke: currentColor;
+        }
+
+        /* ======================================================= */
+        /* 🎨 Click Effects Options CSS Declarations               */
+        /* ======================================================= */
+
+        /* Option 1: Clean Glass Bubble */
+        .effect-glass-bubble {
+            position: fixed;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: 1.5px solid rgba(255, 255, 255, 0.45);
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.02) 70%);
+            box-shadow:
+                inset 1.5px 1.5px 3px rgba(255, 255, 255, 0.4),
+                0 0 20px rgba(99, 102, 241, 0.25);
+            transform: translate(-50%, -50%) scale(0.1);
+            pointer-events: none;
+            z-index: 9999;
+            backdrop-filter: blur(4px) saturate(120%);
+            -webkit-backdrop-filter: blur(4px) saturate(120%);
+            will-change: transform, opacity;
+            animation: glass-bubble-pop 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes glass-bubble-pop {
+            0% {
+                transform: translate(-50%, -50%) scale(0.1);
+                opacity: 0.95;
+            }
+
+            100% {
+                transform: translate(-50%, -50%) scale(1.6);
+                opacity: 0;
+            }
+        }
+
+        /* Option 2: Organic Water Splash */
+        .effect-water-splash {
+            position: fixed;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0.05) 75%);
+            border: 1.5px solid rgba(255, 255, 255, 0.45);
+            box-shadow: inset 1.5px 1.5px 2px rgba(255, 255, 255, 0.45), 0 4px 12px rgba(0, 0, 0, 0.25);
+            transform: translate(-50%, -50%) scale(0.2);
+            pointer-events: none;
+            z-index: 9999;
+            backdrop-filter: blur(3.5px);
+            -webkit-backdrop-filter: blur(3.5px);
+            will-change: transform, opacity;
+            animation: water-splash-center 0.45s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
+        }
+
+        .effect-water-splash-droplet {
+            position: fixed;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.65);
+            box-shadow: inset 0.5px 0.5px 1px rgba(255, 255, 255, 0.8), 0 2px 4px rgba(99, 102, 241, 0.3);
+            pointer-events: none;
+            z-index: 9999;
+            will-change: transform, opacity;
+            animation: water-droplet-fly var(--duration) cubic-bezier(0.1, 0.8, 0.2, 1) forwards;
+        }
+
+        @keyframes water-splash-center {
+            0% {
+                transform: translate(-50%, -50%) scale(0.2);
+                opacity: 0.9;
+            }
+
+            100% {
+                transform: translate(-50%, -50%) scale(1.3);
+                opacity: 0;
+            }
+        }
+
+        @keyframes water-droplet-fly {
+            0% {
+                transform: translate(-50%, -50%) translate(0, 0) scale(1);
+                opacity: 0.95;
+            }
+
+            100% {
+                transform: translate(-50%, -50%) translate(var(--tx), var(--ty)) scale(0.1);
+                opacity: 0;
+            }
+        }
+
+        /* Option 3: Neon Glow Wave */
+        .effect-neon-wave {
+            position: fixed;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(6, 182, 212, 0.35) 0%, rgba(99, 102, 241, 0.1) 45%, transparent 75%);
+            box-shadow: 0 0 25px rgba(6, 182, 212, 0.4), inset 0 0 15px rgba(99, 102, 241, 0.2);
+            border: 1px solid rgba(6, 182, 212, 0.3);
+            transform: translate(-50%, -50%) scale(0.1);
+            pointer-events: none;
+            z-index: 9999;
+            will-change: transform, opacity;
+            animation: neon-wave-pop 0.5s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+        }
+
+        @keyframes neon-wave-pop {
+            0% {
+                transform: translate(-50%, -50%) scale(0.1);
+                opacity: 0.9;
+            }
+
+            100% {
+                transform: translate(-50%, -50%) scale(1.8);
+                opacity: 0;
+            }
+        }
+
+        /* Option 4: Sparkle Dust Burst */
+        .effect-sparkle {
+            position: fixed;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #ffffff;
+            box-shadow: 0 0 8px #ffffff, 0 0 16px rgba(99, 102, 241, 0.8);
+            pointer-events: none;
+            z-index: 9999;
+            will-change: transform, opacity;
+            animation: sparkle-burst var(--duration) cubic-bezier(0.25, 1, 0.5, 1) forwards;
+        }
+
+        @keyframes sparkle-burst {
+            0% {
+                transform: translate(-50%, -50%) translate(0, 0) scale(1.2) rotate(0deg);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translate(-50%, -50%) translate(var(--tx), var(--ty)) scale(0.1) rotate(180deg);
+                opacity: 0;
+            }
+        }
+
+        /* Option 5: Apple Matte Wave */
+        .effect-apple-wave {
+            position: fixed;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            transform: translate(-50%, -50%) scale(0.3);
+            pointer-events: none;
+            z-index: 9999;
+            will-change: transform, opacity;
+            animation: apple-wave-pop 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        }
+
+        @keyframes apple-wave-pop {
+            0% {
+                transform: translate(-50%, -50%) scale(0.3);
+                opacity: 0.8;
+            }
+
+            100% {
+                transform: translate(-50%, -50%) scale(1.5);
+                border-color: rgba(255, 255, 255, 0.1);
+                opacity: 0;
+            }
+        }
+
+        /* ======================================================= */
+        /* 🎛️ Selector Control Panel UI                            */
+        /* ======================================================= */
+        .control-panel {
+            margin-top: 24px;
+            background: rgba(12, 12, 18, 0.45);
+            backdrop-filter: blur(28px) saturate(160%);
+            -webkit-backdrop-filter: blur(28px) saturate(160%);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 20px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 12px 40px rgba(0, 0, 0, 0.5);
+            z-index: 100;
+        }
+
+        .control-panel h2 {
+            font-size: 13px;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 12px;
+            text-align: left;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .control-panel h2::before {
+            content: '';
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            background-color: #6366f1;
+            border-radius: 50%;
+            box-shadow: 0 0 8px #6366f1;
+        }
+
+        .effect-options {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .effect-option {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 14px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            font-size: 13.5px;
+            color: rgba(255, 255, 255, 0.7);
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .effect-option:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+            transform: translateX(2px);
+        }
+
+        .effect-option.active {
+            background: rgba(99, 102, 241, 0.14);
+            border-color: rgba(99, 102, 241, 0.45);
+            color: #a5b4fc;
+            box-shadow: 0 0 15px rgba(99, 102, 241, 0.1);
+        }
+
+        .effect-info {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 2px;
+        }
+
+        .effect-name {
+            font-weight: 600;
+        }
+
+        .effect-desc {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .effect-option.active .effect-desc {
+            color: rgba(165, 180, 252, 0.6);
+        }
+
+        .radio-dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 1.5px solid rgba(255, 255, 255, 0.35);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .effect-option:hover .radio-dot {
+            border-color: rgba(255, 255, 255, 0.6);
+        }
+
+        .effect-option.active .radio-dot {
+            border-color: #a5b4fc;
+        }
+
+        .effect-option.active .radio-dot::after {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background-color: #a5b4fc;
+            border-radius: 50%;
+            box-shadow: 0 0 6px rgba(165, 180, 252, 0.8);
+        }
+
+        .click-anywhere-hint {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.4);
+            margin-top: 12px;
+            font-style: italic;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Floating Background Blur Meshes -->
+    <div class="ambient-blob-1"></div>
+    <div class="ambient-blob-2"></div>
+
+    <div class="container">
+        <div class="header-section">
+            <h1>LocatorX Click Interaction Sandbox</h1>
+            <p class="desc">Compare these premium transitions. Select an effect from the panel below, then click
+                anywhere on the page to preview it.</p>
+        </div>
+
+        <button class="antigravity-apple-button">
+            <svg class="apple-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path
+                    d="M12 2a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1V7a5 5 0 0 0-5-5zM9 7a3 3 0 0 1 6 0v3H9V7zm9 5v8H6v-8h12z" />
+            </svg>
+            Sign In
+        </button>
+
+        <!-- Interactive Click Effect Control Panel -->
+        <div class="control-panel">
+            <h2>Choose Click Effect</h2>
+            <div class="effect-options">
+                <!-- Option 1: Clean Glass Bubble -->
+                <div class="effect-option active" data-effect="glass-bubble">
+                    <div class="effect-info">
+                        <span class="effect-name">Clean Glass Bubble</span>
+                        <span class="effect-desc">Minimalist, premium frosted bubble pop</span>
+                    </div>
+                    <div class="radio-dot"></div>
+                </div>
+
+                <!-- Option 2: Organic Water Splash -->
+                <div class="effect-option" data-effect="water-splash">
+                    <div class="effect-info">
+                        <span class="effect-name">Organic Water Splash</span>
+                        <span class="effect-desc">Springy fluid droplet + secondary micro-splashes</span>
+                    </div>
+                    <div class="radio-dot"></div>
+                </div>
+
+                <!-- Option 3: Neon Glow Wave -->
+                <div class="effect-option" data-effect="neon-wave">
+                    <div class="effect-info">
+                        <span class="effect-name">Neon Glow Wave</span>
+                        <span class="effect-desc">Cyan-indigo pulsing fluid energy halo</span>
+                    </div>
+                    <div class="radio-dot"></div>
+                </div>
+
+                <!-- Option 4: Sparkle Dust Burst -->
+                <div class="effect-option" data-effect="sparkle-burst">
+                    <div class="effect-info">
+                        <span class="effect-name">Sparkle Dust Burst</span>
+                        <span class="effect-desc">Glittering magical particle burst</span>
+                    </div>
+                    <div class="radio-dot"></div>
+                </div>
+
+                <!-- Option 5: Apple Matte Wave -->
+                <div class="effect-option" data-effect="apple-wave">
+                    <div class="effect-info">
+                        <span class="effect-name">Apple Matte Wave</span>
+                        <span class="effect-desc">Ultra-clean, wireframe boundary expansion</span>
+                    </div>
+                    <div class="radio-dot"></div>
+                </div>
+            </div>
+            <div class="click-anywhere-hint">Click anywhere on the screen to test the active effect!</div>
+        </div>
+    </div>
+
+    <script>
+        let activeEffect = 'glass-bubble';
+
+        // Register option click handlers
+        document.querySelectorAll('.effect-option').forEach(option => {
+            option.addEventListener('click', (e) => {
+                e.stopPropagation(); // Prevent triggering the effect itself on selection click
+                document.querySelectorAll('.effect-option').forEach(opt => opt.classList.remove('active'));
+                option.classList.add('active');
+                activeEffect = option.dataset.effect;
+            });
+        });
+
+        document.addEventListener('click', (e) => {
+            // If the click is inside the control panel, don't spawn the effect
+            if (e.target.closest('.control-panel')) {
+                return;
+            }
+
+            const x = e.clientX;
+            const y = e.clientY;
+
+            if (activeEffect === 'glass-bubble') {
+                const bubble = document.createElement('div');
+                bubble.className = 'effect-glass-bubble';
+                bubble.style.left = x + 'px';
+                bubble.style.top = y + 'px';
+                document.body.appendChild(bubble);
+                setTimeout(() => bubble.remove(), 500);
+            }
+            else if (activeEffect === 'water-splash') {
+                // Spawn center splash
+                const splash = document.createElement('div');
+                splash.className = 'effect-water-splash';
+                splash.style.left = x + 'px';
+                splash.style.top = y + 'px';
+                document.body.appendChild(splash);
+                setTimeout(() => splash.remove(), 500);
+
+                // Spawn secondary droplets
+                const numDroplets = 5;
+                for (let i = 0; i < numDroplets; i++) {
+                    const droplet = document.createElement('div');
+                    droplet.className = 'effect-water-splash-droplet';
+                    droplet.style.left = x + 'px';
+                    droplet.style.top = y + 'px';
+
+                    // Spread radially
+                    const angle = (i * (2 * Math.PI) / numDroplets) + (Math.random() * 0.4 - 0.2);
+                    const distance = 24 + Math.random() * 20;
+                    const tx = Math.cos(angle) * distance;
+                    const ty = Math.sin(angle) * distance;
+                    const duration = 0.35 + Math.random() * 0.15;
+
+                    droplet.style.setProperty('--tx', `${tx}px`);
+                    droplet.style.setProperty('--ty', `${ty}px`);
+                    droplet.style.setProperty('--duration', `${duration}s`);
+
+                    document.body.appendChild(droplet);
+                    setTimeout(() => droplet.remove(), duration * 1000);
+                }
+            }
+            else if (activeEffect === 'neon-wave') {
+                const wave = document.createElement('div');
+                wave.className = 'effect-neon-wave';
+                wave.style.left = x + 'px';
+                wave.style.top = y + 'px';
+                document.body.appendChild(wave);
+                setTimeout(() => wave.remove(), 500);
+            }
+            else if (activeEffect === 'sparkle-burst') {
+                const numSparkles = 8;
+                for (let i = 0; i < numSparkles; i++) {
+                    const sparkle = document.createElement('div');
+                    sparkle.className = 'effect-sparkle';
+                    sparkle.style.left = x + 'px';
+                    sparkle.style.top = y + 'px';
+
+                    const angle = Math.random() * 2 * Math.PI;
+                    const distance = 25 + Math.random() * 35;
+                    const tx = Math.cos(angle) * distance;
+                    const ty = Math.sin(angle) * distance;
+                    const duration = 0.4 + Math.random() * 0.2;
+
+                    sparkle.style.setProperty('--tx', `${tx}px`);
+                    sparkle.style.setProperty('--ty', `${ty}px`);
+                    sparkle.style.setProperty('--duration', `${duration}s`);
+
+                    document.body.appendChild(sparkle);
+                    setTimeout(() => sparkle.remove(), duration * 1000);
+                }
+            }
+            else if (activeEffect === 'apple-wave') {
+                const wave = document.createElement('div');
+                wave.className = 'effect-apple-wave';
+                wave.style.left = x + 'px';
+                wave.style.top = y + 'px';
+                document.body.appendChild(wave);
+                setTimeout(() => wave.remove(), 400);
+            }
+        });
+    </script>
+</body>
+
+</html>

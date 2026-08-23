@@ -81,7 +81,7 @@ const PromoCodeInput = ({ onApply, onRemove, disabled, planName }) => {
                     placeholder="Promo Code"
                     value={code}
                     onChange={(e) => setCode(e.target.value)}
-                    className="pl-9 bg-background/50 border-white/10"
+                    className="pl-9"
                     disabled={disabled || isValidating}
                     onKeyDown={(e) => e.key === 'Enter' && handleApply()}
                 />

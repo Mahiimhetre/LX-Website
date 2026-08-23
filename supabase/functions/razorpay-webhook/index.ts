@@ -3,6 +3,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { crypto } from "https://deno.land/std@0.177.0/crypto/mod.ts";
 import { encode } from "https://deno.land/std@0.177.0/encoding/hex.ts";
 import { Resend } from "https://esm.sh/resend@2.0.0";
+import sjson from "npm:secure-json-parse";
 
 const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
@@ -44,7 +45,7 @@ serve(async (req: Request) => {
             return new Response(JSON.stringify({ error: 'Invalid signature' }), { status: 401 });
         }
 
-        const event = JSON.parse(bodyText);
+        const event = sjson.parse(bodyText);
         console.log("Webhook received:", event.event);
 
         if (event.event === 'payment.captured') {

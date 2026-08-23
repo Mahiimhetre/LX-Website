@@ -41,7 +41,7 @@ const UserProfile = () => {
     };
 
     return (
-        <Card className="w-full bg-white/5 border-white/10 backdrop-blur-md">
+        <Card className="w-full glass-panel">
             <CardHeader>
                 <div className="flex flex-col sm:flex-row items-center gap-4">
                     <Avatar className="h-16 w-16 border-2 border-primary/20">
@@ -162,7 +162,7 @@ const UserProfile = () => {
                                         </html>
                                     `}
                                     sandbox=""
-                                    className="w-full h-[150px] rounded-md border border-white/10 bg-black/20"
+                                    className="w-full h-[150px] rounded-xl border border-white/10 bg-black/20"
                                     title="Terms of Service"
                                 />
                             </div>

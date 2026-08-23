@@ -23,7 +23,9 @@ const OAuthCallback = () => {
             if (token) {
                 await loginWithToken(token);
                 toast.success('Successfully logged in!');
-                navigate('/dashboard');
+                const returnTo = searchParams.get('returnTo');
+                const destination = returnTo && returnTo.startsWith('/') ? returnTo : '/dashboard';
+                navigate(destination);
             } else {
                 navigate('/auth/login');
             }

@@ -5,6 +5,7 @@ import {
     ArrowRight,
     ArrowUpDown,
     Award,
+    Bell,
     Book,
     Bot,
     Building,
@@ -154,6 +155,7 @@ export const BotIcon = Bot;
 export const BookIcon = Book;
 export const CodeIcon = Code;
 
+export const BellIcon = Bell;
 export const BuildingIcon = Building;
 export const CopyIcon = Copy;
 export const LandmarkIcon = Landmark;

@@ -1,5 +1,5 @@
 import { performCleanup } from './utils/cleanupService.js';
-import * as emailService from './utils/emailService.js';
+import * as emailService from './utils/emailService.jsx';
 import { User, Profile } from './models/index.js';
 import sequelize from './config/database.js';
 

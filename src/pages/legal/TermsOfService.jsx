@@ -44,6 +44,24 @@ const TermsOfService = () => {
                     <p>
                         In no event shall Locator-X, nor its directors, employees, partners, agents, suppliers, or affiliates, be liable for any indirect, incidental, special, consequential or punitive damages, including without limitation, loss of profits, data, use, goodwill, or other intangible losses.
                     </p>
+
+                    <h2 className="text-2xl font-bold text-foreground mt-8">7. AI Services & API Fair Use</h2>
+                    <p>
+                        If you use our AI locator assistance, you agree not to automate requests, script API endpoints, or exceed rate limits. 
+                        Violating fair use policies may result in temporary or permanent suspension of your account.
+                    </p>
+
+                    <h2 className="text-2xl font-bold text-foreground mt-8">8. Extension Licensing & Restrictions</h2>
+                    <p>
+                        We grant you a personal, non-transferable license to use the Locator-X extension. You may not reverse-engineer, 
+                        decompile, clone, or distribute modified versions of the extension.
+                    </p>
+
+                    <h2 className="text-2xl font-bold text-foreground mt-8">9. Selector Disclaimer</h2>
+                    <p>
+                        LocatorX generates selectors based on the current state of a webpage. We do not guarantee that locators are unbreakable. 
+                        We are not liable for failures, false positives, or downtime in your automated testing suites or CI/CD pipelines.
+                    </p>
                 </div>
             </div>
         </div>

@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import TiltCard from "@/components/ui/tilt-card";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -35,7 +34,7 @@ const ModalSystem = ({ className }) => {
     };
 
     return (
-        <TiltCard className={cn("w-full rounded-xl border border-white/10 bg-white/5 backdrop-blur-md", className)}>
+        <Card className={cn("w-full glass-panel", className)}>
             <CardHeader>
                 <CardTitle>Modal System</CardTitle>
             </CardHeader>
@@ -88,7 +87,7 @@ const ModalSystem = ({ className }) => {
                         <DrawerTrigger asChild>
                             <Button variant="secondary">Open Bottom Sheet</Button>
                         </DrawerTrigger>
-                        <DrawerContent className="bg-[#0f172a] border-white/10">
+                        <DrawerContent className="bg-black/60 border-white/10 backdrop-blur-2xl">
                             <div className="p-6 pt-2 relative">
                                 <DrawerClose asChild>
                                     <button className="absolute right-2 top-0 p-0.5 hover:bg-white/10 rounded-full transition-colors z-10">
@@ -109,7 +108,7 @@ const ModalSystem = ({ className }) => {
                     </Drawer>
                 </div>
             </CardContent>
-        </TiltCard>
+        </Card>
     );
 };
 

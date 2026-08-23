@@ -1,15 +1,17 @@
 import { useEffect } from 'react';
 import { useLocation, Link } from 'react-router-dom';
-import {  ArrowLeft  } from '@/components/icons';
+import { ArrowLeft } from '@/components/icons';
 import Header from './Header';
 import Footer from './Footer';
 import PromoBanner from '../marketing/PromoBanner';
+import NotificationModal from '@/components/notifications/NotificationModal';
 
 const Layout = ({ children }) => {
     const location = useLocation();
     const isAuthPage = location.pathname.startsWith('/auth');
 
     useEffect(() => {
+        window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
         const path = location.pathname;
         let title = 'LocatorX';
 
@@ -26,11 +28,40 @@ const Layout = ({ children }) => {
         else if (path.startsWith('/team')) title = 'LocatorX | Team';
 
         document.title = title;
-    }, [location]);
+    }, [location.pathname]);
+
+    useEffect(() => {
+        const handleGlobalClick = (e) => {
+            const wave = document.createElement('div');
+            wave.className = 'click-wave-feedback';
+            wave.style.left = `${e.clientX}px`;
+            wave.style.top = `${e.clientY}px`;
+            document.body.appendChild(wave);
+
+            setTimeout(() => {
+                if (wave.parentNode) {
+                    wave.remove();
+                }
+            }, 400);
+        };
+
+        window.addEventListener('click', handleGlobalClick);
+        return () => {
+            window.removeEventListener('click', handleGlobalClick);
+        };
+    }, []);
 
     return (
-        <div className="flex flex-col min-h-screen bg-background relative">
-            <div className="sticky top-0 z-50 w-full flex flex-col">
+        <div className="flex flex-col min-h-screen bg-background relative overflow-hidden">
+            {/* Siri/iOS-style animated background blur mesh */}
+            <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+                <div className="absolute top-[10%] left-[5%] w-[45vw] h-[45vw] md:w-[35vw] md:h-[35vw] bg-indigo-600/12 rounded-full blur-[100px] md:blur-[140px] animate-ios-drift-1" />
+                <div className="absolute top-[35%] right-[5%] w-[45vw] h-[45vw] md:w-[40vw] md:h-[40vw] bg-purple-600/10 rounded-full blur-[110px] md:blur-[150px] animate-ios-drift-2" />
+                <div className="absolute bottom-[5%] left-[10%] w-[40vw] h-[40vw] md:w-[35vw] md:h-[35vw] bg-cyan-600/10 rounded-full blur-[90px] md:blur-[130px] animate-ios-drift-3" />
+                <div className="absolute top-[70%] left-[45%] -translate-x-1/2 w-[55vw] h-[35vw] bg-pink-600/6 rounded-full blur-[120px] md:blur-[160px]" />
+            </div>
+
+            <div className="sticky top-0 z-50 w-full flex flex-col relative">
                 {/* <PromoBanner /> */}
                 {!isAuthPage && <Header />}
             </div>
@@ -47,10 +78,13 @@ const Layout = ({ children }) => {
                 </div>
             )}
 
-            <main className="flex-1 w-full flex flex-col">
-                {children}
+            <main className={`flex-1 w-full flex flex-col relative z-10 ${!isAuthPage ? 'pt-20' : ''}`}>
+                <div key={location.pathname} className="flex-1 flex flex-col route-entrance">
+                    {children}
+                </div>
             </main>
-            {!isAuthPage && <Footer />}
+            {!isAuthPage && <Footer className="relative z-10" />}
+            <NotificationModal />
         </div>
     );
 };

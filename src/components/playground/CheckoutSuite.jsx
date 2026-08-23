@@ -41,7 +41,7 @@ export const ShoppingCart = React.memo(({
     const formatPrice = (amount) => `₹${amount.toLocaleString('en-IN')}`;
 
     return (
-        <Card className="w-full bg-white/5 border-white/10 backdrop-blur-md">
+        <Card className="w-full glass-panel">
             <CardHeader className="flex flex-row items-center justify-between">
                 <div className="flex items-center gap-4">
                     <Button variant="ghost" size="icon" onClick={onContinueShopping} title="Back to Products">
@@ -75,7 +75,7 @@ export const ShoppingCart = React.memo(({
                     <div className="grid gap-6 lg:grid-cols-3">
                         <div className="lg:col-span-2 space-y-4">
                             {cart.map((item) => (
-                                <Card key={item.id} className="bg-white/5 border-white/10">
+                                <Card key={item.id} className="glass border border-white/5 bg-white/2 hover:bg-white/4">
                                     <CardContent className="p-4 flex flex-col sm:flex-row items-start sm:items-center gap-4 justify-between">
                                         <div className="space-y-1 flex-1">
                                             <h4 className="font-semibold">{item.name}</h4>
@@ -83,11 +83,11 @@ export const ShoppingCart = React.memo(({
                                             <p className="font-medium text-primary">{item.price}</p>
                                         </div>
                                         <div className="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
-                                            <div className="flex items-center gap-2 bg-background/50 rounded-md border border-input p-1">
+                                            <div className="flex items-center gap-2 bg-white/5 rounded-xl border border-white/8 p-1">
                                                 <Button
                                                     variant="ghost"
                                                     size="icon"
-                                                    className="h-8 w-8 rounded-sm"
+                                                    className="h-8 w-8 rounded-lg"
                                                     onClick={() => onUpdateQuantity(item.id, -1)}
                                                 >
                                                     <Minus className="h-3 w-3" />
@@ -96,7 +96,7 @@ export const ShoppingCart = React.memo(({
                                                 <Button
                                                     variant="ghost"
                                                     size="icon"
-                                                    className="h-8 w-8 rounded-sm"
+                                                    className="h-8 w-8 rounded-lg"
                                                     onClick={() => onUpdateQuantity(item.id, 1)}
                                                     disabled={item.quantity >= item.stock}
                                                 >
@@ -117,7 +117,7 @@ export const ShoppingCart = React.memo(({
                             ))}
                         </div>
                         <div className="lg:col-span-1">
-                            <Card className="bg-white/5 border-white/10 sticky top-4">
+                             <Card className="glass border border-white/5 bg-white/2 sticky top-4">
                                 <CardHeader>
                                     <CardTitle className="text-lg">Order Summary</CardTitle>
                                 </CardHeader>
@@ -197,7 +197,7 @@ export const AddressForm = React.memo(({ onClose, onProceedToPayment, cartTotal 
     };
 
     return (
-        <Card className="w-full bg-white/5 border-white/10 backdrop-blur-md">
+        <Card className="w-full glass-panel">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle>Delivery Address</CardTitle>
                 <Button variant="ghost" size="sm" onClick={onClose}>Close</Button>
@@ -260,7 +260,7 @@ export const AddressForm = React.memo(({ onClose, onProceedToPayment, cartTotal 
 
                 <div className="mt-6 border-t border-white/10 pt-6">
                     <Label className="mb-2 block">Location Preview</Label>
-                    <div className="relative w-full h-[200px] rounded-md overflow-hidden border border-white/10 bg-black/20">
+                    <div className="relative w-full h-[200px] rounded-xl overflow-hidden border border-white/10 bg-black/20">
                         <iframe
                             srcDoc={`
                                 <!DOCTYPE html>
@@ -377,20 +377,20 @@ export const PaymentGateway = React.memo(({ amount, onClose, onPaymentComplete }
         setTimeout(() => {
             setIsProcessing(false);
             alert(`Payment of ₹${paymentAmount.toLocaleString('en-IN')} successful!`);
-            onPaymentComplete();
+            onPaymentComplete({ method: paymentMethod, amount: paymentAmount });
         }, 2000);
     };
 
     return (
-        <Card className="w-full max-w-2xl mx-auto bg-white/5 border-white/10 backdrop-blur-md">
+        <Card className="w-full max-w-2xl mx-auto glass-panel">
             <CardHeader className="flex flex-row items-center justify-between">
                 <div><CardTitle>Payment Gateway</CardTitle><CardDescription>Securely complete transaction</CardDescription></div>
                 <Button variant="ghost" onClick={onClose}>Close</Button>
             </CardHeader>
             <CardContent className="space-y-6">
-                <div className="flex items-center gap-4 p-4 bg-primary/10 rounded-lg border border-primary/20">
+                <div className="flex items-center gap-4 p-4 bg-primary/10 rounded-xl border border-primary/20">
                     <Label className="text-lg font-semibold">Amount to Pay:</Label>
-                    <div className="relative w-full max-w-[200px]"><span className="absolute left-3 top-2.5 text-muted-foreground">₹</span><Input type="number" value={paymentAmount} onChange={(e) => setPaymentAmount(Number(e.target.value))} className="pl-7 bg-background" /></div>
+                    <div className="relative w-full max-w-[200px]"><span className="absolute left-3 top-2.5 text-muted-foreground">₹</span><Input type="number" value={paymentAmount} onChange={(e) => setPaymentAmount(Number(e.target.value))} className="pl-7" /></div>
                 </div>
                 <Tabs value={paymentMethod} onValueChange={setPaymentMethod} className="w-full">
                     <TabsList className="grid w-full grid-cols-3 mb-6"><TabsTrigger value="upi" className="gap-2"><Smartphone className="h-4 w-4" /> UPI</TabsTrigger><TabsTrigger value="card" className="gap-2"><CreditCard className="h-4 w-4" /> Card</TabsTrigger><TabsTrigger value="netbanking" className="gap-2"><Landmark className="h-4 w-4" /> Net Banking</TabsTrigger></TabsList>

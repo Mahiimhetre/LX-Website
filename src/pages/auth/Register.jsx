@@ -1,9 +1,10 @@
 import { useState, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import {  Eye, EyeOff, Check, Loader2, ArrowRight, User, Mail, Lock, X, Github  } from '@/components/icons';
+import {  Eye, EyeOff, Check, Loader2, ArrowRight, User, Mail, Lock, X, Github, ShieldAlert  } from '@/components/icons';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import Logo from '@/components/Logo';
+import SocialButton from '@/components/ui/SocialButton';
 import {
     emailSchema,
     nameSchema,
@@ -24,6 +25,7 @@ const Register = () => {
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [focusedField, setFocusedField] = useState(null);
+    const [formError, setFormError] = useState('');
 
     const [nameError, setNameError] = useState(null);
     const [emailError, setEmailError] = useState(null);
@@ -52,6 +54,7 @@ const Register = () => {
 
     const handleRegister = async (e) => {
         e.preventDefault();
+        setFormError('');
 
         const nameErr = validateField(nameSchema, name);
         const emailErr = validateField(emailSchema, email);
@@ -61,13 +64,13 @@ const Register = () => {
         setEmailError(emailErr);
 
         if (nameErr || emailErr || passwordErr) {
-            toast.error(nameErr || emailErr || passwordErr);
+            setFormError(nameErr || emailErr || passwordErr);
             return;
         }
 
         if (password !== confirmPassword) {
             setConfirmPasswordError('Passwords do not match');
-            toast.error('Passwords do not match');
+            setFormError('Passwords do not match');
             return;
         }
 
@@ -79,7 +82,7 @@ const Register = () => {
             toast.success(result.message);
             navigate(`/auth/verify?email=${encodeURIComponent(email)}&name=${encodeURIComponent(name)}`);
         } else {
-            toast.error(result.message);
+            setFormError(result.message || 'Registration failed. Please try again.');
         }
     };
 
@@ -100,12 +103,12 @@ const Register = () => {
     return (
         <div className="flex-1 flex items-center justify-center relative overflow-hidden py-4 px-4 sm:px-6 lg:px-8">
             {/* Ambient Background Effects */}
-            <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-primary/20 blur-[128px] rounded-full mix-blend-screen opacity-20 pointer-events-none" />
-            <div className="absolute bottom-1/4 left-1/4 w-96 h-96 bg-purple-500/10 blur-[128px] rounded-full mix-blend-screen opacity-20 pointer-events-none" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-[65%] -translate-y-[55%] w-[450px] h-[450px] bg-primary/35 blur-[120px] rounded-full mix-blend-screen pointer-events-none animate-pulse -z-10" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-[35%] -translate-y-[45%] w-[450px] h-[450px] bg-purple-500/25 blur-[120px] rounded-full mix-blend-screen pointer-events-none animate-pulse delay-1000 -z-10" />
 
             <div className="w-full max-w-sm relative z-10 animate-fade-in">
                 {/* Login Card */}
-                <div className="liquid-glass rounded-3xl shadow-2xl overflow-hidden">
+                <div className="glass-panel rounded-3xl shadow-2xl overflow-hidden">
                     <div className="p-6 sm:p-8">
                         {/* Header Section */}
                         <div className="text-center mb-6">
@@ -137,11 +140,12 @@ const Register = () => {
                                     onChange={(e) => {
                                         setName(e.target.value);
                                         if (nameError) setNameError(null);
+                                        if (formError) setFormError('');
                                     }}
                                     onFocus={() => setFocusedField('name')}
                                     onBlur={handleNameBlur}
                                     placeholder="Full Name"
-                                    className={`peer w-full pl-10 pr-10 pt-5 pb-1.5 bg-secondary/30 rounded-full border focus:border-primary/50 outline-none transition-all duration-300 placeholder-transparent text-xs text-foreground focus:bg-secondary/50 focus:shadow-[0_0_20px_rgba(var(--primary),0.1)] ${nameError ? 'border-destructive/50' : 'border-white/5'}`}
+                                    className={`peer w-full pl-10 pr-10 pt-5 pb-1.5 glass-input rounded-full border focus:border-primary/50 outline-none transition-all duration-300 placeholder-transparent text-xs text-foreground ${nameError ? 'border-destructive/50' : 'border-white/8'}`}
                                     required
                                 />
                                 <label
@@ -177,11 +181,12 @@ const Register = () => {
                                     onChange={(e) => {
                                         setEmail(e.target.value);
                                         if (emailError) setEmailError(null);
+                                        if (formError) setFormError('');
                                     }}
                                     onFocus={() => setFocusedField('email')}
                                     onBlur={handleEmailBlur}
                                     placeholder="Email Address"
-                                    className={`peer w-full pl-10 pr-10 pt-5 pb-1.5 bg-secondary/30 rounded-full border focus:border-primary/50 outline-none transition-all duration-300 placeholder-transparent text-xs text-foreground focus:bg-secondary/50 focus:shadow-[0_0_20px_rgba(var(--primary),0.1)] ${emailError ? 'border-destructive/50' : 'border-white/5'}`}
+                                    className={`peer w-full pl-10 pr-10 pt-5 pb-1.5 glass-input rounded-full border focus:border-primary/50 outline-none transition-all duration-300 placeholder-transparent text-xs text-foreground ${emailError ? 'border-destructive/50' : 'border-white/8'}`}
                                     required
                                 />
                                 <label
@@ -214,11 +219,11 @@ const Register = () => {
                                     id="password"
                                     type={showPassword ? 'text' : 'password'}
                                     value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
+                                    onChange={(e) => { setPassword(e.target.value); if (formError) setFormError(''); }}
                                     onFocus={() => setFocusedField('password')}
                                     onBlur={() => setFocusedField(null)}
                                     placeholder="Password"
-                                    className="peer w-full pl-10 pr-16 pt-5 pb-1.5 bg-secondary/30 rounded-full border border-white/5 focus:border-primary/50 outline-none transition-all duration-300 placeholder-transparent text-xs text-foreground focus:bg-secondary/50 focus:shadow-[0_0_20px_rgba(var(--primary),0.1)]"
+                                    className="peer w-full pl-10 pr-16 pt-5 pb-1.5 glass-input rounded-full border border-white/8 focus:border-primary/50 outline-none transition-all duration-300 placeholder-transparent text-xs text-foreground"
                                     required
                                 />
                                 <label
@@ -292,11 +297,12 @@ const Register = () => {
                                     onChange={(e) => {
                                         setConfirmPassword(e.target.value);
                                         if (confirmPasswordError) setConfirmPasswordError(null);
+                                        if (formError) setFormError('');
                                     }}
                                     onFocus={() => setFocusedField('confirmPassword')}
                                     onBlur={handleConfirmPasswordBlur}
                                     placeholder="Confirm Password"
-                                    className={`peer w-full pl-10 pr-16 pt-5 pb-1.5 bg-secondary/30 rounded-full border focus:border-primary/50 outline-none transition-all duration-300 placeholder-transparent text-xs text-foreground focus:bg-secondary/50 focus:shadow-[0_0_20px_rgba(var(--primary),0.1)] ${confirmPasswordError ? 'border-destructive/50' : 'border-white/5'}`}
+                                    className={`peer w-full pl-10 pr-16 pt-5 pb-1.5 glass-input rounded-full border focus:border-primary/50 outline-none transition-all duration-300 placeholder-transparent text-xs text-foreground ${confirmPasswordError ? 'border-destructive/50' : 'border-white/8'}`}
                                     required
                                 />
                                 <label
@@ -330,21 +336,25 @@ const Register = () => {
                                 {confirmPasswordError && <p className="absolute -bottom-5 left-4 text-[10px] text-destructive font-medium">{confirmPasswordError}</p>}
                             </div>
 
+                            {/* Form Error */}
+                            {formError && (
+                                <div className="animate-fade-in flex items-center gap-2 px-3.5 py-2.5 rounded-full bg-red-500/10 border border-red-500/20">
+                                    <ShieldAlert className="w-3.5 h-3.5 text-red-400 flex-shrink-0" />
+                                    <p className="text-[10px] font-medium text-red-400 leading-tight">{formError}</p>
+                                </div>
+                            )}
+
                             <button
                                 type="submit"
                                 disabled={isLoading}
-                                className="w-full relative group overflow-hidden rounded-full bg-gradient-to-r from-primary to-blue-600 p-[1px] transition-all hover:shadow-[0_0_40px_rgba(var(--primary),0.4)] disabled:opacity-50 disabled:hover:shadow-none mt-6"
+                                className="w-full primary-glass-button font-bold py-3.5 rounded-full flex items-center justify-center gap-2 transition-all active:scale-98 disabled:opacity-70 disabled:cursor-not-allowed group text-xs text-white mt-6"
                             >
-                                <div className="relative flex items-center justify-center gap-2 bg-black/20 backdrop-blur-sm px-4 py-2.5 rounded-full transition-all group-hover:bg-transparent">
-                                    <span className="font-semibold text-white tracking-wide">
-                                        {isLoading ? 'Creating Account...' : 'Create Account'}
-                                    </span>
-                                    {isLoading ? (
-                                        <Loader2 className="w-4 h-4 animate-spin text-white" />
-                                    ) : (
-                                        <ArrowRight className="w-4 h-4 text-white transition-transform group-hover:translate-x-1" />
-                                    )}
-                                </div>
+                                <span>{isLoading ? 'Creating Account...' : 'Create Account'}</span>
+                                {isLoading ? (
+                                    <Loader2 className="w-4 h-4 animate-spin text-white" />
+                                ) : (
+                                    <ArrowRight className="w-4 h-4 text-white transition-transform group-hover:translate-x-1" />
+                                )}
                             </button>
                         </form>
 
@@ -388,20 +398,5 @@ const Register = () => {
         </div>
     );
 };
-
-const SocialButton = ({ onClick, icon, label }) => (
-    <button
-        type="button"
-        onClick={onClick}
-        className="flex items-center justify-center gap-2 px-4 py-2 rounded-full bg-secondary/20 border border-white/5 hover:bg-secondary/40 hover:border-white/10 hover:shadow-lg transition-all duration-300 group"
-    >
-        <span className="text-muted-foreground group-hover:text-foreground transition-colors group-hover:scale-110 duration-300">
-            {icon}
-        </span>
-        <span className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">
-            {label}
-        </span>
-    </button>
-);
 
 export default Register;

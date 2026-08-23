@@ -12,6 +12,7 @@ import PlanChangedEmail from '../emails/templates/PlanChangedEmail.jsx';
 import CleanupReminderEmail from '../emails/templates/CleanupReminderEmail.jsx';
 import PasswordExpiryReminderEmail from '../emails/templates/PasswordExpiryReminderEmail.jsx';
 import PlanExpiryReminderEmail from '../emails/templates/PlanExpiryReminderEmail.jsx';
+import TeamInvitationEmail from '../emails/templates/TeamInvitationEmail.jsx';
 
 dotenv.config();
 
@@ -25,19 +26,34 @@ const transporter = nodemailer.createTransport({
     }
 });
 
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 /**
- * Enhanced sendEmail function.
+ * Enhanced sendEmail function with CID inline logo attachment support.
  */
 const sendEmail = async ({ to, subject, component }) => {
     try {
         console.log(`Rendering email: ${subject}...`);
         const emailHtml = await render(component);
 
+        // Single bulletproof path relative to emailService file location
+        const actualLogoPath = path.resolve(__dirname, '../../public/image.png');
+
         const mailOptions = {
-            from: '"Locator-X Support" <noreply@locator-x.com>',
+            from: `"LocatorX Support" <${process.env.SMTP_USER || 'noreply@locatorx.dev'}>`,
             to,
             subject,
-            html: emailHtml
+            html: emailHtml,
+            attachments: actualLogoPath ? [{
+                filename: 'logo.png',
+                path: actualLogoPath,
+                cid: 'locatorx_logo',
+                contentDisposition: 'inline'
+            }] : []
         };
 
         const info = await transporter.sendMail(mailOptions);
@@ -83,8 +99,10 @@ export const sendPlanChangedEmail = async (email, name, planName) => {
     });
 };
 
-export const sendCleanupReminderEmail = async (email, name) => {
-    const verifyUrl = `${process.env.FRONTEND_URL}/auth/verify`;
+export const sendCleanupReminderEmail = async (email, name, token = '') => {
+    const verifyUrl = token
+        ? `${process.env.FRONTEND_URL}/auth/verify?token=${token}&email=${encodeURIComponent(email)}`
+        : `${process.env.FRONTEND_URL}/auth/verify?email=${encodeURIComponent(email)}`;
     return sendEmail({
         to: email,
         subject: 'Final Reminder: Verify your Locator-X Account',
@@ -116,5 +134,14 @@ export const sendPlanExpiryReminder = async (email, name, teamName, daysRemainin
         to: email,
         subject: `Action Required: Your plan for ${teamName} expires soon`,
         component: <PlanExpiryReminderEmail name={name} teamName={teamName} daysRemaining={daysRemaining} renewUrl={renewUrl} />
+    });
+};
+
+export const sendTeamInviteEmail = async (email, inviterName, teamName, token) => {
+    const inviteUrl = `${process.env.FRONTEND_URL}/join-team?token=${token}`;
+    return sendEmail({
+        to: email,
+        subject: `You've been invited to join ${teamName} on Locator-X`,
+        component: <TeamInvitationEmail inviterName={inviterName} teamName={teamName} inviteUrl={inviteUrl} />
     });
 };

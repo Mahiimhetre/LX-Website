@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import apiClient from '@/api/client';
+import { handleApiError } from '@/lib/errorHandler';
 
 const AuthContext = createContext(undefined);
 
@@ -66,31 +67,47 @@ export const AuthProvider = ({ children }) => {
         }
     }, [user, profile, isLoading]);
 
-    const login = async (email, password) => {
+    const login = async (email, password, captchaAnswer, captchaToken) => {
         try {
-            const { data } = await apiClient.post('/auth/login', { email, password });
+            const { data } = await apiClient.post('/auth/login', { email, password, captchaAnswer, captchaToken });
             if (data.success) {
                 localStorage.setItem('locatorx_token', data.token);
                 await initAuth();
                 return { success: true, message: 'Login successful' };
             }
+            const parsed = handleApiError(data, 'Login failed. Please try again.');
             return { 
                 success: false, 
-                message: data.message,
+                message: parsed.message,
+                code: parsed.code,
                 remainingAttempts: data.remainingAttempts,
                 retryAfterSeconds: data.retryAfterSeconds,
-                lockedUntil: data.lockedUntil
+                lockedUntil: data.lockedUntil,
+                requiresCaptcha: data.requiresCaptcha
             };
         } catch (error) {
             const errData = error.response?.data;
+            const parsed = handleApiError(error, 'Login failed. Please try again.');
             return { 
                 success: false, 
-                message: errData?.message || 'An error occurred',
+                message: parsed.message,
+                code: parsed.code,
                 needsVerification: errData?.needsVerification,
                 remainingAttempts: errData?.remainingAttempts,
                 retryAfterSeconds: errData?.retryAfterSeconds,
-                lockedUntil: errData?.lockedUntil
+                lockedUntil: errData?.lockedUntil,
+                requiresCaptcha: errData?.requiresCaptcha
             };
+        }
+    };
+
+    const getCaptcha = async () => {
+        try {
+            const { data } = await apiClient.get('/auth/captcha');
+            return data;
+        } catch (error) {
+            console.error('Error fetching captcha:', error);
+            return { success: false, message: 'Could not load CAPTCHA. Please try again.' };
         }
     };
 
@@ -104,27 +121,48 @@ export const AuthProvider = ({ children }) => {
     const register = async (name, email, password) => {
         try {
             const { data } = await apiClient.post('/auth/register', { name, email, password });
+            if (data.success === false) {
+                return { success: false, ...handleApiError(data, 'Registration failed. Please try again.') };
+            }
             return data;
         } catch (error) {
-            return { success: false, message: error.response?.data?.message || 'An error occurred' };
+            return { success: false, ...handleApiError(error, 'Registration failed. Please try again.') };
         }
     };
 
     const resendVerificationEmail = async (email, name) => {
         try {
             const { data } = await apiClient.post('/auth/resend-verification', { email, name });
+            if (data.success === false) {
+                return { success: false, ...handleApiError(data, 'Failed to resend verification email. Please try again.') };
+            }
             return data;
         } catch (error) {
-            return { success: false, message: error.response?.data?.message || 'An error occurred' };
+            return { success: false, ...handleApiError(error, 'Failed to resend verification email. Please try again.') };
         }
     };
 
     const resetPassword = async (email) => {
         try {
             const { data } = await apiClient.post('/auth/reset-password-request', { email });
+            if (data.success === false) {
+                return { success: false, ...handleApiError(data, 'Failed to send reset email. Please try again.') };
+            }
             return data;
         } catch (error) {
-            return { success: false, message: error.response?.data?.message || 'An error occurred' };
+            return { success: false, ...handleApiError(error, 'Failed to send reset email. Please try again.') };
+        }
+    };
+
+    const confirmResetPassword = async (token, newPassword) => {
+        try {
+            const { data } = await apiClient.post('/auth/reset-password', { token, newPassword });
+            if (data.success === false) {
+                return { success: false, ...handleApiError(data, 'Failed to reset password. Please try again.') };
+            }
+            return data;
+        } catch (error) {
+            return { success: false, ...handleApiError(error, 'Failed to reset password. Please try again.') };
         }
     };
 
@@ -157,11 +195,13 @@ export const AuthProvider = ({ children }) => {
             logout,
             register,
             resetPassword,
+            confirmResetPassword,
             resendVerificationEmail,
             signInWithGoogle,
             signInWithGithub,
             loginWithToken,
             refreshProfile,
+            getCaptcha,
         }}>
             {children}
         </AuthContext.Provider>

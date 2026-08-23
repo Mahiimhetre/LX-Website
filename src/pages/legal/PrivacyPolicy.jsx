@@ -46,10 +46,20 @@ const PrivacyPolicy = () => {
                     <h2 className="text-2xl font-bold text-foreground mt-8">4. Data Security</h2>
                     <p>
                         We have put in place appropriate security measures to prevent your personal data from being accidentally lost, used or accessed in an unauthorized way, altered or disclosed.
-                        We use Supabase for secure authentication and database management, ensuring industry-standard encryption.
+                        We use industry-standard JWT authentication, salted bcrypt password hashing, TLS/HTTPS transit encryption, and enterprise database isolation to protect your account and data.
                     </p>
 
-                    <h2 className="text-2xl font-bold text-foreground mt-8">5. Contact Us</h2>
+                    <h2 className="text-2xl font-bold text-foreground mt-8">5. Browser Extension Data & Permissions</h2>
+                    <p>
+                        Our browser extension requires specific permissions to analyze webpages and generate element selectors:
+                    </p>
+                    <ul className="list-disc pl-6 space-y-2">
+                        <li><strong>Active Tab Access (activeTab):</strong> Temporarily reads the HTML DOM of your active browser tab to generate XPath, CSS, and ID selectors. This DOM parsing runs completely locally on your computer.</li>
+                        <li><strong>Data Transmission:</strong> Webpage text, structure, and URLs are never sent to our servers unless you explicitly click to save the locator to your private cloud vault or shared team workspace.</li>
+                        <li><strong>No Sale of Data:</strong> We do not sell, trade, or distribute your data or locator metadata to third-party ad networks, brokers, or data analytics companies for profiling or targeting purposes.</li>
+                    </ul>
+
+                    <h2 className="text-2xl font-bold text-foreground mt-8">6. Contact Us</h2>
                     <p>
                         If you have any questions about this privacy policy or our privacy practices, please contact us at: <a href="mailto:support@locator-x.com" className="text-primary hover:underline">support@locator-x.com</a>
                     </p>

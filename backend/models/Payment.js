@@ -9,7 +9,7 @@ export const Payment = sequelize.define('Payment', {
   },
   teamId: {
     type: DataTypes.UUID,
-    allowNull: false
+    allowNull: true
   },
   userId: { // Who made the payment
     type: DataTypes.UUID,

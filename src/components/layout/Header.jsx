@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { SearchIcon, UserIcon, LogOutIcon, ChevronDownIcon, CreditCardIcon, HelpCircleIcon, SettingsIcon, UsersIcon, PencilIcon, CameraIcon, KeyIcon, MenuIcon, XIcon } from '@/components/icons';
 import { useTheme } from '@/hooks/useTheme';
@@ -9,6 +9,9 @@ import { cn } from '@/lib/utils';
 import Logo from '@/components/Logo';
 import apiClient from '@/api/client';
 import { toast } from 'sonner';
+import NotificationBell from '@/components/NotificationBell';
+import NotificationDropdown from '@/components/NotificationDropdown';
+import HandleAvatar from '@/components/HandleAvatar';
 
 const navLinks = [
     { path: '/', label: 'Home' },
@@ -19,6 +22,39 @@ const navLinks = [
     { path: '/about', label: 'About' },
 ];
 
+const HeaderSearch = ({ navigate }) => {
+    const [headerSearch, setHeaderSearch] = useState('');
+
+    const handleSearch = () => {
+        if (!headerSearch.trim()) return;
+        navigate(`/documentation?search=${encodeURIComponent(headerSearch.trim())}`);
+        setHeaderSearch('');
+    };
+
+    return (
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 backdrop-blur-md border border-white/10 transition-all shadow-lg hover:bg-white/10 focus-within:ring-2 focus-within:ring-primary/20 focus-within:bg-white/10 focus-within:border-primary/40 max-w-[150px] sm:max-w-[200px]">
+            <SearchIcon size={16} className="text-muted-foreground shrink-0" />
+            <input
+                type="text"
+                placeholder="Search..."
+                value={headerSearch}
+                onChange={(e) => setHeaderSearch(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                className="w-full bg-transparent border-none outline-none text-xs text-foreground placeholder:text-muted-foreground/50 p-0"
+            />
+            {headerSearch && (
+                <button
+                    onClick={() => setHeaderSearch('')}
+                    aria-label="Clear Search"
+                    className="p-1 hover:bg-white/10 rounded-full text-muted-foreground hover:text-foreground transition-all shrink-0 ml-1 animate-in zoom-in duration-200"
+                >
+                    <XIcon size={12} />
+                </button>
+            )}
+        </div>
+    );
+};
+
 const Header = () => {
     // Theme toggle removed as per latest design
     const { user, profile, logout, refreshProfile } = useAuth();
@@ -27,21 +63,28 @@ const Header = () => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
     const [isProfileSubmenuOpen, setIsProfileSubmenuOpen] = useState(false);
-    // isSearchOpen state removed as we switched to persistent search bar
-    const [headerSearch, setHeaderSearch] = useState('');
+    const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+    const notificationsToggleRef = useRef(null);
     const [avatarUrl, setAvatarUrl] = useState(null);
     const [isEditingName, setIsEditingName] = useState(false);
     const [editName, setEditName] = useState('');
     const [isSavingName, setIsSavingName] = useState(false);
-    const fileInputRef = useRef(null);
     const userMenuRef = useRef(null);
     const mobileMenuRef = useRef(null);
+    const userMenuToggleRef = useRef(null);
+    const mobileMenuToggleRef = useRef(null);
 
-    useOutsideClick(userMenuRef, () => {
+    useOutsideClick(userMenuRef, (e) => {
+        if (userMenuToggleRef.current && userMenuToggleRef.current.contains(e.target)) {
+            return;
+        }
         if (isUserMenuOpen) setIsUserMenuOpen(false);
     });
 
-    useOutsideClick(mobileMenuRef, () => {
+    useOutsideClick(mobileMenuRef, (e) => {
+        if (mobileMenuToggleRef.current && mobileMenuToggleRef.current.contains(e.target)) {
+            return;
+        }
         if (isMobileMenuOpen) setIsMobileMenuOpen(false);
     });
 
@@ -113,35 +156,9 @@ const Header = () => {
         setIsSavingName(false);
     };
 
-    const handleAvatarUpload = async (e) => {
-        if (!e.target.files || !e.target.files[0] || !user) return;
-        const file = e.target.files[0];
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${user.id}/${Date.now()}.${fileExt}`;
 
-        try {
-            const formData = new FormData();
-            formData.append('avatar', file);
 
-            const { data } = await apiClient.post('/profile/avatar', formData, {
-                headers: { 'Content-Type': 'multipart/form-data' }
-            });
 
-            if (!data.success) throw new Error(data.message);
-
-            await refreshProfile();
-            setAvatarUrl(data.avatarUrl);
-            toast.success('Avatar updated successfully!');
-        } catch (error) {
-            toast.error(error.message || 'Failed to upload avatar');
-        }
-    };
-
-    const handleSearch = () => {
-        if (!headerSearch.trim()) return;
-        navigate(`/documentation?search=${encodeURIComponent(headerSearch.trim())}`);
-        setHeaderSearch('');
-    };
 
     const toggleProfileSubmenu = () => {
         setIsProfileSubmenuOpen(!isProfileSubmenuOpen);
@@ -152,46 +169,43 @@ const Header = () => {
 
     return (
         <>
-            <input type="file" ref={fileInputRef} onChange={handleAvatarUpload} accept="image/*" className="hidden" />
-
-            {/* Minimal Sticky Header */}
-            <header className="w-full h-14 bg-background/60 backdrop-blur-xl border-b border-white/5 transition-all">
+            {/* Floating Glass Capsule Header */}
+            <header className={`fixed top-4 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-7xl h-14 bg-black/45 backdrop-blur-3xl saturate-[210%] border border-white/10 rounded-full transition-all shadow-[0_12px_40px_rgba(0,0,0,0.5),_inset_0_1px_0_0_rgba(255,255,255,0.12)] z-[100] ${!sessionStorage.getItem('header-animated') ? (sessionStorage.setItem('header-animated', '1'), 'animate-header-drop') : ''}`}>
                 <div className="h-full w-full px-6 flex items-center justify-between">
                     {/* Minimal Logo */}
                     {/* Brand Section */}
-                    <Link to="/" className="grid grid-cols-[auto_auto] grid-rows-[auto_auto] items-center gap-x-3 gap-y-0.5 group">
-                        <div className="relative group row-span-full">
-                            <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full blur opacity-25 group-hover:opacity-75 transition duration-500"></div>
-                            <div className="relative w-8 h-8 md:w-10 md:h-10 rounded-full ring-1 ring-white/10">
+                    <Link to="/" className="flex items-center gap-3 group">
+                        <div className="relative group shrink-0">
+                            <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 via-indigo-500 to-purple-600 rounded-full blur opacity-20 group-hover:opacity-60 transition duration-500"></div>
+                            <div className="relative w-8 h-8 md:w-9 md:h-9 rounded-full ring-1 ring-white/15">
                                 <Logo />
                             </div>
                         </div>
-                        <span
-                            className="text-2xl font-bold font-display tracking-tight leading-none text-transparent bg-clip-text col-start-2 w-fit bg-gradient-to-r from-blue-600 to-purple-600"
-                        >
-                            LocatorX
-                        </span>
-                        <span className="hidden sm:flex text-[10px] md:text-[11px] text-muted-foreground font-medium tracking-wide opacity-80 leading-tight col-start-2">
-                            Locator Generator & Manager
-                        </span>
+                        <div className="flex flex-col justify-center">
+                            <span
+                                className="text-xl md:text-2xl font-bold font-display tracking-tight leading-none text-transparent bg-clip-text w-fit bg-gradient-to-r from-blue-400 to-purple-400 group-hover:brightness-110 transition-all"
+                            >
+                                LocatorX
+                            </span>
+                            <span className="hidden sm:block text-[9px] md:text-[10px] text-muted-foreground font-medium tracking-wider opacity-70 leading-none mt-1">
+                                Locator Generator &amp; Manager
+                            </span>
+                        </div>
                     </Link>
 
                     {/* Compact Navigation */}
-                    <nav className="hidden xl:flex items-center gap-1 xl:gap-2 mx-4">
+                    <nav className="hidden xl:flex items-center gap-6 mx-4">
                         {user && (
                             <Link
                                 to="/dashboard"
                                 className={cn(
-                                    'text-sm font-medium px-4 py-1.5 rounded-full transition-all duration-300 relative group overflow-hidden',
+                                    'text-sm font-medium py-1 relative premium-nav-link transition-colors duration-300',
                                     location.pathname === '/dashboard'
-                                        ? 'text-white bg-white/10 shadow-[0_0_15px_rgba(255,255,255,0.1)] border border-white/5'
-                                        : 'text-muted-foreground hover:text-white hover:bg-white/5'
+                                        ? 'text-white active'
+                                        : 'text-muted-foreground hover:text-white'
                                 )}
                             >
                                 <span className="relative z-10">Dashboard</span>
-                                {location.pathname === '/dashboard' && (
-                                    <div className="absolute inset-0 bg-primary/10 blur-xl rounded-full" />
-                                )}
                             </Link>
                         )}
                         {navLinks.map((link) => (
@@ -199,16 +213,13 @@ const Header = () => {
                                 key={link.path}
                                 to={link.path}
                                 className={cn(
-                                    'text-sm font-medium px-4 py-1.5 rounded-full transition-all duration-300 relative group overflow-hidden',
+                                    'text-sm font-medium py-1 relative premium-nav-link transition-colors duration-300',
                                     location.pathname === link.path
-                                        ? 'text-white bg-white/10 shadow-[0_0_15px_rgba(255,255,255,0.1)] border border-white/5'
-                                        : 'text-muted-foreground hover:text-white hover:bg-white/5'
+                                        ? 'text-white active'
+                                        : 'text-muted-foreground hover:text-white'
                                 )}
                             >
                                 <span className="relative z-10">{link.label}</span>
-                                {location.pathname === link.path && (
-                                    <div className="absolute inset-0 bg-primary/10 blur-xl rounded-full" />
-                                )}
                             </Link>
                         ))}
                     </nav>
@@ -216,32 +227,30 @@ const Header = () => {
                     {/* Minimal Toolbar */}
                     <div className="flex items-center gap-3">
                         {/* Search - Persistent Capsule */}
-                        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 backdrop-blur-md border border-white/10 transition-all shadow-lg hover:bg-white/10 focus-within:ring-2 focus-within:ring-primary/20 focus-within:bg-white/10 focus-within:border-primary/40 max-w-[150px] sm:max-w-[200px]">
-                            <SearchIcon size={16} className="text-muted-foreground shrink-0" />
-                            <input
-                                type="text"
-                                placeholder="Search..."
-                                value={headerSearch}
-                                onChange={(e) => setHeaderSearch(e.target.value)}
-                                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                                className="w-full bg-transparent border-none outline-none text-xs text-foreground placeholder:text-muted-foreground/50 p-0"
-                            />
-                            {headerSearch && (
-                                <button
-                                    onClick={() => setHeaderSearch('')}
-                                    aria-label="Clear Search"
-                                    className="p-1 hover:bg-white/10 rounded-full text-muted-foreground hover:text-foreground transition-all shrink-0 ml-1 animate-in zoom-in duration-200"
-                                >
-                                    <XIcon size={12} />
-                                </button>
-                            )}
-                        </div>
+                        <HeaderSearch navigate={navigate} />
 
                         <div className="h-4 w-px bg-white/10 mx-1" />
+
+                        {user && (
+                            <>
+                                <div className="relative">
+                                    <div ref={notificationsToggleRef}>
+                                        <NotificationBell onClick={() => setIsNotificationsOpen(!isNotificationsOpen)} />
+                                    </div>
+                                    <NotificationDropdown
+                                        isOpen={isNotificationsOpen}
+                                        onClose={() => setIsNotificationsOpen(false)}
+                                        toggleRef={notificationsToggleRef}
+                                    />
+                                </div>
+                                <div className="h-4 w-px bg-white/10 mx-1" />
+                            </>
+                        )}
 
                         {user ? (
                             <div className="relative z-50">
                                 <button
+                                    ref={userMenuToggleRef}
                                     onClick={() => {
                                         setIsUserMenuOpen(!isUserMenuOpen);
                                         setIsProfileSubmenuOpen(false);
@@ -286,76 +295,19 @@ const Header = () => {
 
                                 {/* Dropdown Menu */}
                                 {isUserMenuOpen && (
-                                    <div ref={userMenuRef} className="absolute right-0 mt-3 w-72 rounded-2xl bg-[#0a0a0a] border border-white/10 shadow-2xl overflow-hidden z-[999] animate-in fade-in slide-in-from-top-2 duration-200">
+                                    <div ref={userMenuRef} className="absolute right-0 mt-3 w-72 rounded-2xl bg-black/60 backdrop-blur-2xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden z-[999] animate-in fade-in slide-in-from-top-2 duration-200">
                                         <div className="p-4 border-b border-white/5 bg-white/5 relative group/header">
                                             <div className="flex items-center gap-4">
-                                                {/* Avatar Action Trigger */}
-                                                <div className="relative group/avatar cursor-pointer">
-                                                    <div
-                                                        onClick={() => {
-                                                            if (!avatarUrl) {
-                                                                fileInputRef.current?.click();
-                                                            }
-                                                        }}
-                                                        className="relative"
-                                                    >
-                                                        <div className="relative w-14 h-14 rounded-full overflow-hidden ring-2 ring-white/10 group-hover/avatar:ring-primary/50 transition-all duration-300">
-                                                            {avatarUrl ? (
-                                                                <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover transition-transform duration-500 group-hover/avatar:scale-110" />
-                                                            ) : (
-                                                                <div className="w-full h-full bg-gradient-to-br from-primary/20 to-purple-600/20 flex items-center justify-center text-primary font-bold">
-                                                                    <CameraIcon size={20} className="opacity-70" />
-                                                                </div>
-                                                            )}
-
-                                                            {/* Glassmorphism Overlay on Hover */}
-                                                            <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] opacity-0 group-hover/avatar:opacity-100 flex items-center justify-center transition-all duration-300">
-                                                                <CameraIcon size={16} className="text-white/80" />
-                                                            </div>
-                                                        </div>
-
-                                                        {/* Pencil Edit Button at Bottom-Right */}
-                                                        <button
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                fileInputRef.current?.click();
-                                                            }}
-                                                            aria-label="Change Avatar"
-                                                            className="absolute -bottom-0.5 -right-0.5 w-6 h-6 bg-primary text-white rounded-full flex items-center justify-center shadow-lg border-2 border-[#1a1a1a] hover:scale-110 transition-transform z-10"
-                                                            title="Change Avatar"
-                                                        >
-                                                            <PencilIcon size={12} />
-                                                        </button>
-
-                                                        {/* Remove Button (Corner) */}
-                                                        {avatarUrl && (
-                                                            <button
-                                                                onClick={async (e) => {
-                                                                    e.stopPropagation();
-                                                                    if (confirm('Remove profile picture?')) {
-                                                                        try {
-                                                                            const formData = new FormData();
-                                                                            formData.append('remove', 'true');
-                                                                            const { data } = await apiClient.post('/profile/avatar', formData);
-                                                                            if (!data.success) throw new Error(data.message);
-
-                                                                            await refreshProfile();
-                                                                            setAvatarUrl(null);
-                                                                            toast.success('Avatar removed');
-                                                                        } catch (err) {
-                                                                            toast.error('Failed to remove avatar');
-                                                                        }
-                                                                    }
-                                                                }}
-                                                                aria-label="Remove Avatar"
-                                                                className="absolute -top-1 -right-1 w-5 h-5 bg-black/50 backdrop-blur-md text-white/70 rounded-full flex items-center justify-center border border-white/10 opacity-0 group-hover/avatar:opacity-100 hover:bg-destructive hover:text-white transition-all duration-200"
-                                                                title="Remove Avatar"
-                                                            >
-                                                                <XIcon size={12} />
-                                                            </button>
-                                                        )}
-                                                    </div>
-                                                </div>
+                                                {/* Reusable Avatar Action Trigger */}
+                                                <HandleAvatar
+                                                    userId={user.id}
+                                                    currentAvatarUrl={avatarUrl}
+                                                    onUploadComplete={async (url) => {
+                                                        await refreshProfile();
+                                                        setAvatarUrl(url);
+                                                    }}
+                                                    size="header"
+                                                />
 
                                                 <div className="flex-1 min-w-0">
                                                     {isEditingName ? (
@@ -411,7 +363,7 @@ const Header = () => {
                                                 </Link>
                                             )}
 
-                                            <Link to="/billing" className="flex items-center gap-3 px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-white hover:bg-white/5 rounded-lg transition-colors group">
+                                            <Link to="/pricing" className="flex items-center gap-3 px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-white hover:bg-white/5 rounded-lg transition-colors group">
                                                 <CreditCardIcon size={14} className="group-hover:text-purple-400 transition-colors" />
                                                 <span>Billing & Usage</span>
                                             </Link>
@@ -435,6 +387,7 @@ const Header = () => {
                         )}
 
                         <Button
+                            ref={mobileMenuToggleRef}
                             variant="secondary"
                             size="icon"
                             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -448,7 +401,7 @@ const Header = () => {
 
                 {/* Mobile Menu (Dropdown) */}
                 {isMobileMenuOpen && (
-                    <div ref={mobileMenuRef} className="absolute top-full right-4 mt-2 w-64 rounded-2xl bg-[#0a0a0a] border border-white/10 shadow-2xl overflow-hidden z-[1001] animate-in fade-in slide-in-from-top-2 duration-200">
+                    <div ref={mobileMenuRef} className="absolute top-full right-4 mt-2 w-64 rounded-2xl bg-black/60 backdrop-blur-2xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden z-[1001] animate-in fade-in slide-in-from-top-2 duration-200">
                         <div className="p-2 space-y-1">
                             {navLinks.map(link => (
                                 <Link
@@ -481,19 +434,18 @@ const Header = () => {
                             )}
                             {!user && (
                                 <div className="pt-2 border-t border-white/5 mt-1">
-                                    <Link
-                                        to="/auth/login"
-                                        onClick={() => setIsMobileMenuOpen(false)}
-                                        className="flex items-center justify-center gap-2 bg-primary text-white text-sm py-1.5 rounded-lg font-bold shadow-sm hover:bg-primary/90 transition-all"
-                                    >
-                                        Log In
-                                    </Link>
+                                    <Button asChild size="sm" className="w-full">
+                                        <Link to="/auth/login" onClick={() => setIsMobileMenuOpen(false)}>
+                                            Log In
+                                        </Link>
+                                    </Button>
                                 </div>
                             )}
                         </div>
                     </div>
                 )}
             </header>
+
         </>
     );
 };

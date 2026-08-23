@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {  Star, Upload, Trash2, Send  } from '@/components/icons';
-import TiltCard from "@/components/ui/tilt-card";
 
 const RatingSystem = () => {
     const [ratings, setRatings] = useState({
@@ -41,7 +40,7 @@ const RatingSystem = () => {
                         aria-checked={star <= value}
                         aria-label={`Rate ${star} stars`}
                         onClick={() => onChange(star)}
-                        className={`rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background transition-transform hover:scale-110 ${star <= value ? 'text-yellow-500' : 'text-muted-foreground/30'}`}
+                        className={`rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background transition-transform hover:scale-110 ${star <= value ? 'text-yellow-500' : 'text-muted-foreground/30'}`}
                     >
                         <Star className={`h-6 w-6 ${star <= value ? 'fill-yellow-500' : ''}`} />
                     </button>
@@ -63,25 +62,25 @@ const RatingSystem = () => {
     };
 
     return (
-        <TiltCard className="w-full rounded-xl border border-white/10 bg-white/5 backdrop-blur-md">
+        <Card className="w-full glass-panel">
             <CardHeader>
                 <CardTitle>Submit Your Review</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="bg-background/20 p-4 rounded-lg flex flex-col items-center gap-2 border border-white/5">
+                    <div className="bg-white/2 p-4 rounded-2xl flex flex-col items-center gap-2 border border-white/8 backdrop-blur-md">
                         <Label>Service Quality</Label>
                         <StarRating ariaLabel="Service Quality Rating" value={ratings.service} onChange={(val) => handleRating('service', val)} />
                         <span className="text-sm text-muted-foreground">{ratings.service}/5</span>
                     </div>
 
-                    <div className="bg-background/20 p-4 rounded-lg flex flex-col items-center gap-2 border border-white/5">
+                    <div className="bg-white/2 p-4 rounded-2xl flex flex-col items-center gap-2 border border-white/8 backdrop-blur-md">
                         <Label>Product Quality</Label>
                         <StarRating ariaLabel="Product Quality Rating" value={ratings.product} onChange={(val) => handleRating('product', val)} />
                         <span className="text-sm text-muted-foreground">{ratings.product}/5</span>
                     </div>
 
-                    <div className="bg-background/20 p-4 rounded-lg flex flex-col items-center gap-2 border border-white/5">
+                    <div className="bg-white/2 p-4 rounded-2xl flex flex-col items-center gap-2 border border-white/8 backdrop-blur-md">
                         <Label>Support</Label>
                         <StarRating ariaLabel="Support Rating" value={ratings.support} onChange={(val) => handleRating('support', val)} />
                         <span className="text-sm text-muted-foreground">{ratings.support}/5</span>
@@ -117,14 +116,14 @@ const RatingSystem = () => {
                         </div>
 
                         {files.length > 0 && (
-                            <div className="flex flex-wrap gap-2 p-4 bg-background/20 rounded-md border border-white/5">
+                            <div className="flex flex-wrap gap-2 p-4 bg-background/20 rounded-xl border border-white/5">
                                 {files.map((file, index) => (
-                                    <div key={index} className="flex items-center gap-2 bg-background/50 p-2 rounded text-sm group relative pr-8 max-w-[200px] border border-white/10">
+                                    <div key={index} className="flex items-center gap-2 bg-background/50 p-2 rounded-lg text-sm group relative pr-8 max-w-[200px] border border-white/10">
                                         <span className="truncate">{file.name}</span>
                                         <button
                                             onClick={() => removeFile(index)}
                                             aria-label="Remove file"
-                                            className="absolute right-1 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-destructive transition-colors rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 focus-visible:ring-offset-background"
+                                            className="absolute right-1 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-destructive transition-colors rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 focus-visible:ring-offset-background"
                                         >
                                             <Trash2 className="h-4 w-4" />
                                         </button>
@@ -140,7 +139,7 @@ const RatingSystem = () => {
                     <Send className="h-4 w-4" /> Submit Review
                 </Button>
             </CardFooter>
-        </TiltCard>
+        </Card>
     );
 };
 

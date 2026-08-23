@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useSearchParams, useNavigate, useLocation } from 'react-router-dom';
-import {  Mail, CheckCircle, ArrowRight, Loader2, RotateCcw  } from '@/components/icons';
+import {  Mail, CheckCircle, ArrowRight, Loader2, RotateCcw, ShieldAlert  } from '@/components/icons';
 import { useAuth } from '@/contexts/AuthContext';
 import apiClient from '@/api/client';
 import { toast } from 'sonner';
@@ -9,18 +9,50 @@ import Logo from '@/components/Logo';
 const VerifyEmail = () => {
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
-    const { user, profile, resendVerificationEmail } = useAuth();
+    const { user, profile, resendVerificationEmail, refreshProfile } = useAuth();
 
+    const token = searchParams.get('token') || '';
     const email = searchParams.get('email') || '';
 
     const [isVerified, setIsVerified] = useState(false);
+    const [isVerifying, setIsVerifying] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [resendCountdown, setResendCountdown] = useState(0);
+    const [formError, setFormError] = useState('');
+    const hasVerifiedTokenRef = useRef(false);
 
-    // Handle automatic verification via URL hash/query
+    // 1. Process verification token from email link
     useEffect(() => {
-        // Use an interval to poll the backend if the user is verified, 
-        // because we no longer have Supabase web sockets.
+        if (token && !hasVerifiedTokenRef.current) {
+            hasVerifiedTokenRef.current = true;
+            setIsVerifying(true);
+            setFormError('');
+
+            apiClient.post('/auth/verify-email', { token })
+                .then(async ({ data }) => {
+                    if (data.success) {
+                        setIsVerified(true);
+                        toast.success(data.message || 'Email successfully verified!');
+                        if (refreshProfile) await refreshProfile();
+                        setTimeout(() => navigate('/dashboard'), 2000);
+                    } else {
+                        setFormError(data.message || 'Invalid or expired verification link.');
+                    }
+                })
+                .catch((err) => {
+                    const msg = err.response?.data?.message || err.message || 'Failed to verify email.';
+                    setFormError(msg);
+                })
+                .finally(() => {
+                    setIsVerifying(false);
+                });
+        }
+    }, [token, navigate, refreshProfile]);
+
+    // 2. Poll session in background if waiting on link click in another tab/device
+    useEffect(() => {
+        if (token) return; // If verifying via token in this tab, don't poll session concurrently
+
         const intervalId = setInterval(async () => {
              if (user && (!profile || !profile.isVerified)) {
                  try {
@@ -31,12 +63,14 @@ const VerifyEmail = () => {
                          toast.success('Email successfully verified!');
                          setTimeout(() => navigate('/dashboard'), 2000);
                      }
-                 } catch (err) {}
+                 } catch (err) {
+                     // Ignore authentication session retrieval errors during background polling
+                 }
              }
         }, 5000);
 
         return () => clearInterval(intervalId);
-    }, [navigate]);
+    }, [user, profile, token, navigate]);
 
     // Check if user is already verified (fallback)
     useEffect(() => {
@@ -64,6 +98,7 @@ const VerifyEmail = () => {
 
     const handleResendVerification = async () => {
         if (resendCountdown > 0 || !email) return;
+        setFormError('');
 
         setIsLoading(true);
         try {
@@ -74,10 +109,10 @@ const VerifyEmail = () => {
                 toast.success(result.message);
                 setResendCountdown(60);
             } else {
-                toast.error(result.message);
+                setFormError(result.message || 'Failed to resend verification email.');
             }
         } catch (error) {
-            toast.error(error.message || 'Failed to resend verification email');
+            setFormError(error.message || 'Failed to resend verification email');
         }
         setIsLoading(false);
     };
@@ -85,12 +120,12 @@ const VerifyEmail = () => {
     return (
         <div className="flex-1 flex items-center justify-center relative overflow-hidden py-8 px-4 sm:px-6 lg:px-8">
             {/* Ambient Background Effects */}
-            <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-primary/20 blur-[128px] rounded-full mix-blend-screen opacity-20 pointer-events-none" />
-            <div className="absolute bottom-1/4 left-1/4 w-96 h-96 bg-purple-500/10 blur-[128px] rounded-full mix-blend-screen opacity-20 pointer-events-none" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-[65%] -translate-y-[55%] w-[450px] h-[450px] bg-primary/35 blur-[120px] rounded-full mix-blend-screen pointer-events-none animate-pulse -z-10" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-[35%] -translate-y-[45%] w-[450px] h-[450px] bg-purple-500/25 blur-[120px] rounded-full mix-blend-screen pointer-events-none animate-pulse delay-1000 -z-10" />
 
             <div className="w-full max-w-md relative z-10 animate-fade-in">
                 {/* Card */}
-                <div className="glass-dark rounded-3xl border border-white/5 shadow-2xl overflow-hidden backdrop-blur-xl">
+                <div className="glass-panel rounded-3xl shadow-2xl overflow-hidden">
                     <div className="p-6 sm:p-8 text-center">
                         <Link to="/" className="inline-block group mb-4 relative">
                             <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full blur opacity-25 group-hover:opacity-75 transition duration-500"></div>
@@ -100,13 +135,21 @@ const VerifyEmail = () => {
                         </Link>
 
                         <h2 className="text-2xl font-display font-bold text-white mb-1 tracking-tight">
-                            Check your inbox
+                            {isVerifying ? 'Verifying Account' : isVerified ? 'Account Verified' : 'Check your inbox'}
                         </h2>
                         <p className="text-muted-foreground text-xs mb-6">
-                            We've sent you a verification link
+                            {isVerifying ? 'Validating your verification link...' : isVerified ? 'Your email has been confirmed' : "We've sent you a verification link"}
                         </p>
 
-                        {!email ? (
+                        {isVerifying ? (
+                            <div className="space-y-4 py-6">
+                                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto border border-primary/20">
+                                    <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                                </div>
+                                <h2 className="text-base font-bold text-white">Verifying Email...</h2>
+                                <p className="text-xs text-muted-foreground">Please wait while we confirm your verification token.</p>
+                            </div>
+                        ) : !email && !token ? (
                             <div className="space-y-4">
                                 <div className="w-14 h-14 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-3 border border-red-500/20">
                                     <Mail className="w-6 h-6 text-red-500" />
@@ -129,6 +172,14 @@ const VerifyEmail = () => {
                                     <div className="relative w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20">
                                         <Mail className="w-8 h-8 text-primary" />
                                     </div>
+
+                                    {/* Resend Error */}
+                                    {formError && (
+                                        <div className="animate-fade-in flex items-center gap-2 px-3.5 py-2.5 rounded-full bg-red-500/10 border border-red-500/20">
+                                            <ShieldAlert className="w-3.5 h-3.5 text-red-400 flex-shrink-0" />
+                                            <p className="text-[10px] font-medium text-red-400 leading-tight">{formError}</p>
+                                        </div>
+                                    )}
                                 </div>
 
                                 <div className="bg-secondary/30 rounded-xl p-3 border border-white/5">

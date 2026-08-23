@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LocatorX - Multi-Stage 3D Authentication Success Animation Playground</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            400: '#818cf8',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            900: '#1e1b4b',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Outfit', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .perspective-container {
+            perspective: 1200px;
+            transform-style: preserve-3d;
+        }
+
+        .preserve-3d {
+            transform-style: preserve-3d;
+        }
+
+        .glass-panel {
+            background: rgba(12, 12, 18, 0.55);
+            backdrop-filter: blur(30px) saturate(200%);
+            -webkit-backdrop-filter: blur(30px) saturate(200%);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.15), 0 20px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        @keyframes float3d {
+            0%, 100% { transform: translateY(0px) rotateX(6deg) rotateY(-6deg); }
+            50% { transform: translateY(-14px) rotateX(-6deg) rotateY(6deg); }
+        }
+
+        @keyframes spinY {
+            0% { transform: rotateY(0deg); }
+            100% { transform: rotateY(360deg); }
+        }
+
+        @keyframes spinZ {
+            0% { transform: rotateZ(0deg); }
+            100% { transform: rotateZ(360deg); }
+        }
+
+        .anim-float { animation: float3d 4s ease-in-out infinite; }
+        .anim-spin-y { animation: spinY 8s linear infinite; }
+        .anim-spin-z { animation: spinZ 10s linear infinite; }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 99px; }
+    </style>
+</head>
+<body class="bg-[#08080a] text-slate-100 min-h-screen transition-colors duration-500 font-sans overflow-x-hidden">
+
+    <!-- Background Ambient Glow Blobs -->
+    <div class="fixed top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-indigo-600/20 blur-[130px] rounded-full pointer-events-none z-0 animate-pulse"></div>
+    <div class="fixed bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2 w-[500px] h-[500px] bg-emerald-600/20 blur-[130px] rounded-full pointer-events-none z-0 animate-pulse"></div>
+
+    <!-- Main Wrapper -->
+    <div class="relative z-10 min-h-screen flex flex-col justify-between p-4 md:p-8 max-w-7xl mx-auto space-y-6">
+
+        <!-- Top Header & Controls bar -->
+        <header class="flex flex-col md:flex-row items-center justify-between gap-4 p-4 rounded-3xl glass-panel">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-500 to-emerald-400 flex items-center justify-center shadow-lg shadow-indigo-500/30">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-xl font-display font-bold tracking-tight text-white">LocatorX Multi-Stage 3D Auth Lab</h1>
+                    <p class="text-xs text-slate-400">5-Stage Motion Sequences: Start → Action → Transform → Success → End</p>
+                </div>
+            </div>
+
+            <!-- Header Controls -->
+            <div class="flex items-center gap-3 flex-wrap">
+                <button id="reducedMotionBtn" class="px-3.5 py-2 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold flex items-center gap-2 transition-all active:scale-95">
+                    <span>✨ Motion Full</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Display Arena -->
+        <main class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            
+            <!-- Left Sidebar Navigation (4 Cols) -->
+            <section class="lg:col-span-4 space-y-4">
+                <div class="p-4 rounded-3xl glass-panel space-y-3">
+                    <div class="flex items-center justify-between px-1">
+                        <span class="text-xs font-mono font-bold uppercase tracking-wider text-emerald-400">AUTHENTICATION (10)</span>
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                    </div>
+                    <div id="activeStateList" class="space-y-1.5 max-h-[340px] overflow-y-auto pr-1"></div>
+                </div>
+
+                <div class="p-4 rounded-3xl glass-panel space-y-3">
+                    <div class="flex items-center justify-between px-1">
+                        <span class="text-xs font-mono font-bold uppercase tracking-wider text-amber-400">COMING SOON (2)</span>
+                        <span class="text-[10px] text-amber-300 font-mono">Not Implemented</span>
+                    </div>
+                    <div id="comingSoonStateList" class="space-y-1.5"></div>
+                </div>
+            </section>
+
+            <!-- Center Stage & Controls (8 Cols) -->
+            <section class="lg:col-span-8 space-y-6">
+                
+                <!-- Controls Bar & Timeline Scrubber -->
+                <div class="p-5 rounded-3xl glass-panel space-y-4">
+                    <div class="flex flex-wrap items-center justify-between gap-4">
+                        <div class="flex items-center gap-2">
+                            <button id="replayBtn" class="px-5 py-2.5 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white font-bold text-xs shadow-lg shadow-indigo-500/30 transition-all hover:scale-105 active:scale-95 flex items-center gap-1.5">
+                                ▶️ Replay
+                            </button>
+                            <button id="playPauseBtn" class="px-3.5 py-2 rounded-full bg-white/10 hover:bg-white/20 text-white text-xs font-semibold border border-white/10 transition-all">
+                                ⏸️ Pause
+                            </button>
+                            <button id="autoReplayBtn" class="px-3.5 py-2 rounded-full bg-white/5 border border-white/10 text-slate-400 text-xs font-semibold transition-all">
+                                Auto Replay: OFF
+                            </button>
+                        </div>
+
+                        <div class="flex items-center gap-3">
+                            <div id="speedSelector" class="flex items-center gap-1 bg-black/40 p-1 rounded-full border border-white/10 text-[11px] font-mono">
+                                <button data-speed="0.5" class="px-2 py-0.5 rounded-full text-slate-400">0.5×</button>
+                                <button data-speed="0.75" class="px-2 py-0.5 rounded-full text-slate-400">0.75×</button>
+                                <button data-speed="1.0" class="px-2 py-0.5 rounded-full bg-indigo-600 text-white font-bold">1×</button>
+                                <button data-speed="1.25" class="px-2 py-0.5 rounded-full text-slate-400">1.25×</button>
+                                <button data-speed="1.5" class="px-2 py-0.5 rounded-full text-slate-400">1.5×</button>
+                            </div>
+                            <div class="px-3 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-400/20 text-indigo-300 font-mono text-xs flex items-center gap-2">
+                                <span>Duration</span>
+                                <span id="durationDisplay" class="font-bold text-white">2.0s</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Scrubber Slider -->
+                    <div class="space-y-1.5 pt-2 border-t border-white/5">
+                        <div class="flex items-center justify-between text-[11px] font-mono text-slate-400">
+                            <span id="activeStageLabel" class="text-indigo-300 font-bold">START — Dimmed Initial State</span>
+                            <span id="scrubPercentLabel">0%</span>
+                        </div>
+                        <input id="timelineScrubber" type="range" min="0" max="1" step="0.01" value="0" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500">
+                    </div>
+                </div>
+
+                <!-- 3D Stage Window -->
+                <div id="stageWindow" class="perspective-container relative w-full h-[470px] rounded-3xl glass-panel flex items-center justify-center p-8 overflow-hidden transition-all group">
+                    <div id="tiltCard" class="preserve-3d relative w-full max-w-sm p-8 rounded-3xl bg-slate-950/85 border border-white/15 shadow-2xl flex flex-col items-center justify-center text-center space-y-6">
+                        
+                        <!-- 3D Circle Logo Render Stage -->
+                        <div id="webglContainer" class="relative w-48 h-48 flex items-center justify-center">
+                            <!-- Injected dynamically -->
+                        </div>
+
+                        <!-- Staggered Card Text Reveal -->
+                        <div class="space-y-2 preserve-3d min-h-[58px] flex flex-col items-center justify-center">
+                            <h3 id="cardHeading" class="text-xl font-bold font-display text-white transition-all duration-500 transform opacity-0 translate-y-3">Welcome Back</h3>
+                            <p id="cardSubtext" class="text-xs text-slate-400 max-w-xs transition-all duration-500 delay-100 transform opacity-0 translate-y-3">You have been successfully authenticated.</p>
+                        </div>
+
+                        <!-- Staggered Action Button -->
+                        <button id="continueBtn" class="w-full py-3 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold text-xs shadow-lg shadow-indigo-500/25 transition-all duration-500 opacity-0 translate-y-4">
+                            Continue →
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Specs Box -->
+                <div class="p-5 rounded-2xl glass-panel space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-slate-300 font-mono">Component Usage API</span>
+                    </div>
+                    <pre class="p-3.5 rounded-xl bg-black/60 border border-white/10 font-mono text-[11px] text-indigo-300 overflow-x-auto" id="codeBox"></pre>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- JavaScript Multi-Stage Motion Controller -->
+    <script>
+        const AUTH_CONFIGS = {
+            'login': {
+                title: 'Welcome Back',
+                desc: 'You have been successfully authenticated.',
+                duration: 2.0,
+                category: 'ACTIVE',
+                stages: ['START', 'ACTION', 'TRANSFORM', 'SUCCESS', 'END'],
+                icon: '🛡️',
+                accent: '#10b981'
+            },
+            'registration': {
+                title: 'Account Created',
+                desc: 'Your account has been created successfully.',
+                duration: 2.5,
+                category: 'ACTIVE',
+                stages: ['START', 'ACTION', 'TRANSFORM', 'SUCCESS', 'END'],
+                icon: '👤',
+                accent: '#10b981'
+            },
+            'account-created': {
+                title: 'Account Created',
+                desc: 'Your account is ready to use.',
+                duration: 2.2,
+                category: 'ACTIVE',
+                stages: ['START', 'ACTION', 'TRANSFORM', 'SUCCESS', 'END'],
+                icon: '🪪',
+                accent: '#34d399'
+            },
+            'email-sent': {
+                title: 'Email Sent',
+                desc: "We've sent a verification email to your inbox.",
+                duration: 1.8,
+                category: 'ACTIVE',
+                stages: ['START', 'ACTION', 'TRANSFORM', 'SUCCESS', 'END'],
+                icon: '✉️',
+                accent: '#38bdf8'
+            },
+            'email-verified': {
+                title: 'Email Verified',
+                desc: 'Your email address has been successfully verified.',
+                duration: 2.2,
+                category: 'ACTIVE',
+                stages: ['START', 'ACTION', 'TRANSFORM', 'SUCCESS', 'END'],
+                icon: '📧',
+                accent: '#10b981'
+            },
+            'password-reset': {
+                title: 'Password Reset',
+                desc: 'Your password has been successfully updated.',
+                duration: 2.2,
+                category: 'ACTIVE',
+                stages: ['START', 'ACTION', 'TRANSFORM', 'SUCCESS', 'END'],
+                icon: '🔑',
+                accent: '#f59e0b'
+            },
+            'password-changed': {
+                title: 'Password Changed',
+                desc: 'Your password has been updated successfully.',
+                duration: 1.8,
+                category: 'ACTIVE',
+                stages: ['START', 'ACTION', 'TRANSFORM', 'SUCCESS', 'END'],
+                icon: '🔒',
+                accent: '#818cf8'
+            },
+            'two-factor': {
+                title: 'Authentication Complete',
+                desc: 'Two-factor authentication was completed successfully.',
+                duration: 2.2,
+                category: 'ACTIVE',
+                stages: ['START', 'ACTION', 'TRANSFORM', 'SUCCESS', 'END'],
+                icon: '⚡',
+                accent: '#a855f7'
+            },
+            'logout': {
+                title: 'Logged Out',
+                desc: 'You have been successfully logged out.',
+                duration: 1.5,
+                category: 'ACTIVE',
+                stages: ['START', 'ACTION', 'TRANSFORM', 'SUCCESS', 'END'],
+                icon: '🚪',
+                accent: '#94a3b8'
+            },
+            'generic-success': {
+                title: 'Success',
+                desc: 'The action was completed successfully.',
+                duration: 1.8,
+                category: 'ACTIVE',
+                stages: ['START', 'ACTION', 'TRANSFORM', 'SUCCESS', 'END'],
+                icon: '💎',
+                accent: '#10b981'
+            },
+            'otp-verified': {
+                title: 'OTP Verified',
+                desc: 'One-time passcode verified successfully.',
+                duration: 1.8,
+                category: 'COMING_SOON',
+                stages: ['START', 'ACTION', 'TRANSFORM', 'SUCCESS', 'END'],
+                icon: '●●●',
+                accent: '#06b6d4'
+            },
+            'profile-complete': {
+                title: 'Profile Complete',
+                desc: 'Your profile setup is 100% complete.',
+                duration: 2.5,
+                category: 'COMING_SOON',
+                stages: ['START', 'ACTION', 'TRANSFORM', 'SUCCESS', 'END'],
+                icon: '🌟',
+                accent: '#8b5cf6'
+            }
+        };
+
+        let activeState = 'login';
+        let currentSpeed = 1.0;
+        let autoReplay = false;
+        let isPaused = false;
+        let progress = 0;
+        let animTimer = null;
+
+        const activeStateList = document.getElementById('activeStateList');
+        const comingSoonStateList = document.getElementById('comingSoonStateList');
+        const webglContainer = document.getElementById('webglContainer');
+        const cardHeading = document.getElementById('cardHeading');
+        const cardSubtext = document.getElementById('cardSubtext');
+        const continueBtn = document.getElementById('continueBtn');
+        const durationDisplay = document.getElementById('durationDisplay');
+        const codeBox = document.getElementById('codeBox');
+        const replayBtn = document.getElementById('replayBtn');
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        const autoReplayBtn = document.getElementById('autoReplayBtn');
+        const timelineScrubber = document.getElementById('timelineScrubber');
+        const activeStageLabel = document.getElementById('activeStageLabel');
+        const scrubPercentLabel = document.getElementById('scrubPercentLabel');
+
+        function renderLists() {
+            activeStateList.innerHTML = Object.keys(AUTH_CONFIGS)
+                .filter(k => AUTH_CONFIGS[k].category === 'ACTIVE')
+                .map(key => `
+                    <button onclick="setState('${key}')" class="w-full text-left p-3 rounded-2xl border transition-all flex items-center justify-between ${key === activeState ? 'bg-indigo-600/20 border-indigo-400/60 text-white' : 'bg-white/5 border-white/5 text-slate-400 hover:bg-white/10'}">
+                        <span class="text-xs font-semibold">${AUTH_CONFIGS[key].title}</span>
+                        <span class="text-[11px] font-mono text-slate-400">${AUTH_CONFIGS[key].duration}s</span>
+                    </button>
+                `).join('');
+
+            comingSoonStateList.innerHTML = Object.keys(AUTH_CONFIGS)
+                .filter(k => AUTH_CONFIGS[k].category === 'COMING_SOON')
+                .map(key => `
+                    <button onclick="setState('${key}')" class="w-full text-left p-3 rounded-2xl border transition-all flex items-center justify-between ${key === activeState ? 'bg-amber-500/20 border-amber-400/60 text-white' : 'bg-white/5 border-white/5 text-slate-400 hover:bg-white/10'}">
+                        <span class="text-xs font-semibold">${AUTH_CONFIGS[key].title}</span>
+                        <span class="text-[10px] font-mono text-amber-300">Preview</span>
+                    </button>
+                `).join('');
+        }
+
+        function updateProgress(p) {
+            progress = Math.max(0, Math.min(1.0, p));
+            timelineScrubber.value = progress;
+            scrubPercentLabel.textContent = `${(progress * 100).toFixed(0)}%`;
+
+            const config = AUTH_CONFIGS[activeState];
+            let stageName = "START";
+            if (progress >= 0.85) stageName = "END";
+            else if (progress >= 0.65) stageName = "SUCCESS";
+            else if (progress >= 0.45) stageName = "TRANSFORM";
+            else if (progress >= 0.25) stageName = "ACTION";
+
+            activeStageLabel.textContent = `Stage: ${stageName}`;
+
+            // Staggered UI Reveals
+            if (progress >= 0.65) {
+                cardHeading.classList.remove('opacity-0', 'translate-y-3');
+                cardHeading.classList.add('opacity-100', 'translate-y-0');
+            } else {
+                cardHeading.classList.add('opacity-0', 'translate-y-3');
+                cardHeading.classList.remove('opacity-100', 'translate-y-0');
+            }
+
+            if (progress >= 0.75) {
+                cardSubtext.classList.remove('opacity-0', 'translate-y-3');
+                cardSubtext.classList.add('opacity-100', 'translate-y-0');
+            } else {
+                cardSubtext.classList.add('opacity-0', 'translate-y-3');
+                cardSubtext.classList.remove('opacity-100', 'translate-y-0');
+            }
+
+            if (progress >= 0.85) {
+                continueBtn.classList.remove('opacity-0', 'translate-y-4');
+                continueBtn.classList.add('opacity-100', 'translate-y-0');
+            } else {
+                continueBtn.classList.add('opacity-0', 'translate-y-4');
+                continueBtn.classList.remove('opacity-100', 'translate-y-0');
+            }
+
+            // Render Circle Logo with Staggered Checkmark
+            const showCheck = progress >= 0.65;
+            webglContainer.innerHTML = `
+                <div class="preserve-3d relative w-44 h-44 flex items-center justify-center anim-float">
+                    <div class="absolute w-44 h-44 rounded-full border-2 border-emerald-400/50 anim-spin-z shadow-[0_0_25px_rgba(52,211,153,0.3)]"></div>
+                    <div class="relative z-10 w-32 h-32 rounded-full bg-gradient-to-tr from-slate-950 via-slate-900 to-indigo-900 border-2 border-emerald-400/60 shadow-[0_0_40px_rgba(16,185,129,0.4)] flex flex-col items-center justify-center backdrop-blur-xl">
+                        <div class="text-2xl mb-1">${config.icon}</div>
+                        ${showCheck ? `
+                            <div class="w-8 h-8 rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/60 flex items-center justify-center text-white font-bold text-sm border-2 border-white/80 transition-all scale-100">
+                                ✓
+                            </div>
+                        ` : `
+                            <div class="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin"></div>
+                        `}
+                    </div>
+                </div>
+            `;
+        }
+
+        function runTimeline() {
+            clearInterval(animTimer);
+            if (isPaused) return;
+
+            const stepMs = 50;
+            const config = AUTH_CONFIGS[activeState];
+            const totalMs = (config.duration * 1000) / currentSpeed;
+
+            animTimer = setInterval(() => {
+                progress += stepMs / totalMs;
+                if (progress >= 1.0) {
+                    progress = 1.0;
+                    updateProgress(progress);
+                    clearInterval(animTimer);
+
+                    if (autoReplay) {
+                        setTimeout(() => setState(activeState), 800);
+                    }
+                } else {
+                    updateProgress(progress);
+                }
+            }, stepMs);
+        }
+
+        function setState(key) {
+            activeState = key;
+            const config = AUTH_CONFIGS[key];
+            cardHeading.textContent = config.title;
+            cardSubtext.textContent = config.desc;
+            durationDisplay.textContent = `${(config.duration / currentSpeed).toFixed(1)}s`;
+            codeBox.textContent = `<SuccessAnimation type="${key}" speed={${currentSpeed}} />`;
+            
+            progress = 0;
+            updateProgress(0);
+            renderLists();
+
+            if (!isPaused) {
+                runTimeline();
+            }
+        }
+
+        replayBtn.addEventListener('click', () => {
+            isPaused = false;
+            playPauseBtn.textContent = '⏸️ Pause';
+            setState(activeState);
+        });
+
+        playPauseBtn.addEventListener('click', () => {
+            isPaused = !isPaused;
+            playPauseBtn.textContent = isPaused ? '▶️ Play' : '⏸️ Pause';
+            if (!isPaused) runTimeline();
+        });
+
+        timelineScrubber.addEventListener('input', (e) => {
+            isPaused = true;
+            playPauseBtn.textContent = '▶️ Play';
+            clearInterval(animTimer);
+            updateProgress(parseFloat(e.target.value));
+        });
+
+        autoReplayBtn.addEventListener('click', () => {
+            autoReplay = !autoReplay;
+            autoReplayBtn.textContent = `Auto Replay: ${autoReplay ? 'ON' : 'OFF'}`;
+            autoReplayBtn.classList.toggle('text-emerald-300', autoReplay);
+        });
+
+        document.querySelectorAll('#speedSelector button').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                currentSpeed = parseFloat(e.target.getAttribute('data-speed'));
+                document.querySelectorAll('#speedSelector button').forEach(b => b.className = 'px-2 py-0.5 rounded-full text-slate-400');
+                e.target.className = 'px-2 py-0.5 rounded-full bg-indigo-600 text-white font-bold';
+                setState(activeState);
+            });
+        });
+
+        setState('login');
+    </script>
+</body>
+</html>

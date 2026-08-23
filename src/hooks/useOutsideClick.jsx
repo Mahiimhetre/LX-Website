@@ -10,7 +10,7 @@ export function useOutsideClick(ref, callback) {
          */
         function handleClickOutside(event) {
             if (ref.current && !ref.current.contains(event.target)) {
-                callback();
+                callback(event);
             }
         }
         // Bind the event listener

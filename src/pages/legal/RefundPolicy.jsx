@@ -32,12 +32,12 @@ const RefundPolicy = () => {
                         We use this feedback to improve our product.
                     </p>
 
-                    <h2 className="text-2xl font-bold text-foreground mt-8">3. Processing Time</h2>
+                    <h2 className="text-2xl font-bold text-foreground mt-8">4. Processing Time</h2>
                     <p>
                         Refunds are processed within 5-7 business days of approval. The time it takes for the credit to appear on your statement depends on your card issuer.
                     </p>
 
-                    <h2 className="text-2xl font-bold text-foreground mt-8">4. Promo Codes & Sales</h2>
+                    <h2 className="text-2xl font-bold text-foreground mt-8">5. Promo Codes & Sales</h2>
                     <p>
                         Purchases made with "Limited Time Offer" or "Flash Sale" promo codes are still eligible for the 14-day money-back guarantee, typically refunded at the discounted price paid.
                     </p>

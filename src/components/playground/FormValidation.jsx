@@ -91,7 +91,7 @@ const FormValidation = () => {
     };
 
     return (
-        <Card className="w-full bg-white/5 border-white/10 backdrop-blur-md">
+        <Card className="w-full glass-panel">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle>Form Validation</CardTitle>
                 <Button variant="ghost" size="sm" onClick={resetForm} className="gap-2">

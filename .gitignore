@@ -13,3 +13,6 @@ dist/
 merge_result.txt
 gemini_models.json
 models.json
+.claude/
+.agents/
+backend/scratch/

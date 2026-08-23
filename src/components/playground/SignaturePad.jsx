@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { PenToolIcon, SaveIcon, RotateCcwIcon } from '@/components/icons';
 import { cn } from "@/lib/utils";
-import TiltCard from "@/components/ui/tilt-card";
 
 const SignaturePad = ({ className }) => {
     const [isDrawing, setIsDrawing] = useState(false);
@@ -88,7 +87,7 @@ const SignaturePad = ({ className }) => {
     }, []);
 
     return (
-        <TiltCard className={cn("w-full rounded-xl border border-white/10 bg-white/5 backdrop-blur-md flex flex-col", className)}>
+        <Card className={cn("w-full glass-panel flex flex-col", className)}>
             <CardHeader className="flex-none">
                 <CardTitle className="flex items-center gap-2">
                     <PenToolIcon className="h-5 w-5 text-primary" />
@@ -96,8 +95,8 @@ const SignaturePad = ({ className }) => {
                 </CardTitle>
                 <CardDescription>Draw, customize, and export your digital signature on a local canvas.</CardDescription>
             </CardHeader>
-            <CardContent className="flex-grow flex flex-col justify-between gap-4 min-h-[250px]">
-                <div className="flex-grow border border-white/10 rounded-lg p-1 bg-white overflow-hidden shadow-inner min-h-[140px]">
+            <CardContent className="flex-grow flex flex-col gap-4">
+                <div className="flex-grow border border-white/10 rounded-xl p-1 bg-white overflow-hidden shadow-inner min-h-[140px]">
                     <canvas
                         ref={canvasRef}
                         className="w-full h-full cursor-crosshair touch-none bg-white block"
@@ -111,14 +110,14 @@ const SignaturePad = ({ className }) => {
                     />
                 </div>
 
-                <div className="flex flex-col sm:flex-row gap-4 p-3 bg-white/5 rounded-lg border border-white/10 text-sm flex-none">
+                <div className="flex flex-col sm:flex-row gap-4 p-3 bg-white/2 rounded-xl border border-white/8 text-sm flex-none backdrop-blur-md">
                     <div className="flex items-center justify-between gap-3">
                         <span className="text-xs text-muted-foreground whitespace-nowrap">Color:</span>
                         <input
                             type="color"
                             value={penColor}
                             onChange={(e) => setPenColor(e.target.value)}
-                            className="h-7 w-10 p-0 bg-transparent border-none cursor-pointer rounded overflow-hidden"
+                            className="h-7 w-10 p-0 bg-transparent border-none cursor-pointer rounded-[6px] overflow-hidden"
                         />
                     </div>
                     <div className="flex items-center gap-3 flex-1">
@@ -149,7 +148,7 @@ const SignaturePad = ({ className }) => {
                     </div>
                 </div>
             </CardContent>
-        </TiltCard>
+        </Card>
     );
 };
 

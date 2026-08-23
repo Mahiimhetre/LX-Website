@@ -3,23 +3,33 @@ import BaseEmail, { headingStyle, textStyle, buttonStyle } from '../BaseEmail.js
 
 export default function PasswordResetEmail({ name, resetUrl }) {
   return (
-    <BaseEmail title="Password Reset Request" name={name}>
-      <h2 style={headingStyle}>
+    <BaseEmail 
+      title="Password Reset Request" 
+      name={name}
+      categoryBadge="Security Action"
+      fallbackUrl={resetUrl}
+      securityNote="If you didn't request this, you can safely ignore this email."
+    >
+      <h2 className="text-heading" style={headingStyle}>
         Password Reset Request
       </h2>
 
-      <p style={textStyle}>
-        We received a request to reset your password. Click the button below to set a new password:
+      <p className="text-body" style={textStyle}>
+        We received a request to reset the password for your LocatorX account.
+      </p>
+
+      <p className="text-body" style={textStyle}>
+        If you initiated this request, please click the button below to establish a new password:
       </p>
       
       <div style={{ textAlign: 'center' }}>
         <a href={resetUrl} style={buttonStyle}>
-          Reset Password
+          Reset Password &rarr;
         </a>
       </div>
       
-      <p style={{ ...textStyle, margin: '16px 0 0 0' }}>
-        If you didn't request a password reset, you can safely ignore this email.
+      <p className="text-body" style={{ ...textStyle, fontSize: '13px', margin: '16px 0 0 0' }}>
+        For security purposes, this password reset link will expire shortly.
       </p>
     </BaseEmail>
   );

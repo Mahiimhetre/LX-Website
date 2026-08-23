@@ -32,7 +32,6 @@ const limiter = rateLimit({
 });
 
 // Apply rate limiter to auth routes only (optional, but safer)
-app.use('/api/v1/auth/login', limiter);
 app.use('/api/v1/auth/register', limiter);
 app.use('/api/v1/auth/verify-email', limiter);
 app.use('/api/v1/auth/resend-verification', limiter);
@@ -71,8 +70,13 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // Database Connection and Server Start
 
 connectDB().then(async () => {
-    // Sync models with database
-    await sequelize.sync();
+    // Sync models with database (only in non-production to prevent accidental schema changes)
+    if (process.env.NODE_ENV !== 'production') {
+        await sequelize.sync();
+        console.log('Database synced successfully');
+    } else {
+        console.log('Production mode: Skipping database schema sync. Ensure migrations are applied.');
+    }
     
     // Initialize Jobs
     initCleanupJob();

@@ -13,13 +13,8 @@ import { toast } from 'sonner';
 import { UsersIcon, MailIcon, ShieldIcon, CrownIcon, UserPlusIcon, Trash2Icon, ClockIcon, CheckCircleIcon, XCircleIcon, AlertCircleIcon, CopyIcon } from '@/components/icons';
 import { format } from 'date-fns';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import use3DTilt from '@/hooks/use3DTilt';
 
 const TeamDashboard = () => {
-    const teamCardRef = use3DTilt({ max: 4, scale: 1.01, speed: 300 });
-    const invitesCardRef = use3DTilt({ max: 4, scale: 1.01, speed: 300 });
-    const noTeamCardRef = use3DTilt({ max: 8, scale: 1.02, speed: 200 });
-
     const { user, isLoading } = useAuth();
     const navigate = useNavigate();
     const [team, setTeam] = useState(null);
@@ -60,10 +55,11 @@ const TeamDashboard = () => {
                     ...m,
                     user_id: m.userId,
                     profile: {
-                        name: m.user.profile.name,
-                        email: m.user.email,
-                        avatar_url: m.user.profile.avatarUrl
-                    }
+                        name: m.user?.profile?.name || 'Team Member',
+                        email: m.user?.email || '',
+                        avatar_url: m.user?.profile?.avatarUrl || null
+                    },
+                    joined_at: m.createdAt || m.created_at || new Date().toISOString()
                 }));
                 setMembers(formattedMembers);
                 setInvitations(detailsData.team.invitations || []);
@@ -168,18 +164,9 @@ const TeamDashboard = () => {
         return (
             <DashboardLayout>
                 <div 
-                    ref={noTeamCardRef}
-                    className="flex flex-col items-center justify-center min-h-[60vh] text-center max-w-lg mx-auto p-8 rounded-3xl glass border border-white/5 bg-white/5 relative overflow-hidden group transform-gpu"
-                    style={{ transformStyle: 'preserve-3d' }}
+                    className="flex flex-col items-center justify-center min-h-[60vh] text-center max-w-lg mx-auto p-8 rounded-3xl glass-panel relative overflow-hidden group transform-gpu"
                 >
-                    {/* Spotlight Glare */}
-                    <div 
-                        className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-20"
-                        style={{
-                            background: `radial-gradient(250px circle at var(--glare-x, 50%) var(--glare-y, 50%), rgba(255, 255, 255, 0.05), transparent 50%)`
-                        }}
-                    />
-                    <div className="relative z-10 flex flex-col items-center" style={{ transform: 'translateZ(20px)' }}>
+                    <div className="relative z-10 flex flex-col items-center">
                         <div className="w-20 h-20 rounded-full bg-secondary/50 flex items-center justify-center mb-6">
                             <UsersIcon className="h-10 w-10 text-muted-foreground" />
                         </div>
@@ -269,17 +256,8 @@ const TeamDashboard = () => {
 
                 {/* Team Members List */}
                 <div 
-                    ref={teamCardRef}
-                    className="rounded-3xl glass border border-white/5 overflow-hidden relative group transform-gpu"
-                    style={{ transformStyle: 'preserve-3d' }}
+                    className="rounded-3xl glass-panel overflow-hidden relative group transform-gpu"
                 >
-                    {/* Spotlight Glare */}
-                    <div 
-                        className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-20"
-                        style={{
-                            background: `radial-gradient(400px circle at var(--glare-x, 50%) var(--glare-y, 50%), rgba(255, 255, 255, 0.04), transparent 50%)`
-                        }}
-                    />
                     <div className="relative z-10">
                         <div className="p-6 border-b border-white/5 flex items-center justify-between">
                             <h2 className="text-lg font-bold">Team Members</h2>
@@ -361,17 +339,8 @@ const TeamDashboard = () => {
                 {/* Invitations List */}
                 {invitations.length > 0 && (
                     <div 
-                        ref={invitesCardRef}
-                        className="rounded-3xl glass border border-white/5 overflow-hidden relative group transform-gpu"
-                        style={{ transformStyle: 'preserve-3d' }}
+                        className="rounded-3xl glass-panel overflow-hidden relative group transform-gpu"
                     >
-                        {/* Spotlight Glare */}
-                        <div 
-                            className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-20"
-                            style={{
-                                background: `radial-gradient(400px circle at var(--glare-x, 50%) var(--glare-y, 50%), rgba(255, 255, 255, 0.04), transparent 50%)`
-                            }}
-                        />
                         <div className="relative z-10">
                             <div className="p-6 border-b border-white/5 flex items-center justify-between">
                                 <h2 className="text-lg font-bold">Pending Invitations</h2>

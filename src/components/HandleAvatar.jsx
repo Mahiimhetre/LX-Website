@@ -11,12 +11,14 @@ const HandleAvatar = ({ userId, currentAvatarUrl, onUploadComplete, size = 'md' 
 
     const sizeClasses = {
         sm: 'w-12 h-12',
+        header: 'w-14 h-14',
         md: 'w-20 h-20',
         lg: 'w-32 h-32',
     };
 
     const iconSizes = {
         sm: 'w-4 h-4',
+        header: 'w-5 h-5',
         md: 'w-6 h-6',
         lg: 'w-8 h-8',
     };

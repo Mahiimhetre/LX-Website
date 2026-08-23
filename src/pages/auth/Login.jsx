@@ -1,13 +1,16 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import {  Eye, EyeOff, Loader2, ArrowRight, Mail, Lock, Github, X, ShieldAlert, Clock  } from '@/components/icons';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import Logo from '@/components/Logo';
+import SocialButton from '@/components/ui/SocialButton';
 
 const Login = () => {
     const navigate = useNavigate();
-    const { login, signInWithGoogle, signInWithGithub, user } = useAuth();
+    const [searchParams] = useSearchParams();
+    const { login, signInWithGoogle, signInWithGithub, user, getCaptcha } = useAuth();
+    const returnTo = searchParams.get('returnTo');
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -15,34 +18,125 @@ const Login = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [focusedField, setFocusedField] = useState(null);
 
-    // Brute-force lockout state
-    const [lockoutSeconds, setLockoutSeconds] = useState(0);
+    // Lockout state per email: { [emailLower]: lockedUntilTimestamp }
+    const [lockouts, setLockouts] = useState({});
     const [remainingAttempts, setRemainingAttempts] = useState(null);
-    const lockoutTimerRef = useRef(null);
+
+    // Inline errors and warnings
+    const [formError, setFormError] = useState('');
+    const [formWarning, setFormWarning] = useState('');
+
+    // CAPTCHA state
+    const [requiresCaptcha, setRequiresCaptcha] = useState(false);
+    const [captchaSvg, setCaptchaSvg] = useState('');
+    const [captchaToken, setCaptchaToken] = useState('');
+    const [captchaInput, setCaptchaInput] = useState('');
+
+    const fetchNewCaptcha = useCallback(async () => {
+        const res = await getCaptcha();
+        if (res && res.success) {
+            setCaptchaSvg(res.captchaSvg);
+            setCaptchaToken(res.captchaToken);
+            setCaptchaInput('');
+        }
+    }, [getCaptcha]);
+
+    // Check rate limit state from local storage on email change (mock mode helper)
+    useEffect(() => {
+        const emailLower = email.toLowerCase().trim();
+        setCaptchaToken('');
+        setCaptchaInput('');
+
+        if (!emailLower) {
+            setRemainingAttempts(null);
+            setRequiresCaptcha(false);
+            return;
+        }
+
+        try {
+            const data = localStorage.getItem('locatorx_login_attempts');
+            if (data) {
+                const attemptsMap = new Map(JSON.parse(data));
+                const record = attemptsMap.get(emailLower);
+                if (record) {
+                    if (record.lockedUntil && Date.now() < record.lockedUntil) {
+                        setLockouts(prev => ({
+                            ...prev,
+                            [emailLower]: record.lockedUntil
+                        }));
+                    }
+                    if (record.attempts >= 3) {
+                        setRequiresCaptcha(true);
+                    } else {
+                        setRequiresCaptcha(false);
+                    }
+                    if (record.attempts > 0 && record.attempts < 5) {
+                        setRemainingAttempts(5 - record.attempts);
+                    } else {
+                        setRemainingAttempts(null);
+                    }
+                } else {
+                    setRemainingAttempts(null);
+                    setRequiresCaptcha(false);
+                }
+            } else {
+                setRemainingAttempts(null);
+                setRequiresCaptcha(false);
+            }
+        } catch (e) {
+            console.error('Error reading locatorx_login_attempts:', e);
+        }
+    }, [email]);
+
+    // Fetch CAPTCHA when required and missing token
+    useEffect(() => {
+        if (requiresCaptcha && !captchaToken) {
+            fetchNewCaptcha();
+        }
+    }, [requiresCaptcha, captchaToken, fetchNewCaptcha]);
+
+    // Calculate dynamic countdown for the currently typed email
+    const emailLower = email.toLowerCase().trim();
+    const currentLockoutUntil = lockouts[emailLower] || null;
+    const [currentLockoutSeconds, setCurrentLockoutSeconds] = useState(0);
+
+    useEffect(() => {
+        if (currentLockoutUntil) {
+            const updateTimer = () => {
+                const now = Date.now();
+                if (now >= currentLockoutUntil) {
+                    setCurrentLockoutSeconds(0);
+                    setLockouts(prev => {
+                        const next = { ...prev };
+                        delete next[emailLower];
+                        return next;
+                    });
+                    setRemainingAttempts(null);
+                } else {
+                    setCurrentLockoutSeconds(Math.ceil((currentLockoutUntil - now) / 1000));
+                }
+            };
+            updateTimer();
+            const interval = setInterval(updateTimer, 1000);
+            return () => clearInterval(interval);
+        } else {
+            setCurrentLockoutSeconds(0);
+        }
+    }, [currentLockoutUntil, emailLower]);
+
+    // Clear messages when inputs change
+    useEffect(() => {
+        setFormError('');
+        setFormWarning('');
+    }, [email, password]);
 
     // Redirect if already logged in
     useEffect(() => {
         if (user) {
-            navigate('/dashboard');
+            const destination = returnTo && returnTo.startsWith('/') ? returnTo : '/dashboard';
+            navigate(destination);
         }
-    }, [user, navigate]);
-
-    // Lockout countdown timer
-    useEffect(() => {
-        if (lockoutSeconds > 0) {
-            lockoutTimerRef.current = setInterval(() => {
-                setLockoutSeconds(prev => {
-                    if (prev <= 1) {
-                        clearInterval(lockoutTimerRef.current);
-                        setRemainingAttempts(null);
-                        return 0;
-                    }
-                    return prev - 1;
-                });
-            }, 1000);
-            return () => clearInterval(lockoutTimerRef.current);
-        }
-    }, [lockoutSeconds]);
+    }, [user, navigate, returnTo]);
 
     const formatLockoutTime = useCallback((seconds) => {
         const mins = Math.floor(seconds / 60);
@@ -53,35 +147,60 @@ const Login = () => {
     const handleLogin = async (e) => {
         e.preventDefault();
         if (!email || !password) {
-            toast.error('Please fill in all fields');
+            setFormError('Please fill in all fields');
             return;
         }
 
-        if (lockoutSeconds > 0) {
-            toast.error(`Account locked. Try again in ${formatLockoutTime(lockoutSeconds)}`);
+        if (currentLockoutSeconds > 0) {
+            return;
+        }
+
+        if (requiresCaptcha && !captchaInput) {
+            setFormError('Please enter the CAPTCHA characters');
             return;
         }
 
         setIsLoading(true);
-        const result = await login(email, password);
+        const result = await login(email, password, captchaInput, captchaToken);
         setIsLoading(false);
 
         if (result.success) {
             setRemainingAttempts(null);
-            setLockoutSeconds(0);
+            setRequiresCaptcha(false);
+            setCaptchaInput('');
+            setFormError('');
+            setFormWarning('');
             toast.success('Welcome back!');
-            navigate('/dashboard');
+            const destination = returnTo && returnTo.startsWith('/') ? returnTo : '/dashboard';
+            navigate(destination);
         } else {
+            const targetEmailLower = email.toLowerCase().trim();
+            setFormError('');
+            setFormWarning('');
+
+            // Handle CAPTCHA prompt
+            if (result.requiresCaptcha) {
+                setRequiresCaptcha(true);
+                fetchNewCaptcha();
+                setFormWarning(result.message || 'CAPTCHA verification required.');
+            }
+
             // Handle lockout
-            if (result.retryAfterSeconds) {
-                setLockoutSeconds(result.retryAfterSeconds);
+            if (result.retryAfterSeconds || result.lockedUntil) {
+                const durationMs = (result.retryAfterSeconds || 300) * 1000;
+                const lockedTime = result.lockedUntil ? new Date(result.lockedUntil).getTime() : Date.now() + durationMs;
+                
+                setLockouts(prev => ({
+                    ...prev,
+                    [targetEmailLower]: lockedTime
+                }));
                 setRemainingAttempts(0);
-                toast.error(result.message, { duration: 5000 });
+                setFormError(result.message);
             } else if (result.remainingAttempts !== undefined && result.remainingAttempts !== null) {
                 setRemainingAttempts(result.remainingAttempts);
-                toast.warning(result.message, { duration: 4000 });
-            } else {
-                toast.error(result.message);
+                setFormWarning(result.message);
+            } else if (!result.requiresCaptcha) {
+                setFormError(result.message);
             }
 
             if (result.needsVerification) {
@@ -93,12 +212,12 @@ const Login = () => {
     return (
         <div className="flex-1 flex items-center justify-center relative overflow-hidden py-4 px-4 sm:px-6 lg:px-8">
             {/* Ambient Background Effects */}
-            <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 blur-[128px] rounded-full mix-blend-screen opacity-20 pointer-events-none animate-pulse" />
-            <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/10 blur-[128px] rounded-full mix-blend-screen opacity-20 pointer-events-none animate-pulse delay-1000" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-[65%] -translate-y-[55%] w-[450px] h-[450px] bg-primary/35 blur-[120px] rounded-full mix-blend-screen pointer-events-none animate-pulse -z-10" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-[35%] -translate-y-[45%] w-[450px] h-[450px] bg-purple-500/25 blur-[120px] rounded-full mix-blend-screen pointer-events-none animate-pulse delay-1000 -z-10" />
 
             <div className="w-full max-w-sm relative z-10 animate-fade-in">
                 {/* Login Card */}
-                <div className="liquid-glass rounded-3xl shadow-2xl overflow-hidden">
+                <div className="glass-panel rounded-3xl shadow-2xl overflow-hidden">
                     <div className="p-5 sm:p-6">
                         {/* Header Section */}
                         <div className="text-center mb-6">
@@ -132,7 +251,7 @@ const Login = () => {
                                     onChange={(e) => setEmail(e.target.value)}
                                     onFocus={() => setFocusedField('email')}
                                     onBlur={() => setFocusedField(null)}
-                                    className="peer w-full pl-10 pr-10 pt-5 pb-1.5 bg-secondary/30 rounded-full border border-white/5 focus:border-primary/50 outline-none transition-all duration-300 placeholder-transparent text-xs text-foreground focus:bg-secondary/50 focus:shadow-[0_0_20px_rgba(var(--primary),0.1)]"
+                                    className="peer w-full pl-10 pr-10 pt-5 pb-1.5 glass-input rounded-full border border-white/8 focus:border-primary/50 outline-none transition-all duration-300 placeholder-transparent text-xs text-foreground"
                                     placeholder="Email address"
                                     required
                                 />
@@ -169,7 +288,7 @@ const Login = () => {
                                     onChange={(e) => setPassword(e.target.value)}
                                     onFocus={() => setFocusedField('password')}
                                     onBlur={() => setFocusedField(null)}
-                                    className="peer w-full pl-10 pr-16 pt-5 pb-1.5 bg-secondary/30 rounded-full border border-white/5 focus:border-primary/50 outline-none transition-all duration-300 placeholder-transparent text-xs text-foreground focus:bg-secondary/50 focus:shadow-[0_0_20px_rgba(var(--primary),0.1)]"
+                                    className="peer w-full pl-10 pr-16 pt-5 pb-1.5 glass-input rounded-full border border-white/8 focus:border-primary/50 outline-none transition-all duration-300 placeholder-transparent text-xs text-foreground"
                                     placeholder="Password"
                                     required
                                 />
@@ -213,30 +332,66 @@ const Login = () => {
                                 </Link>
                             </div>
 
-                            {/* Lockout Warning Banner */}
-                            {lockoutSeconds > 0 && (
-                                <div className="animate-fade-in rounded-2xl bg-red-500/10 border border-red-500/20 p-3 flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center flex-shrink-0">
-                                        <ShieldAlert className="w-5 h-5 text-red-400" />
+                            {/* CAPTCHA Challenge Box */}
+                            {requiresCaptcha && (
+                                <div className="animate-fade-in space-y-3 rounded-2xl bg-white/5 border border-white/10 p-4">
+                                    <div className="flex items-center justify-between">
+                                        <p className="text-[10px] font-bold text-primary uppercase tracking-wider">Security Check</p>
+                                        <span className="text-[9px] text-muted-foreground/70 font-medium">Case-insensitive</span>
                                     </div>
-                                    <div className="flex-1 min-w-0">
-                                        <p className="text-[10px] font-bold text-red-400 uppercase tracking-wider">Account Locked</p>
-                                        <p className="text-xs text-red-300/70">Too many failed attempts</p>
+                                    <div className="flex items-center justify-between gap-3">
+                                        <div 
+                                            className="flex-1 flex justify-center py-2 bg-black/40 rounded-full border border-white/5 overflow-hidden"
+                                            dangerouslySetInnerHTML={{ __html: captchaSvg }}
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={fetchNewCaptcha}
+                                            className="px-3 py-2 text-[10px] font-semibold text-muted-foreground hover:text-primary transition-colors border border-white/10 rounded-full hover:bg-white/5"
+                                        >
+                                            Refresh
+                                        </button>
                                     </div>
-                                    <div className="flex items-center gap-1.5 bg-red-500/20 px-3 py-1.5 rounded-full">
-                                        <Clock className="w-3 h-3 text-red-400" />
-                                        <span className="text-sm font-mono font-bold text-red-400 tabular-nums">
-                                            {formatLockoutTime(lockoutSeconds)}
-                                        </span>
+                                    <div className="relative group">
+                                        <input
+                                            id="captchaInput"
+                                            name="captchaInput"
+                                            type="text"
+                                            value={captchaInput}
+                                            onChange={(e) => setCaptchaInput(e.target.value)}
+                                            className="w-full px-4 py-3 glass-input rounded-full border border-white/8 focus:border-primary/50 outline-none transition-all duration-300 text-xs text-foreground placeholder-muted-foreground/60 uppercase tracking-widest"
+                                            placeholder="Enter code (case-insensitive)"
+                                            required
+                                        />
                                     </div>
                                 </div>
                             )}
 
+                            {/* Form Error */}
+                            {formError && (
+                                <div className="animate-fade-in flex items-center gap-2 px-3.5 py-2.5 rounded-full bg-red-500/10 border border-red-500/20">
+                                    <ShieldAlert className="w-3.5 h-3.5 text-red-400 flex-shrink-0" />
+                                    <p className="text-[10px] font-medium text-red-400 leading-tight">
+                                        {formError}
+                                    </p>
+                                </div>
+                            )}
+
+                            {/* Form Warning */}
+                            {formWarning && !formError && (
+                                <div className="animate-fade-in flex items-center gap-2 px-3.5 py-2.5 rounded-full bg-amber-500/10 border border-amber-500/20">
+                                    <ShieldAlert className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
+                                    <p className="text-[10px] font-medium text-amber-400 leading-tight">
+                                        {formWarning}
+                                    </p>
+                                </div>
+                            )}
+
                             {/* Remaining Attempts Warning */}
-                            {remainingAttempts !== null && remainingAttempts > 0 && remainingAttempts <= 3 && lockoutSeconds === 0 && (
+                            {remainingAttempts !== null && remainingAttempts > 0 && remainingAttempts <= 3 && currentLockoutSeconds === 0 && !formWarning && !formError && (
                                 <div className="animate-fade-in flex items-center gap-2 px-3 py-2 rounded-full bg-amber-500/10 border border-amber-500/20">
                                     <ShieldAlert className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
-                                    <p className="text-[10px] font-medium text-amber-400">
+                                    <p className="text-[10px] font-medium text-amber-400 leading-tight">
                                         {remainingAttempts} attempt{remainingAttempts !== 1 ? 's' : ''} remaining before lockout
                                     </p>
                                 </div>
@@ -245,27 +400,25 @@ const Login = () => {
                             {/* Submit Button */}
                             <button
                                 type="submit"
-                                disabled={isLoading || lockoutSeconds > 0}
-                                className={`w-full relative group overflow-hidden rounded-full p-[1px] transition-all disabled:opacity-50 disabled:hover:shadow-none ${
-                                    lockoutSeconds > 0
-                                        ? 'bg-gradient-to-r from-red-600 to-red-800'
-                                        : 'bg-gradient-to-r from-primary to-blue-600 hover:shadow-[0_0_40px_rgba(var(--primary),0.4)]'
+                                disabled={isLoading || currentLockoutSeconds > 0}
+                                className={`w-full py-3.5 rounded-full font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-xs ${
+                                    currentLockoutSeconds > 0 
+                                        ? "bg-red-500/10 border border-red-500/30 text-red-400" 
+                                        : "primary-glass-button text-white"
                                 }`}
                             >
-                                <div className="relative flex items-center justify-center gap-2 bg-black/20 backdrop-blur-sm px-4 py-2.5 rounded-full transition-all group-hover:bg-transparent">
-                                    <span className="font-semibold text-white tracking-wide text-xs">
-                                        {lockoutSeconds > 0
-                                            ? `Locked · ${formatLockoutTime(lockoutSeconds)}`
-                                            : isLoading ? 'Signing In...' : 'Sign In'}
-                                    </span>
-                                    {isLoading ? (
-                                        <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />
-                                    ) : lockoutSeconds > 0 ? (
-                                        <ShieldAlert className="w-3.5 h-3.5 text-red-300" />
-                                    ) : (
-                                        <ArrowRight className="w-3.5 h-3.5 text-white transition-transform group-hover:translate-x-1" />
-                                    )}
-                                </div>
+                                <span>
+                                    {currentLockoutSeconds > 0
+                                        ? `Locked · ${formatLockoutTime(currentLockoutSeconds)}`
+                                        : isLoading ? 'Signing In...' : 'Sign In'}
+                                </span>
+                                {isLoading ? (
+                                    <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />
+                                ) : currentLockoutSeconds > 0 ? (
+                                    <ShieldAlert className="w-3.5 h-3.5 text-red-400" />
+                                ) : (
+                                    <ArrowRight className="w-3.5 h-3.5 text-white transition-transform group-hover:translate-x-1" />
+                                )}
                             </button>
                         </form>
 
@@ -275,7 +428,7 @@ const Login = () => {
                                 <div className="w-full border-t border-white/5"></div>
                             </div>
                             <div className="relative flex justify-center text-[10px] uppercase">
-                                <span className="bg-[#0B0F17] px-2 text-muted-foreground/50 font-medium tracking-widest">
+                                <span className="bg-[#08080a] px-2 text-muted-foreground/50 font-medium tracking-widest">
                                     Or continue with
                                 </span>
                             </div>
@@ -317,6 +470,8 @@ const Login = () => {
                     <div className="h-1.5 w-full bg-gradient-to-r from-transparent via-primary/50 to-transparent opacity-50"></div>
                 </div>
 
+
+
                 {/* Copyright/Simple Footer text outside card (optional, but requested in layout) */}
                 <div className="mt-8 text-center">
                     <p className="text-xs text-muted-foreground/40 font-medium">
@@ -327,20 +482,5 @@ const Login = () => {
         </div>
     );
 };
-
-const SocialButton = ({ onClick, icon, label }) => (
-    <button
-        type="button"
-        onClick={onClick}
-        className="flex items-center justify-center gap-2 px-4 py-2 rounded-full bg-secondary/20 border border-white/5 hover:bg-secondary/40 hover:border-white/10 hover:shadow-lg transition-all duration-300 group"
-    >
-        <span className="text-muted-foreground group-hover:text-foreground transition-colors group-hover:scale-110 duration-300">
-            {icon}
-        </span>
-        <span className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">
-            {label}
-        </span>
-    </button>
-);
 
 export default Login;

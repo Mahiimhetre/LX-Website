@@ -73,7 +73,7 @@ const FooterLink = ({ to, children }) => (
 );
 
 const SocialLink = ({ href, icon: Icon }) => (
-    <a href={href} className="inline-block transform-gpu" style={{ transformStyle: 'preserve-3d' }}>
+    <a href={href} className="inline-block">
         <Button
             variant="secondary"
             className="w-7 h-7 !p-0 rounded-full flex items-center justify-center border border-white/5 bg-white/5 hover:bg-primary/20 hover:text-primary hover:border-primary/30 shadow-sm"

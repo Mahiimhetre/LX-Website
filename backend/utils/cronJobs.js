@@ -1,19 +1,20 @@
 import cron from 'node-cron';
 import { Op } from 'sequelize';
-import { User, Team, Profile } from '../models/index.js';
+import { User, Team, TeamMember, Profile } from '../models/index.js';
 import * as emailService from './emailService.jsx';
 
 /**
- * Daily job to check for expiries at Midnight.
+ * Daily job to check for expiries and process subscription downgrades at Midnight.
  */
 export const initCronJobs = () => {
-    console.log('--- Initializing Daily Expiry Check Cron Job ---');
+    console.log('--- Initializing Daily Expiry & Subscription Cron Jobs ---');
     
-    // Run every day at 00:00
+    // Run every day at 00:00 (Midnight)
     cron.schedule('0 0 * * *', async () => {
-        console.log('CRON: Running Daily Expiry Checks...');
+        console.log('CRON: Running Daily Expiry & Subscription Processing...');
         await checkPasswordExpiries();
         await checkPlanExpiries();
+        await processExpiredSubscriptions();
     });
 };
 
@@ -135,5 +136,72 @@ export async function checkPlanExpiries() {
         }
     } catch (error) {
         console.error('CRON ERROR (Plan Expiry):', error);
+    }
+}
+
+/**
+ * Process and downgrade all expired team subscriptions to 'free' plan.
+ * Resets member profiles to 'free' if they have no other active paid team memberships.
+ */
+export async function processExpiredSubscriptions() {
+    try {
+        const now = new Date();
+
+        // 1. Find all expired teams that are currently marked as paid
+        const expiredTeams = await Team.findAll({
+            where: {
+                isPaid: true,
+                planExpiresAt: {
+                    [Op.lt]: now
+                }
+            },
+            include: [{
+                model: TeamMember,
+                as: 'members'
+            }]
+        });
+
+        if (expiredTeams.length === 0) {
+            return;
+        }
+
+        console.log(`CRON: Found ${expiredTeams.length} expired team subscription(s) to downgrade.`);
+
+        for (const team of expiredTeams) {
+            // Downgrade team status
+            team.isPaid = false;
+            team.planName = 'free';
+            await team.save();
+
+            const affectedUserIds = (team.members || []).map(m => m.userId);
+
+            for (const userId of affectedUserIds) {
+                // Check if user belongs to any OTHER active paid team
+                const otherActivePaidMemberships = await TeamMember.findAll({
+                    where: { userId },
+                    include: [{
+                        model: Team,
+                        as: 'team',
+                        where: {
+                            isPaid: true,
+                            planExpiresAt: { [Op.gt]: now }
+                        }
+                    }]
+                });
+
+                if (otherActivePaidMemberships.length === 0) {
+                    const profile = await Profile.findOne({ where: { userId } });
+                    if (profile && profile.plan === 'team') {
+                        profile.plan = 'free';
+                        await profile.save();
+                        console.log(`CRON: Downgraded profile for user ${userId} to free tier.`);
+                    }
+                }
+            }
+        }
+
+        console.log('CRON: Expired subscriptions processed successfully.');
+    } catch (error) {
+        console.error('CRON ERROR (processExpiredSubscriptions):', error);
     }
 }

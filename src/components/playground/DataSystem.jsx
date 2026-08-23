@@ -12,7 +12,6 @@ import {
 } from "@/components/ui/pagination";
 import { DatabaseIcon, PackageIcon, DownloadIcon, EyeIcon, Trash2Icon, UploadIcon, FileIcon, XIcon, CheckIcon, ShoppingCartIcon, ArrowUpDownIcon, SearchIcon } from '@/components/icons';;
 import { cn } from "@/lib/utils";
-import TiltCard from "@/components/ui/tilt-card";
 import productsData from '@/data/products.json';
 
 // --- Product Inventory (DataTable) ---
@@ -51,11 +50,11 @@ export const DataTable = React.memo(({ onAddToCart, cartCount, onViewCart, onVie
     };
 
     return (
-        <TiltCard className="w-full rounded-xl border border-white/10 bg-white/5 backdrop-blur-md">
+        <Card className="w-full glass-panel">
             <CardHeader className="flex flex-col sm:flex-row items-center justify-between gap-4 pb-4">
                 <CardTitle>Product Inventory</CardTitle>
                 <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 backdrop-blur-md border border-white/10 transition-all shadow-lg hover:bg-white/10 focus-within:ring-2 focus-within:ring-primary/20 focus-within:bg-white/10 focus-within:border-primary/40 max-w-[150px] sm:max-w-[200px]">
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 backdrop-blur-md border border-white/10 transition-all hover:bg-white/10 focus-within:ring-2 focus-within:ring-primary/25 focus-within:bg-white/10 focus-within:border-primary/40 max-w-[150px] sm:max-w-[200px]">
                         <SearchIcon size={16} className="text-muted-foreground shrink-0" />
                         <input
                             type="text"
@@ -97,7 +96,7 @@ export const DataTable = React.memo(({ onAddToCart, cartCount, onViewCart, onVie
                             setCurrentPage(1);
                         }}
                     >
-                        <SelectTrigger className="w-[70px] h-8 rounded-full bg-white/5">
+                        <SelectTrigger className="w-[70px] h-8 rounded-full bg-white/5 border-white/10 hover:bg-white/10">
                             <SelectValue placeholder={entriesPerPage} />
                         </SelectTrigger>
                         <SelectContent>
@@ -165,7 +164,7 @@ export const DataTable = React.memo(({ onAddToCart, cartCount, onViewCart, onVie
                     </Pagination>
                 </div>
             </CardContent>
-        </TiltCard>
+        </Card>
     );
 });
 // ⚡ Bolt Optimization: Wrap component in React.memo to prevent unnecessary re-renders on unrelated parent state updates.
@@ -190,13 +189,13 @@ export const DataManagement = React.memo(({ className }) => {
     };
 
     return (
-        <TiltCard className={cn("w-full rounded-xl border border-white/10 bg-white/5 backdrop-blur-md flex flex-col", className)}>
+        <Card className={cn("w-full glass-panel flex flex-col", className)}>
             <CardHeader className="flex-none">
                 <CardTitle className="flex items-center gap-2"><DatabaseIcon className="h-5 w-5" /> Data Management</CardTitle>
                 <CardDescription>Manage local persistence and exports.</CardDescription>
             </CardHeader>
-            <CardContent className="flex-grow flex flex-col justify-between gap-6 min-h-[300px]">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 rounded-lg bg-black/20 border border-white/5">
+            <CardContent className="flex-grow flex flex-col gap-6">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 rounded-xl bg-black/20 border border-white/5">
                     <div className="space-y-1">
                         <span className="text-sm font-medium text-muted-foreground">Retention Period</span>
                         <div className="text-sm">
@@ -244,10 +243,10 @@ export const DataManagement = React.memo(({ className }) => {
                     <h3 className="text-lg font-medium mb-4 flex items-center gap-2"><UploadIcon className="h-5 w-5" /> Import Data</h3>
                     <div
                         className={cn(
-                            "flex-grow border-2 border-dashed rounded-lg p-6 text-center transition-all duration-200 flex flex-col justify-center items-center min-h-[140px]",
+                            "flex-grow border-2 border-dashed rounded-xl p-6 text-center transition-all duration-200 flex flex-col justify-center items-center min-h-[140px]",
                             isDragging
                                 ? 'border-primary bg-primary/10'
-                                : 'border-white/10 hover:border-primary/50 hover:bg-white/5'
+                                : 'border-white/8 hover:border-primary/40 hover:bg-white/5'
                         )}
                         onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
                         onDragLeave={() => setIsDragging(false)}
@@ -266,6 +265,6 @@ export const DataManagement = React.memo(({ className }) => {
                     )}
                 </div>
             </CardContent>
-        </TiltCard>
+        </Card>
     );
 });
